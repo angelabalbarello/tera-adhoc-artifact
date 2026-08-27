@@ -9,10 +9,17 @@ a Table 8 do artigo submetido.
 Compara, por (seed, config_id), todas as metricas numericas de
 results_all_seeds.csv. Tambem confere generator_hash entre manifests.
 
-Criterio:
-  PASS   — diferenca absoluta <= 1e-9 em todas as metricas (determinismo pleno)
+As metricas dividem-se em duas classes:
+  DETERMINISTICAS (F1, ECE, FailRate, TTD*, TTDef*, SkipPct, estratificacoes):
+    dependem apenas de seed + codigo + dados -> exige-se reproducao exata.
+  RELOGIO DE PAREDE (Lat_ms, Cost_ms_per_frame): medem tempo real de execucao
+    e dependem do estado da maquina no momento (carga, termica) -> drift e
+    esperado entre campanhas; sao reportadas a parte, sem reprovar.
+
+Criterio (apenas sobre as deterministicas):
+  PASS   — diferenca absoluta <= 1e-9 (determinismo pleno)
   WARN   — diferenca <= 1e-3 (drift numerico de versao torch/GPU; discutir)
-  FAIL   — diferenca  > 1e-3 em qualquer metrica (NAO integrar; investigar)
+  FAIL   — diferenca  > 1e-3 (NAO integrar; investigar)
 
 Nao altera nenhum arquivo do artigo. Apenas relata.
 """
@@ -26,6 +33,7 @@ ROOT = HERE.parent.parent
 NEW_DIR = ROOT / "1-pipeline-tera" / "results" / "exp_seed12_round1"
 REF_DIR = ROOT / "2-campaign-exp_20260519_055950"
 SEEDS_REF = ["42", "43", "44", "45"]
+WALL_CLOCK = {"Lat_ms", "Cost_ms_per_frame"}  # medidas de tempo real: drift esperado
 
 
 def load_rows(p: Path) -> dict:
@@ -59,8 +67,9 @@ def main() -> None:
 
     worst = 0.0
     worst_key = None
-    n_cmp = 0
-    diffs = []
+    n_det = 0
+    diffs = []       # deterministicas fora de 1e-9
+    wall_diffs = []  # relogio de parede (informativo)
     for key, r_ref in sorted(ref.items()):
         r_new = new[key]
         for col, v in r_ref.items():
@@ -71,20 +80,36 @@ def main() -> None:
             except (ValueError, KeyError):
                 continue
             d = abs(a - b)
-            n_cmp += 1
+            if col in WALL_CLOCK:
+                if d > 1e-9:
+                    wall_diffs.append((key, col, a, b, d))
+                continue
+            n_det += 1
             if d > worst:
                 worst, worst_key = d, (key, col, a, b)
             if d > 1e-9:
                 diffs.append((key, col, a, b, d))
 
-    print(f"\n{n_cmp} valores comparados em {len(ref)} linhas (seed x config).")
+    print(f"\n{n_det} valores DETERMINISTICOS comparados em {len(ref)} linhas "
+          f"(seed x config).")
+    if wall_diffs:
+        print(f"[informativo] {len(wall_diffs)} valores de relogio de parede "
+              f"(Lat_ms/Cost_ms_per_frame) divergiram — esperado entre campanhas "
+              f"(dependem da carga da maquina). Maior: "
+              f"{max(w[4] for w in wall_diffs):.3f} ms.")
+
     if not diffs:
-        print("PASS: reproducao exata (todas as diferencas <= 1e-9).")
+        print("\nPASS: reproducao exata das metricas deterministicas "
+              "(todas as diferencas <= 1e-9).")
         print("As seeds 42-45 da nova campanha reproduzem a Table 8. "
               "Pode-se integrar as 12 seeds como replicacoes homogeneas.")
+        print("Nota: a coluna ms/f (custo) do agregado n=12 deve usar apenas a "
+              "campanha nova (medicao homogenea), e a diferenca de escala vs a "
+              "Table 8 publicada deve ser mencionada na integracao.")
         return
 
-    print(f"{len(diffs)} diferencas acima de 1e-9. Maior: {worst:.3e} em {worst_key}")
+    print(f"\n{len(diffs)} diferencas deterministicas acima de 1e-9. "
+          f"Maior: {worst:.3e} em {worst_key}")
     for key, col, a, b, d in sorted(diffs, key=lambda x: -x[4])[:25]:
         print(f"  seed={key[0]} config={key[1]:>16s} {col:>22s}: "
               f"ref={a:.6f} novo={b:.6f} diff={d:.3e}")

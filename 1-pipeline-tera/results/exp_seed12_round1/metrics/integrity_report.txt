@@ -1,0 +1,19 @@
+TERA Pipeline — Relatório de Integridade
+==================================================
+
+[Cobertura de Seeds]
+  baseline_fixed           : [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53]  ✓ COMPLETO
+  baseline_hybrid          : [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53]  ✓ COMPLETO
+  aftkd_fixed              : [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53]  ✓ COMPLETO
+  aftkd_hybrid             : [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53]  ✓ COMPLETO
+
+[Configs Ausentes]
+
+[Métricas Críticas]
+  aftkd_fixed              : FR=0.001 ✓  n_seeds=12
+  aftkd_hybrid             : FR=0.001 ✓  n_seeds=12
+  baseline_fixed           : FR=0.033 ✓  n_seeds=12
+  baseline_hybrid          : FR=0.035 ✓  n_seeds=12
+
+==================================================
+RESULTADO GERAL: ✓ PIPELINE COMPLETO

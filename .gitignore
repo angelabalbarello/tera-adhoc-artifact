@@ -19,3 +19,8 @@ venv/
 # OS
 Thumbs.db
 .DS_Store
+
+# Datasets regenerados por novas campanhas: 151 MB regeneraveis
+# deterministicamente pela seed (o pipeline congelado + seed reproduz bit a bit).
+# A campanha publicada (2-campaign-exp_20260519_055950/data) PERMANECE versionada.
+1-pipeline-tera/results/*/data/
