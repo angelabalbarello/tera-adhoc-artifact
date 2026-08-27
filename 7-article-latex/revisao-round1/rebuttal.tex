@@ -1,0 +1,322 @@
+\documentclass[1p,12pt,authoryear]{elsarticle}
+
+\usepackage{epsfig}
+\usepackage{epstopdf}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage[utf8]{inputenc}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+%Por causa de \sout{}
+\usepackage{ulem}
+
+\usepackage[dvipsnames]{xcolor}
+
+\journal{Ad Hoc Networks}
+
+%% =====================================================================
+%% [NOTA INTERNA -- REMOVER ANTES DE SUBMETER]
+%% (i) Substituir o texto dos comentarios pelos textos ORIGINAIS dos
+%%     revisores (aqui estao traduzidos de volta ao ingles a partir da
+%%     traducao exibida no EM);
+%% (ii) Conferir nome do editor responsavel no Editorial Manager;
+%% (iii) [PENDENTE] Regenerar as figuras com fontes maiores (R2.6) usando
+%%     os scripts em TreinamentoNovo/Experimentos-Artigo1-AdHoc/figuras;
+%% (iv) R3.11: decisao de NAO adicionar as referencias sugeridas (possivel
+%%     autocitacao do revisor, fora de escopo). Se o orientador preferir
+%%     adicionar, obter BibTeX completo e verificado antes.
+%% =====================================================================
+
+\begin{document}
+
+%Identificação do primeiro autor
+\begin{flushright}
+\^Angela Br\'igida Albarello \\
+Department of Computer Science -- CiC \\
+University of Bras\'ilia -- UnB \\
+E-mail: angela.albarello@aluno.unb.br \\
+\today \\
+\end{flushright}
+
+%Identificação do Editor
+\noindent Editor-in-Chief \\
+\noindent Ad Hoc Networks \\
+\noindent Elsevier \\
+
+~
+
+\noindent Dear Editor,
+
+~
+
+\noindent Thank you very much for your email and the reviewers' comments on our manuscript:
+
+\begin{center}
+\textbf{Ref. ID ADHOC-D-26-02099}
+
+``Trustworthy Selective Computation for Resource-Constrained Vehicular Edge Networks''
+\end{center}
+
+~
+
+\noindent As kindly suggested by the editor and the reviewers, the manuscript has been revised in accordance with the comments for improving its quality further. For each issue, we numbered it and explained how we addressed all the points raised by the reviewers. In addition, all the changes in the manuscript have been highlighted in red. For further information, please see the detailed responses below.
+
+~
+
+\noindent Again, we would like to express our sincere appreciation for your prompt handling of our manuscript.
+
+~
+
+\noindent Looking forward to hearing from you.
+
+~
+
+\noindent Best Regards,\\
+\noindent \^Angela B. Albarello, Edna D. Canedo, Vin\'icius P. Gon\c{c}alves, Leandro A. Villas, Rodolfo I. Meneguette and Geraldo P. Rocha Filho
+
+\newpage
+
+\makeatletter
+\def\@xfootnote[#1]{%
+  \protected@xdef\@thefnmark{#1}%
+  \@footnotemark\@footnotetext}
+\makeatother
+
+\begin{center}
+\huge Response to Reviewers\footnote[*]{For the manuscript, Ref. ID ADHOC-D-26-02099, ``Trustworthy Selective Computation for Resource-Constrained Vehicular Edge Networks''.}
+\end{center}
+
+~
+
+\noindent The authors would like to thank the reviewers for their careful assessments and constructive comments on our manuscript, particularly the time being spent. We considered the reviewers' views very seriously and have made every possible effort to address the concerns raised and to modify the manuscript according to their suggestions and comments. The authors hope this revised version is now suitable for publication in Elsevier Ad Hoc Networks. For each issue, we numbered it and explained how we addressed all the reviewers' comments. All the changes in the manuscript have been highlighted in red; the only exception is the abstract, which was rewritten in its entirety (the document class does not support color commands inside the abstract environment, so the whole abstract should be read as changed).
+
+\newpage
+
+%% =====================================================================
+%% REVIEWER 1
+%% =====================================================================
+
+\begin{large}
+\noindent \underline{Response to Reviewer \#1:}
+\end{large}
+
+\vspace{10pt}
+
+\noindent The authors would like to thank the reviewer for spending his/her time to assess the manuscript and for the constructive and informative comments provided in the review. According to the reviewer's comments, the revisions of the current manuscript are as follows:
+
+\vspace{0.5cm}
+\noindent \textbf{1. Comment:} The protocols of vehicular networks and ad hoc networks are not the same, but in this work this distinction is not considered.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer that vehicular networks (e.g., IEEE 802.11p/DSRC, C-V2X) and general-purpose mobile ad hoc networks differ in protocol stack, mobility model, and infrastructure assumptions, and that they should not be treated as interchangeable. Our contribution operates strictly at the \emph{computation layer of a single node} -- deciding \emph{when} to spend an inference step -- and is agnostic to the underlying communication protocol; the operational-risk state $\ell_t$ it emits is a compact payload that either class of network could disseminate. To make this distinction and the scope explicit, a clarification paragraph has been added at the end of Section~2.1 (highlighted in red): ``A clarification on scope is warranted: vehicular networks (e.g., IEEE 802.11p/DSRC, C-V2X) and general-purpose mobile ad hoc networks differ in protocol stack, mobility model, and infrastructure assumptions, and we do not treat them as interchangeable. (...) Protocol-level concerns such as medium access, routing, and dissemination latency are outside the scope of this paper.''
+
+~
+
+\noindent \textbf{2. Comment:} What does TERA-Gen mean in this protocol?
+
+\vspace{2mm}
+\noindent \textbf{Response:} Thank you for pointing this out. TERA-Gen is the \emph{TERA episode Generator}: the synthetic-data component of the TERA (Temporal Evaluation and Risk Assessment) ecosystem. It generates driving episodes with a deterministic, frame-precise risk onset, calibrated against SHRP2 odds ratios, which is the property that makes frame-level evaluation of the scheduler possible. The acronym is now expanded at its first mention in the Introduction (Section~1, contributions paragraph, highlighted in red): ``TERA-Gen (the \emph{TERA episode Generator}, the synthetic-data component of the ecosystem) generates synthetic episodes with a deterministic onset (...)''. Its full specification remains in Section~3.1.
+
+~
+
+\noindent \textbf{3. Comment:} The conceptual hypothesis investigated by TERA was not well explained; the informative scheduling signal block lacks adequate justification or explanation.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer that the term ``informative scheduling signal'' deserved an explicit definition. The following text has been added to the hypothesis paragraph of Section~1 (highlighted in red): ``By an \emph{informative scheduling signal} we mean an uncertainty trajectory whose level separates episode phases: low and stable during redundant intervals, rising ahead of and during risk transitions. This is the property depicted in the central block of Figure~1: without it, the gate has no temporal basis on which to discriminate; with it, thresholding entropy becomes a meaningful allocation criterion.'' The caption of Figure~1 has also been extended (in red) to explain the block in the same terms.
+
+~
+
+\noindent \textbf{4. Comment:} The sensor stream of the TERA operational architecture needs to be explained.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. An explanatory passage has been added to the opening of Section~3, right after the description of the predictive core (highlighted in red): ``The sensor stream at the input of Figure~2 is the frame-synchronous concatenation of the four on-board modality groups detailed in Section~3.1: behavioral-visual channels from the cabin-facing detector, kinematic channels (speed, longitudinal accelerations, gyroscope), driving-context channels (road type, precipitation, illumination, traffic density), and acoustic event channels, plus two detector-reliability indicators -- yielding $x_t \in \mathbb{R}^{31}$ per frame at $\approx$9.6\,fps. At each timestep the MHEG gate inspects only the kinematic variation $\Delta x_t$ and the buffered entropy $H(p_{t-1})$; the full vector reaches the recurrent core only when the gate fires.''
+
+~
+
+\noindent \textbf{5. Comment:} The efficient inference cycle of the MHEG runtime computation scheduler algorithm needs to be explained in terms of its complexity.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. A complexity analysis paragraph has been added immediately after Algorithm~1 (Section~3.4, highlighted in red): the gate itself (lines 2--4 and 8--10) costs $\mathcal{O}(D)$ and $\mathcal{O}(1)$ per timestep (a maximum over channel differences, one closed-form binary entropy, and three threshold comparisons, with no matrix operation), while the recurrent update of line~5 costs $\mathcal{O}(4(DH{+}H^2))$ and executes only when the disjunction fires. The expected per-frame cost is therefore $c_{\mathrm{gate}} + (1-s)\,\mathcal{O}(4(DH{+}H^2))$, where $s$ is the suppression rate. This analysis is consistent with the component-level complexity profile already reported in Table~4.
+
+~
+
+\noindent \textbf{6. Comment:} The frame-by-frame temporal evidence for the seed-42 graph is not well explained.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. A detailed reading guide for Figure~4 has been added to Section~4.2 (Movement~1, highlighted in red), explaining each visual element (probability curve, entropy curve, onset line, detection marker, and suppressed spans) and walking the reader through the AF-TOI+MHEG and Baseline columns for both the progressive and the abrupt episodes of seed~42: entropy is low and flat through the redundant pre-onset stretch (suppressed), rises as the transition approaches, forces dense computation around $t_0$, and detection follows within a few frames; in the Baseline column, flat entropy makes suppression land indiscriminately, including inside the onset window.
+
+\newpage
+
+%% =====================================================================
+%% REVIEWER 2
+%% =====================================================================
+
+\begin{large}
+\noindent \underline{Response to Reviewer \#2:}
+\end{large}
+
+\vspace{10pt}
+
+\noindent The authors would like to thank the reviewer for spending his/her time to assess the manuscript, for the careful and encouraging evaluation, and for the recommendation of minor revision. According to the reviewer's comments, the revisions of the current manuscript are as follows:
+
+\vspace{0.5cm}
+\noindent \textbf{1. Comment:} The abstract is well structured but too long ($\approx$350 words versus the $\approx$200-word standard for this type of article), although the contributions are clearly stated in it.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. The abstract has been rewritten in its entirety and shortened to approximately 200 words, preserving the problem statement, the three components, the central negative-control result, and the headline quantitative findings. Because the document class does not support color commands inside the abstract environment, the abstract is the only change not rendered in red; the entire abstract should be read as revised.
+
+~
+
+\noindent \textbf{2. Comment:} The introduction is clear and presents the three components and the hypothesis, but an explicit paragraph describing the structure of the paper is missing.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. A paper-structure paragraph has been added at the end of Section~1 (highlighted in red), describing the organization of Sections~2 through~7.
+
+~
+
+\noindent \textbf{3. Comment:} The related work section is exceptionally complete: six subsections and a gap-matrix table that positions the paper explicitly and identifies the limitations of each prior line of work.
+
+\vspace{2mm}
+\noindent \textbf{Response:} The authors are grateful to the reviewer for the positive assessment of the related work section and of the gap-matrix positioning.
+
+~
+
+\noindent \textbf{4. Comment:} The structure is clear and the problem is well defined. The theoretical approach is dense but readable.
+
+\vspace{2mm}
+\noindent \textbf{Response:} The authors thank the reviewer for the positive comment.
+
+~
+
+\noindent \textbf{5. Comment:} The concepts are solid and well demonstrated internally. The results are not fully proven: all evaluations rely on synthetic data with $n=4$ seeds, and the minimum Wilcoxon $p$-value is 0.0625, so no result reaches conventional statistical significance. However, the authors acknowledge this and leave validation with real data and hardware for future work.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer, and we have moderated the statistical language accordingly. In addition to the existing acknowledgment in the limitations (Section~5, ``Threats to validity'', third limitation), the following sentence has been added to the statistical analysis of Section~4.4 (highlighted in red): ``Given $n=4$, these statistics are reported as descriptive effect-size characterizations; no claim of conventional statistical significance is made anywhere in the paper.'' The rewritten abstract also avoids inferential phrasing. Expanding the study to 10--12 seeds with an a priori power analysis remains stated as a priority for the next iteration.
+
+~
+
+\noindent \textbf{6. Comment:} The figures are high quality and informative, but several are dense and text-heavy, and would benefit from larger fonts.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. The dense multi-panel figures have been regenerated with increased font sizes to improve readability at print scale.
+%% [PENDENTE -- ACAO DA ANGELA: regenerar as figuras (fig_entropy_dist_en,
+%% fig_temporal_trace_en, fig_gating_heatmap_en, fig_multiseed_en,
+%% fig_ttdef_dist, fig_prob_dist_en) com fontes maiores, usando os scripts
+%% em TreinamentoNovo/Experimentos-Artigo1-AdHoc/figuras, antes de submeter.]
+
+~
+
+\noindent \textbf{Recommendation:} Minor revision. The main contribution is solid, the negative-control experiment design is convincing, and the scope is honestly presented. The main weakness is the evaluation based only on synthetic data, with $n=4$ seeds and without statistical significance. This limits the reach of the claims without invalidating them.
+
+\vspace{2mm}
+\noindent \textbf{Response:} The authors sincerely thank the reviewer for the recommendation and for the fair characterization of both the strengths and the limitations of the study. All three requested adjustments (shorter abstract, structure paragraph, and moderated statistical language) have been implemented, as detailed above.
+
+\newpage
+
+%% =====================================================================
+%% REVIEWER 3
+%% =====================================================================
+
+\begin{large}
+\noindent \underline{Response to Reviewer \#3:}
+\end{large}
+
+\vspace{10pt}
+
+\noindent The authors would like to thank the reviewer for spending his/her time to assess the manuscript and for the detailed and constructive comments, which certainly contributed to improving this work. According to the reviewer's comments, the revisions of the current manuscript are as follows:
+
+\vspace{0.5cm}
+\noindent \textbf{1. Comment:} In the abstract and introduction, the context, motivation, and originality are not clear. The main methodological contribution is AF-TOI, which transfers temporal structural information from a non-causal reference model to a causal deployment model, aiming to organize predictive uncertainty around risk transitions. The motivation is interesting, but the methodological distinction from existing methods -- such as temporal knowledge distillation, sequence-level knowledge transfer, temporal representation learning, uncertainty-aware inference, and adaptive/selective computation -- is not sufficiently clear. The authors should provide a much more explicit discussion of what is fundamentally new in AF-TOI.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer, and an explicit novelty discussion has been added at the end of Section~2.6 (highlighted in red). In summary: temporal knowledge distillation and sequence-level transfer optimize agreement with a teacher's \emph{predictions}, spreading the alignment signal uniformly over time, with accuracy or compression as the objective; AF-TOI instead optimizes the \emph{shape of the uncertainty trajectory} around a deterministic onset, through asymmetric temporal weighting (Eq.~6) anchored to $t_0$, so the training target is entropy stratification across episode phases rather than fidelity to teacher outputs. Uncertainty-aware inference methods consume uncertainty at runtime but do not reshape its temporal structure during training, and adaptive/selective computation methods assume an informative confidence signal rather than inducing one. To the best of our knowledge, using onset-anchored structural alignment to \emph{create} the scheduling signal that a selective-computation gate later consumes is the specific contribution of AF-TOI. The rewritten abstract also states the argument more directly.
+
+~
+
+\noindent \textbf{2. Comment:} In the related work section, it is suggested to include more of the authors' own commentary on the state-of-the-art methods, which would facilitate the problem formulation.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. Beyond the new comparative discussion added to Section~2.6 (see Response to Comment~1), we note that each subsection of Section~2 closes with our own critical reading of the corresponding line of work (e.g., the reliance of exit/skip criteria on instantaneous confidence in Section~2.4, and the marginal character of probabilistic calibration in Section~2.5), and Table~1 consolidates this commentary by marking, per work, which properties required by trustworthy selective computation are present, partial, or absent. The new red paragraph in Section~2.6 makes the resulting problem formulation explicit.
+
+~
+
+\noindent \textbf{3. Comment:} The main experimental conclusions are obtained using TERA-Gen, where risk onset is deterministically defined at frame level. This design is useful to isolate the proposed mechanism and avoid annotation ambiguity, but it also creates a highly controlled environment that may favor the proposed onset-oriented training strategy. The authors do not establish whether the observed temporal organization of uncertainty and the resulting scheduling benefits persist under real driving conditions, where risk transitions can be noisy, gradual, abrupt, ambiguous, or inconsistently annotated.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer that this is the central external-validity question, and we have addressed it on three fronts. \textbf{(i)} The revised limitations (Section~5, highlighted in red) now state the concern explicitly: ``A related caveat is that a controlled environment could, in principle, favor an onset-oriented training strategy.'' \textbf{(ii)} We point out the design elements that mitigate, without eliminating, this risk: episodes mix progressive and abrupt regimes in fixed proportion (Section~3.1); Movement~6 evaluates recipe families never seen in training; and the stress campaign of Section~4.8 spans nine onset/noise scenarios, including degraded entropy, lagged entropy signals, missing kinematic channels, and false onsets -- precisely the noisy, ambiguous conditions the reviewer describes, within the limits of a synthetic environment. \textbf{(iii)} The manuscript already commits to a concrete real-data protocol (Section~5, ``Planned real-data validation'') on DADA2000, whose frame-level abnormal-onset annotations provide a real, frame-precise onset; the protocol specifies transfer regimes, split hygiene, re-calibration rules, and success criteria. We prefer to report real-data results in a dedicated study rather than as a rushed appendix, and the paper's claims are scoped accordingly.
+
+~
+
+\noindent \textbf{4. Comment:} A central claim of the study is that the temporal organization of uncertainty matters for safe selective computation; however, the current experiments appear strongly tied to the risk-transition patterns defined by the experimental setup. The authors should investigate whether AF-TOI generalizes to previously unseen temporal risk trajectories, different onset durations, abrupt versus gradual transitions, intermediate-risk conditions, changes in input feature distribution, or distribution shifts between training and test conditions.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We thank the reviewer for the detailed list, and we note that several of the requested axes are already evaluated in the manuscript; the revision now makes this mapping explicit (Section~5, red paragraph). Specifically: \textbf{(a)} abrupt versus gradual transitions are stratified in Table~10, with the miss-rate benefit concentrated exactly in the abrupt regime; \textbf{(b)} intermediate-risk conditions unseen in training are the object of Movement~6 (borderline recipes A01--A03 and L01--L03, generated independently and never used for training); \textbf{(c)} onset-timing perturbations are covered by the entropy-lag sensitivity study (Table~18), which quantifies the lag budget each regime tolerates; \textbf{(d)} degraded input conditions are covered by the high-noise, missing-kinematics, and false-onset scenarios of the stress campaign (Section~4.8). What the current study cannot establish is generalization under \emph{real} distribution shift between training and test; this is stated in red in the limitations and is the object of the planned DADA2000 protocol (see Response to Comment~3).
+
+~
+
+\noindent \textbf{5. Comment:} The experiments are not sufficient to substantiate the proposed method. The study should include more robust baselines, particularly representative methods based on confidence-based selective inference, entropy-based scheduling without AF-TOI, temporal smoothing or filtering, adaptive computation/early-exit mechanisms when applicable, and existing uncertainty-aware resource allocation strategies.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer that a broader baseline coverage strengthens the study, and the revised manuscript now \emph{adds a dedicated baseline experiment} (new Section~4.11 and Table~19, highlighted in red) covering the two families that were not yet explicitly instantiated: a \textbf{confidence-threshold gate} and a \textbf{smoothed-entropy gate} (moving average, $w{=}5$), both without the kinematic channel, simulated on the stored full-inference trajectories of the factorial study (seeds 42--45) under oracle-calibrated thresholds that favor the baselines. The result is clear-cut: purely confidence/entropy-driven gates deadlock on a buffered low-entropy value and can safely suppress at most $0$--$2\%$ of frames; when tuned to spend the same computation as the entropy+kinematic gate, they miss $99\%$ of critical episodes on unorganized trajectories and $59\%$ on organized ones, whereas the entropy+kinematic gate sustains $\mathrm{FR}=0$ at $96\%$/$69\%$ suppression, with effective delay $0.96$\,s on organized versus $1.90$\,s on unorganized trajectories. The remaining requested families map onto experiments already present in the manuscript, as detailed below.
+
+\vspace{2mm}
+\noindent \textbf{Response to item i) entropy-based scheduling without AF-TOI:} This baseline is already the centerpiece of the factorial design: the Baseline+MHEG configuration (Table~8) applies exactly the same entropy-plus-kinematics scheduler to trajectories without AF-TOI organization, and it is the negative control on which the paper's main argument rests (miss rate unchanged, $\mathrm{TTD}_{\mathrm{ef}}$ worsened by 11.8\%).
+
+\vspace{2mm}
+\noindent \textbf{Response to item ii) confidence-based selective inference:} The post-hoc calibration study (Section~4.7, Table~14) evaluates three confidence-rescaled variants -- temperature scaling, Platt scaling, and isotonic calibration -- each combined with the scheduler and re-calibrated per seed. These are precisely selective-inference baselines driven by (rescaled) confidence, and they show that improving confidence calibration does not reproduce the effect of temporal organization.
+
+\vspace{2mm}
+\noindent \textbf{Response to item iii) temporal smoothing/filtering and other allocation heuristics:} An explicit smoothed-entropy gate (moving average over the buffered entropy, $w{=}5$) is now evaluated in the new Section~4.11 (Table~19): smoothing does not repair the deadlock of purely entropic gating, and at matched suppression it inherits the same coverage collapse as the raw confidence gate. This complements the pre-existing cost-matched campaign of Section~4.8 (Table~17), where MHEG is compared at \emph{identical compute budget} ($\pm 2\%$) against random, unstructured-aggressive, and \emph{lagged} allocators -- the lagged control being the budget-matched equivalent of a low-pass (filtered) scheduling signal -- and the entropy-lag study (Table~18) quantifies the lag effect parametrically. At equal cost, all structure-free controls become unsafe near onset (up to 44\% FS@onset; coverage collapse to 22--24\% on rare transients).
+
+\vspace{2mm}
+\noindent \textbf{Response to item iv) early-exit mechanisms:} Multi-exit/early-exit architectures act on the \emph{depth} axis of a forward pass and presuppose a deep backbone with intermediate heads; our deployed model is a compact two-layer recurrent network ($\approx$58K parameters) in which the scheduling decision acts on the \emph{time} axis (whether to run the step at all). A depth-wise early-exit baseline is therefore not directly applicable to this architecture without changing the model class itself; we now rely on Section~2.4 to position early-exit methods and state this applicability boundary. We consider a systematic comparison against multi-exit backbones on the same protocol a valuable dedicated study, and it is listed among the future directions.
+
+~
+
+\noindent \textbf{6. Comment:} The authors argue that temporal organization is the key factor enabling effective scheduling; additional ablation studies are needed to make the evidence considerably more robust.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We respectfully note that the revised manuscript contains a fairly extensive ablation suite, which the revision now cross-references more visibly: the $2{\times}2$ factorial isolates each component (Table~8); the $\alpha$ sensitivity of the onset weighting is ablated in Table~11; the miss-penalty parameter in Table~12; the non-causal reference topology (BiLSTM vs.\ Transformer, and causal target class) in Table~15; the kinematic channel is removed in the \texttt{kinematic\_signal\_missing} scenario of Section~4.8; and the entropic signal is degraded and lagged parametrically in Tables~17--18. Together these ablate every component of the chain (generator, induction weighting, reference topology, kinematic trigger, entropic gate). Should the reviewer have a specific additional ablation in mind, we would be glad to include it.
+
+~
+
+\noindent \textbf{7. Comment:} The authors use the term ``trustworthy'' relatively broadly, but the current experiments mainly demonstrate improvements in computational efficiency and detection delay in a controlled experimental environment.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. An explicit operational definition has been added at the beginning of Section~2.2 (highlighted in red): ``Throughout this paper, `trustworthy' is used in a restricted, operational sense: a selective-computation policy is trustworthy when it preserves critical-episode coverage ($\mathrm{FR} \le 0.05$) while suppressing computation, under the controlled conditions evaluated here. We make no claim regarding broader dimensions of trustworthiness (security, privacy, adversarial robustness), which are out of scope.''
+
+~
+
+\noindent \textbf{8. Comment:} The study reports attractive model size and recurrent memory consumption, and estimates compatibility with several embedded/automotive platforms; however, these results are based on parameter counts, memory requirements, and computational complexity rather than actual execution on physical embedded hardware.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. This is stated as the fourth limitation in Section~5, and the revision reinforces it at the point of use (Section~4.9, highlighted in red): ``All embedded-viability figures in this subsection are analytical (parameter counts, memory footprints, FLOP counts) or measured on a reference GPU; none derives from execution on physical automotive hardware.'' Characterization on STM32H7-, Cortex-M55-, and SA8155P-class platforms is part of our immediate future work.
+
+~
+
+\noindent \textbf{9. Comment:} The authors discuss vehicular edge networks, but the evaluation itself is mainly performed at the single-node inference level. The study does not experimentally investigate multi-node coordination, communication overhead, offloading, or network-level resource allocation.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer, and this boundary is drawn explicitly in the manuscript: Section~6 opens by stating that it ``offers an architectural interpretation, not an evaluated distributed system'' and that ``no networked coordination, offloading, communication latency, or bandwidth analysis was evaluated''; the same scoping appears in Section~5 (``Scope and applicability'') and in the Conclusion. The validated contribution is single-node embedded selective computation; the VEC/MEC material is presented strictly as candidate integration paths for the $\ell_t$ signal, to be tested in future work. An empirical multi-node study is listed among the immediate priorities.
+
+~
+
+\noindent \textbf{10. Comment:} The authors acknowledge that the current study is limited to a controlled synthetic environment and a single embedded node, and that naturalistic data, physical automotive hardware, distributional robustness, sensor failures, adversarial perturbations, and multi-node studies remain future work. These limitations are important and should be reflected consistently throughout the study.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. In the revised version we performed a consistency pass on the scope language: the rewritten abstract confines the claims to the controlled setting; the operational definition of ``trustworthy'' (Section~2.2, red) binds the term to those conditions; the statistical note (Section~4.4, red) removes any inferential reading; the deployment subsection (Section~4.9, red) restates the analytical character of the embedded estimates; and the limitations paragraph (Section~5, red) now also covers the environment-favorability caveat raised in Comment~3. Together with the pre-existing scope statements in Sections~5, 6, and~7, we believe the limitations are now reflected consistently throughout.
+
+~
+
+\noindent \textbf{11. Comment:} The authors should comprehensively discuss both the limitations of the proposed method and future directions, for example, how to further improve performance by integrating other learning paradigms. It is recommended to include some related papers: the use of online learning for domain adaptation in Wi-Fi-based device-free localization, and online spatio-temporal modeling for robust and lightweight device-free localization in non-stationary environments.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We thank the reviewer for the suggestion. Regarding future directions and other learning paradigms, the Discussion (Section~5, ``Future directions'') already identifies online adaptation of the MHEG thresholds under distributional shift as the principal step toward production, alongside adversarial robustness and the offloading extensions of Section~6; the revised limitations paragraph broadens this discussion further. Regarding the two suggested papers on Wi-Fi-based device-free localization: after careful reading of their scope, we respectfully believe they address a different application domain (RF-sensing indoor localization) whose connection to onset-anchored selective computation in vehicular driver monitoring would be tangential, and our citation policy in this manuscript has been to include only works whose relevance to the specific problem can be made explicit in the text. Should the editor consider the connection through online non-stationary adaptation valuable, we would be glad to discuss it; at present we opted not to add citations we could not organically justify.
+%% [NOTA INTERNA: se o orientador decidir CITAR as referencias sugeridas,
+%% substituir a resposta acima pela versao de aceite e adicionar as refs
+%% (com BibTeX completo verificado) no paragrafo "Future directions" da
+%% Secao 5, em vermelho.]
+
+\end{document}

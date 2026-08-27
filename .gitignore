@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# LaTeX build
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.abs
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# OS
+Thumbs.db
+.DS_Store

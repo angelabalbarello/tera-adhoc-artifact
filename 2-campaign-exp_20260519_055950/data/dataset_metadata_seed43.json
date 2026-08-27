@@ -1,0 +1,12 @@
+{
+  "seed": 43,
+  "generator": "synthetic_driver_risk_v7",
+  "generator_hash": "65bbec4a23050639",
+  "window": 96,
+  "per_recipe": 80,
+  "input_dim": 31,
+  "frame_thr": 0.35,
+  "train_ratio": 0.7,
+  "val_ratio": 0.15,
+  "n_episodes": 1040
+}
