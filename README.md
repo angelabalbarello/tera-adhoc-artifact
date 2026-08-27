@@ -86,7 +86,14 @@ scipy, pyyaml.
                                   logs de frames e robustness_section.tex
 6-revision-round1/                artefatos novos da revisão (baselines R3.5,
                                   expansão de seeds TERA, launcher obsoleto p/ registro)
-7-article-latex/                  fontes LaTeX: versão submetida (versao-final-segura)
-                                  e revisão em andamento (revisao-round1) + figuras-fonte
+7-article-latex/                  fontes LaTeX:
+                                  00-versao-SUBMETIDA/ — a versão que os revisores leram
+                                    (artigo.tex 2028 linhas, do zip ___submited.zip; ver
+                                    MAPA_DE_VERSOES.md, artigo_ORIGINAL_submetido.pdf e
+                                    ADHOC-D-26-02099_versao_oficial_EM.pdf)
+                                  versao-final-segura/ — variante pós-submissão (jul/2026,
+                                    ajustes de fontes/ORCID; 2063 linhas — NÃO é a submetida)
+                                  revisao-round1/ — revisão em andamento + rebuttal
+                                  figuras-fonte/ — fontes das figuras
 docs/                             notas de planejamento experimental
 ```

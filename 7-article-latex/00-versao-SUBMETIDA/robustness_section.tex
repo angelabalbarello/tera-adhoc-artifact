@@ -1,0 +1,177 @@
+%% ====================================================================
+%% Complementary robustness study -- Negative Controls and Cost-Matched
+%% Analysis. Inserted inside Experimental Evaluation, before Embedded
+%% Deployment Viability. Uses only packages already loaded by the main
+%% manuscript (booktabs, tabularx, xcolor[table], multirow, pifont).
+%%
+%% SCOPE NOTE: this campaign is a stress protocol on nine controlled
+%% scenarios with a per-scenario compute-rate-matched budget and a
+%% near-onset false-suppression metric. Its absolute compute-rate and
+%% delay magnitudes are on a different scale from the aggregate figures
+%% of Section~\ref{sec:mov3_consequencia} and are NOT directly
+%% comparable; they contrast methods at equal budget only.
+%% ====================================================================
+\subsection{Negative Controls and Cost-Matched Robustness}
+\label{sec:robustness_controls}
+
+To probe the central claim beyond the $2{\times}2$ factorial, we ran a
+complementary controlled campaign over nine onset/noise scenarios
+(Table~\ref{tab:rob_scenarios}), each with $360$ episodes across seeds
+$42$--$45$. The protocol adds two instruments not used in the main study.
+First, a \emph{compute-rate-matched} budget forces every negative control to
+spend the same fraction of frames on recurrent updates as \mbox{MHEG}
+($\pm 2\%$), so that any difference reflects \emph{where} computation is
+spent, not \emph{how much}. Second, a near-onset false-suppression metric
+(\emph{FS@onset}, the fraction of onset-window frames whose update was
+suppressed) isolates the specific failure that unsafe scheduling produces.
+Coverage and miss rate are reported as percentages; compute rate is the
+fraction of frames on which the update runs. These magnitudes are on the
+stress-protocol scale and are not comparable to the aggregate
+$\mathrm{TTD}_{\mathrm{ef}}$ of Section~\ref{sec:mov3_consequencia}; the study
+is designed to rank safety at fixed cost, not to re-estimate efficiency.
+The budget-matched controls used here (random, unstructured, and lagged
+allocators) are intentionally harsher than the Baseline+MHEG negative control
+of Section~\ref{sec:mov3_consequencia}: they hold the compute budget fixed and
+strip temporal structure, isolating the effect of \emph{where} computation is
+placed rather than how much.
+
+\begin{table}[!tbp]
+\centering
+\caption{Controlled robustness scenarios (each $360$ episodes, seeds
+$42$--$45$).}
+\label{tab:rob_scenarios}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\columnwidth}{>{\raggedright\arraybackslash}l c c
+  >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Scenario} & \textbf{Onset} & \textbf{Entropy} & \textbf{Stressed failure mode} \\
+\midrule
+balanced\_onsets            & mixed       & org.  & cost saving (reference) \\
+\rowcolor{gray!8}
+abrupt\_onset\_dominant      & abrupt      & org.  & false suppression at abrupt onset \\
+progressive\_onset\_dominant & progressive & org.  & delayed detection ($\mathrm{TTD}_{\mathrm{ef}}$) \\
+\rowcolor{gray!8}
+rare\_abrupt\_critical       & abrupt      & org.  & missed transient event (coverage) \\
+high\_noise\_entropy         & mixed       & degr. & entropy scheduler misfires \\
+\rowcolor{gray!8}
+kinematic\_signal\_missing   & abrupt      & org.  & loss of kinematic protection \\
+entropy\_lag                & abrupt      & degr. & lagged entropy misses onset \\
+\rowcolor{gray!8}
+false\_onset                & mixed       & org.  & wasted compute / false trigger \\
+no\_onset\_negative\_control & mixed       & org.  & sanity: FS must be $\approx 0$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Cost-matched safety.}
+The decisive result is that structure, not compute budget, drives safety.
+Table~\ref{tab:rob_costmatched} matches every control to the \mbox{MHEG}
+budget within $\pm 2\%$. At \emph{identical} cost, \mbox{MHEG} preserves full
+coverage with zero onset-window suppression, while budget-matched controls
+degrade near onset: under abrupt onsets the random and unstructured controls
+reach $41$--$44\%$ FS@onset, and under rare transient events coverage
+collapses to $22$--$24\%$ (miss rate $\ge 75\%$) at the same budget. Spending
+the same computation without temporal structure is therefore unsafe.
+
+\begin{table*}[!tbp]
+\centering
+\caption{Cost-matched comparison ($\pm 2\%$ compute budget). \mbox{MHEG}
+vs.\ budget-matched negative controls. Coverage, miss and FS@onset in
+percent; compute rate is the fraction of frames updated.}
+\label{tab:rob_costmatched}
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}l
+  >{\raggedright\arraybackslash}X c c c c}
+\toprule
+\textbf{Scenario} & \textbf{Method} & \textbf{Compute rate} & \textbf{Coverage}
+  & \textbf{Miss} & \textbf{FS@onset} \\
+\midrule
+\multirow{4}{*}{balanced\_onsets}
+ & \textbf{MHEG (hybrid)}            & 0.217 & \textbf{100.0} & \textbf{0.0}  & \textbf{0.0} \\
+ & NC1 random budget-matched         & 0.218 & 99.7  & 0.3  & 23.9 \\
+ & NC2 unstructured aggressive       & 0.218 & 100.0 & 0.0  & 20.3 \\
+ & NC6 cost-matched unstructured     & 0.218 & 100.0 & 0.0  & 20.3 \\
+\midrule
+\multirow{4}{*}{abrupt\_onset\_dominant}
+ & \textbf{MHEG (hybrid)}            & 0.193 & \textbf{100.0} & \textbf{0.0}  & \textbf{0.0} \\
+ & NC1 random budget-matched         & 0.195 & 99.7  & 0.3  & 43.9 \\
+ & NC2 unstructured aggressive       & 0.196 & 99.7  & 0.3  & 41.6 \\
+ & NC6 cost-matched unstructured     & 0.196 & 99.7  & 0.3  & 41.6 \\
+\midrule
+\multirow{4}{*}{rare\_abrupt\_critical}
+ & \textbf{MHEG (hybrid)}            & 0.066 & \textbf{100.0} & \textbf{0.0}  & \textbf{0.0} \\
+ & NC1 random budget-matched         & 0.066 & 21.9  & 78.1 & 86.2 \\
+ & NC2 unstructured aggressive       & 0.067 & 24.4  & 75.6 & 85.1 \\
+ & NC6 cost-matched unstructured     & 0.067 & 24.4  & 75.6 & 85.1 \\
+\bottomrule
+\end{tabularx}
+\vspace{2pt}
+\par\footnotesize
+\textit{Compute rate} is the per-scenario fraction of frames updated under the
+matched-budget protocol; it is deliberately distinct from, and not comparable
+to, the aggregate suppression rate (\%Sup) of
+Section~\ref{sec:mov3_consequencia}. Within each scenario the budget is matched
+\emph{across methods} to isolate allocation quality at equal cost.
+\end{table*}
+
+\paragraph{Negative-control sweep.}
+Across all nine scenarios, \mbox{MHEG} (hybrid and calibrated) held FS@onset at
+$0.0$ wherever the kinematic channel was available, whereas the budget-matched
+unstructured (NC2/NC6), random (NC1), and lagged (NC3) controls incurred
+near-onset suppression on every abrupt-dominated scenario, peaking at
+$56.7\%$ FS@onset for the lagged control under abrupt onsets. The
+\texttt{no\_onset\_negative\_control} sanity check behaved as required, with
+false suppression $\approx 0$ for all methods. When the kinematic channel was
+removed (\texttt{kinematic\_signal\_missing}), \mbox{MHEG} retained coverage
+$100\%$ with only $11.5\%$ FS@onset, while the matched controls became unsafe
+($33$--$46\%$ FS@onset), confirming the kinematic trigger as the intended
+fallback for sub-onset windows.
+
+\paragraph{Entropy-lag sensitivity.}
+Table~\ref{tab:rob_lag} varies the entropic-signal lag. Progressive onsets
+tolerate lag (coverage stays $100\%$ through $10$ frames), but abrupt and
+especially rare transient onsets degrade sharply: at a $5$-frame lag the
+rare-transient scenario loses all coverage (miss $100\%$). This is the
+mechanistic signature of the paper's thesis, namely that near-onset entropy
+timing, not aggregate calibration, governs safe suppression.
+
+\begin{table}[!tbp]
+\centering
+\caption{Entropy-lag sensitivity by onset type. Coverage, miss and FS@onset
+in percent.}
+\label{tab:rob_lag}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{c l c c c}
+\toprule
+\textbf{Lag} & \textbf{Scenario} & \textbf{Coverage} & \textbf{Miss} & \textbf{FS@onset} \\
+\midrule
+1  & abrupt\_onset\_dominant & 100.0 & 0.0   & 28.3 \\
+\rowcolor{gray!8}
+1  & rare\_abrupt\_critical  & 100.0 & 0.0   & 26.3 \\
+3  & abrupt\_onset\_dominant & 100.0 & 0.0   & 56.7 \\
+\rowcolor{gray!8}
+3  & rare\_abrupt\_critical  & 64.4  & 35.6  & 78.8 \\
+5  & abrupt\_onset\_dominant & 100.0 & 0.0   & 85.0 \\
+\rowcolor{gray!8}
+5  & rare\_abrupt\_critical  & 0.0   & 100.0 & 100.0 \\
+10 & rare\_abrupt\_critical  & 0.0   & 100.0 & 100.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Ablation of the scheduling channels.}
+A per-channel ablation confirms that both components are necessary.
+Entropy-only scheduling preserves coverage but adds delay
+($\mathrm{TTD}_{\mathrm{ef}}$ rises relative to the hybrid), while
+kinematic-only scheduling is catastrophic on progressive onsets, collapsing
+coverage to $0\%$ because slow transitions never trigger the kinematic gate.
+The hybrid matches the always-compute delay at a fraction of the cost, and
+paired tests over seeds rank the hybrid strictly above the entropy-only
+control on false suppression (Cliff's $\delta = -0.5$, large) with no delay
+penalty against always-compute ($\delta = 0$, negligible).
