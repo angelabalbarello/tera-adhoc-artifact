@@ -22,8 +22,10 @@
 %%     revisores (aqui estao traduzidos de volta ao ingles a partir da
 %%     traducao exibida no EM);
 %% (ii) Conferir nome do editor responsavel no Editorial Manager;
-%% (iii) [PENDENTE] Regenerar as figuras com fontes maiores (R2.6) usando
-%%     os scripts em TreinamentoNovo/Experimentos-Artigo1-AdHoc/figuras;
+%% (iii) [PARCIAL] fig_multiseed_en e fig_tradeoff ja regeneradas (12 seeds,
+%%     fontes maiores). [PENDENTE] regenerar com fontes maiores as demais
+%%     figuras densas (fig_entropy_dist_en, fig_temporal_trace_en,
+%%     fig_gating_heatmap_en, fig_prob_dist_en, fig_ttdef_dist) -- R2.6;
 %% (iv) R3.11: decisao de NAO adicionar as referencias sugeridas (possivel
 %%     autocitacao do revisor, fora de escopo). Se o orientador preferir
 %%     adicionar, obter BibTeX completo e verificado antes.
@@ -193,7 +195,7 @@ E-mail: angela.albarello@aluno.unb.br \\
 \noindent \textbf{5. Comment:} The concepts are solid and well demonstrated internally. The results are not fully proven: all evaluations rely on synthetic data with $n=4$ seeds, and the minimum Wilcoxon $p$-value is 0.0625, so no result reaches conventional statistical significance. However, the authors acknowledge this and leave validation with real data and hardware for future work.
 
 \vspace{2mm}
-\noindent \textbf{Response:} We agree with the reviewer, and we have moderated the statistical language accordingly. In addition to the existing acknowledgment in the limitations (Section~5, ``Threats to validity'', third limitation), the following sentence has been added to the statistical analysis of Section~4.4 (highlighted in red): ``Given $n=4$, these statistics are reported as descriptive effect-size characterizations; no claim of conventional statistical significance is made anywhere in the paper.'' The rewritten abstract also avoids inferential phrasing. Expanding the study to 10--12 seeds with an a priori power analysis remains stated as a priority for the next iteration.
+\noindent \textbf{Response:} We agree with the reviewer, and we addressed the concern directly: \textbf{the factorial study was expanded from four to twelve seeds (42--53) in this revision}. The protocol was fixed \emph{a priori} -- the eight additional seeds were chosen before any $p$-value was computed, the sample size was not adjusted as a function of outcomes, and all twelve seeds are reported. The expansion was executed with the same frozen experimental pipeline that produced the submitted results (identical configuration and generator hashes), and, before integration, the four original seeds were verified to reproduce the submitted campaign exactly (all deterministic metrics identical within $10^{-9}$; only wall-clock latency, which depends on machine load, differs and is re-measured homogeneously within the new campaign). With $n=12$ the exact paired Wilcoxon test now resolves conventional significance: \mbox{AF-TOI} dominates the Baseline on F1 and ECE ($p=0.0005$) and on $\mathrm{TTD}_{\mathrm{ef}}$ ($p=0.021$); the negative control -- $\mathrm{TTD}_{\mathrm{ef}}$ degradation when the scheduler acts on unorganized trajectories -- is significant at $p=0.001$; and the cost reduction of \mbox{MHEG} on organized trajectories is significant at $p=0.0005$ with the per-seed miss count unchanged. The single non-significant contrast is FR in the fixed comparison ($p=0.0625$), a ceiling effect: nine of the twelve Baseline seeds also have $\mathrm{FR}=0$, and the exact test discards zero differences; in the scheduled contrast FR reaches $p=0.0156$. Tables~8--10, the multiseed and trade-off figures, and all derived quantities have been regenerated for the twelve-seed campaign (highlighted in red); Section~4.4 reports the updated statistics and the expansion protocol; and the third limitation (Section~5) was rewritten accordingly -- the remaining caveat is external validity (synthetic-only evaluation), which statistical significance does not substitute for. Statistical language elsewhere remains moderated to the evaluated regime.
 
 ~
 
@@ -211,7 +213,7 @@ E-mail: angela.albarello@aluno.unb.br \\
 \noindent \textbf{Recommendation:} Minor revision. The main contribution is solid, the negative-control experiment design is convincing, and the scope is honestly presented. The main weakness is the evaluation based only on synthetic data, with $n=4$ seeds and without statistical significance. This limits the reach of the claims without invalidating them.
 
 \vspace{2mm}
-\noindent \textbf{Response:} The authors sincerely thank the reviewer for the recommendation and for the fair characterization of both the strengths and the limitations of the study. All three requested adjustments (shorter abstract, structure paragraph, and moderated statistical language) have been implemented, as detailed above.
+\noindent \textbf{Response:} The authors sincerely thank the reviewer for the recommendation and for the fair characterization of both the strengths and the limitations of the study. All three requested adjustments (shorter abstract, structure paragraph, and moderated statistical language) have been implemented, as detailed above -- and the statistical-power weakness itself was addressed by expanding the factorial study to twelve seeds under an a priori protocol (see Response to Comment~5), which now yields conventional significance on the main contrasts.
 
 \newpage
 
@@ -278,7 +280,7 @@ E-mail: angela.albarello@aluno.unb.br \\
 \noindent \textbf{6. Comment:} The authors argue that temporal organization is the key factor enabling effective scheduling; additional ablation studies are needed to make the evidence considerably more robust.
 
 \vspace{2mm}
-\noindent \textbf{Response:} We respectfully note that the revised manuscript contains a fairly extensive ablation suite, which the revision now cross-references more visibly: the $2{\times}2$ factorial isolates each component (Table~8); the $\alpha$ sensitivity of the onset weighting is ablated in Table~11; the miss-penalty parameter in Table~12; the non-causal reference topology (BiLSTM vs.\ Transformer, and causal target class) in Table~15; the kinematic channel is removed in the \texttt{kinematic\_signal\_missing} scenario of Section~4.8; and the entropic signal is degraded and lagged parametrically in Tables~17--18. Together these ablate every component of the chain (generator, induction weighting, reference topology, kinematic trigger, entropic gate). Should the reviewer have a specific additional ablation in mind, we would be glad to include it.
+\noindent \textbf{Response:} We respectfully note that the revised manuscript contains a fairly extensive ablation suite, which the revision now cross-references more visibly: the $2{\times}2$ factorial isolates each component (Table~8); the $\alpha$ sensitivity of the onset weighting is ablated in Table~11; the miss-penalty parameter in Table~12; the non-causal reference topology (BiLSTM vs.\ Transformer, and causal target class) in Table~15; the kinematic channel is removed in the \texttt{kinematic\_signal\_missing} scenario of Section~4.8; and the entropic signal is degraded and lagged parametrically in Tables~17--18. Together these ablate every component of the chain (generator, induction weighting, reference topology, kinematic trigger, entropic gate). In addition, the factorial core on which these ablations rest was re-run with twelve seeds in this revision (see Response to Reviewer~2, Comment~5), so the central contrasts now carry exact-test significance rather than descriptive effect sizes. Should the reviewer have a specific additional ablation in mind, we would be glad to include it.
 
 ~
 

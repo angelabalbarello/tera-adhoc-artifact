@@ -10,6 +10,9 @@
 % \documentclass reaches natbib at the class's own \RequirePackage, so the
 % numeric style takes effect without any clash.
 \PassOptionsToPackage{numbers,square,sort&compress}{natbib}
+% Cor das alteracoes da revisao (round 1): "red" na versao marcada;
+% o driver artigo_limpo.tex redefine para "black" (versao limpa).
+\providecommand{\revcolor}{red}
 % xcolor is first loaded (without options) by tikz/pgf below; passing the
 % [table] option here avoids an option clash at \usepackage{xcolor}.
 \PassOptionsToPackage{table}{xcolor}
@@ -107,7 +110,11 @@
 \usepackage{colortbl}
 \IfFileExists{siunitx.sty}{\usepackage{siunitx}%
   \sisetup{output-decimal-marker={.}}}{}
-\usepackage{ragged2e,microtype,float}
+\usepackage{ragged2e,float}
+% microtype com expansao desativada: a expansao de fonte exige fontes
+% escalaveis (cm-super); em instalacoes com CM bitmap ela aborta a
+% compilacao. Protrusao continua ativa e o resultado no Overleaf e igual.
+\usepackage[expansion=false]{microtype}
 \usepackage[section]{placeins}
 \usepackage{enumitem,xspace,url}
 \usepackage[htt]{hyphenat}
@@ -191,11 +198,12 @@ study this through the TERA ecosystem: \mbox{TERA-Gen} generates episodes with
 deterministic, frame-precise onsets; \mbox{AF-TOI} induces temporal organization
 offline by aligning a compact causal model to an onset-oriented reference; and
 \mbox{MHEG} exploits the resulting entropy stratification at runtime. In a
-$2\times2$ factorial design, adding the scheduler to an unorganized model
-leaves the miss rate unchanged yet worsens the effective detection delay
-($\mathrm{TTD}_{\mathrm{ef}}$) by 11.8\%, while on \mbox{AF-TOI}-organized
-trajectories the same scheduler achieves \CostReduction\% cost reduction
-($\mathrm{TTD}_{\mathrm{ef}}$ 0.101\,s vs.\ 0.673\,s). A post-hoc calibration
+$2\times2$ factorial design over twelve seeds, adding the scheduler to an
+unorganized model leaves the miss rate unchanged yet worsens the effective
+detection delay ($\mathrm{TTD}_{\mathrm{ef}}$) by 13.9\% ($p=0.001$, exact
+paired Wilcoxon), while on \mbox{AF-TOI}-organized trajectories the same
+scheduler achieves \CostReduction\% cost reduction
+($\mathrm{TTD}_{\mathrm{ef}}$ 0.099\,s vs.\ 0.570\,s). A post-hoc calibration
 control shows that probabilistic calibration and temporally conditioned
 reliability vary independently. The pipeline emits a discrete operational-risk
 state $\ell_t$ at $O(1)$ cost, a candidate input for vehicular edge
@@ -290,14 +298,14 @@ between efficiency and coverage is relieved by reorganizing the model's internal
 dynamics, not by threshold engineering -- and the same organized signal is what lets
 the node report a discrete operational state rather than a bare, local confidence
 value.
-{\color{red}By an \emph{informative scheduling signal} we mean an uncertainty
+{\color{\revcolor}By an \emph{informative scheduling signal} we mean an uncertainty
 trajectory whose level separates episode phases: low and stable during
 redundant intervals, rising ahead of and during risk transitions. This is the
 property depicted in the central block of Figure~\ref{fig:tera_hypothesis}:
 without it, the gate has no temporal basis on which to discriminate; with it,
 thresholding entropy becomes a meaningful allocation criterion.}
 The paper contributes three components that together isolate and exploit this
-property. \textit{TERA-Gen} {\color{red}(the \emph{TERA episode Generator}, the synthetic-data component of the ecosystem)} generates synthetic episodes with a deterministic
+property. \textit{TERA-Gen} {\color{\revcolor}(the \emph{TERA episode Generator}, the synthetic-data component of the ecosystem)} generates synthetic episodes with a deterministic
 onset calibrated against SHRP2 odds ratios~\cite{dingus2016shrp2}; by fixing the
 onset instant it removes the annotation variability that would otherwise make
 frame-precise induction and evaluation impossible. \textit{AF-TOI} is an
@@ -317,16 +325,18 @@ ecosystem, in which organization is induced offline and allocation happens onlin
 on the device.
 The experiments bear the hypothesis out, and the most telling result is the
 negative one. On unorganized trajectories, adding the scheduler leaves the miss
-rate untouched but worsens $\mathrm{TTD}_{\mathrm{ef}}$ by 11.8\%: the scheduler
+rate untouched but worsens $\mathrm{TTD}_{\mathrm{ef}}$ by
+{\color{\revcolor}13.9\%}: the scheduler
 is active, yet without the enabling temporal property it allocates blindly. Give
 the same scheduler \mbox{AF-TOI}-organized trajectories and it cuts effective cost by
-\CostReduction\%, with $\mathrm{TTD}_{\mathrm{ef}}$ of 0.101\,s against 0.673\,s.
+\CostReduction\%, with $\mathrm{TTD}_{\mathrm{ef}}$ of
+{\color{\revcolor}0.099\,s against 0.570\,s}.
 A post-hoc calibration control then rules out the obvious alternative explanation:
 rescaling probabilities improves calibration but does not reorganize entropy in
 time, so the two properties are empirically distinct. \mbox{MHEG} thus works both as a
 local selective-computation mechanism and as a source of a compact operational
 state that could later connect embedded inference to resource-aware coordination.
-{\color{red}The remainder of this paper is organized as follows.
+{\color{\revcolor}The remainder of this paper is organized as follows.
 Section~\ref{sec:relacionados} reviews related work and positions our
 contribution. Section~\ref{sec:framework} presents the TERA framework:
 deterministic temporal anchoring (\mbox{TERA-Gen}), temporal organization
@@ -343,7 +353,7 @@ edge computing, and Section~\ref{sec:conclusao} concludes.}
 organization induces entropy stratification across episode phases, turning
 predictive uncertainty into an informative scheduling signal. Without this
 organization, entropy remains weakly differentiated and selective computation
-may suppress inference near risk onset. {\color{red}The ``informative
+may suppress inference near risk onset. {\color{\revcolor}The ``informative
 scheduling signal'' block denotes phase-stratified entropy: low in stable
 intervals and elevated near onset, which is the property the runtime gate
 thresholds.}}
@@ -369,7 +379,7 @@ settings: \emph{when}, within a single continuous on-device stream, is it worth
 spending a full inference step (Section~\ref{sec:rel_edgeai})? That single-node
 question is the one we take up first, because it has to be answered before
 uncertainty can be relied upon as a coordination signal.
-{\color{red}A clarification on scope is warranted: vehicular networks (e.g.,
+{\color{\revcolor}A clarification on scope is warranted: vehicular networks (e.g.,
 IEEE 802.11p/DSRC, C-V2X) and general-purpose mobile ad hoc networks differ in
 protocol stack, mobility model, and infrastructure assumptions, and we do not
 treat them as interchangeable. TERA operates strictly at the computation layer
@@ -381,7 +391,7 @@ dissemination latency are outside the scope of this paper.}
 \subsection{Trustworthy and Validated Edge AI}
 \label{sec:rel_trust}
 Efficiency alone is insufficient at the edge; dependability is an equally important requirement.
-{\color{red}Throughout this paper, ``trustworthy'' is used in a restricted,
+{\color{\revcolor}Throughout this paper, ``trustworthy'' is used in a restricted,
 operational sense: a selective-computation policy is trustworthy when it
 preserves critical-episode coverage ($\mathrm{FR} \le 0.05$) while suppressing
 computation, under the controlled conditions evaluated here. We make no claim
@@ -463,7 +473,7 @@ divergence experimentally, and we do so here as an explicit control.
 \subsection{Temporal Structure Transfer and Sequential Modeling}
 \label{sec:rel_temporal}
 Temporal structure transfer~\cite{hinton2015distilling,bajestani2020tkd,zheng2024tempdistiller} and online sequential architectures~\cite{zhao2022testra,lstr2021} advance efficiency and accuracy, but none asks whether the transferred structure enables trustworthy runtime allocation. Conventional transfer objectives spread the alignment signal uniformly, pushing compact models to reproduce average predictive behavior rather than uncertainty dynamics that separate stable from transition regions, so entropy stratification for trustworthy selective computation stays unaddressed. Prior works also target segmented offline clips where the full sequence is available; causal streaming invalidates sequence-level normalization and global attention, so organizational gains from those contexts do not carry over automatically. Explicit induction mechanisms are required.
-{\color{red}The methodological distinction of \mbox{AF-TOI} relative to these
+{\color{\revcolor}The methodological distinction of \mbox{AF-TOI} relative to these
 families can be stated explicitly. Temporal knowledge distillation and
 sequence-level transfer optimize agreement with a teacher's
 \emph{predictions}, spreading the alignment signal uniformly over time; their
@@ -628,7 +638,7 @@ acoustic observations. The output $y_t$ depends only on the history $\{x_1,
 architectures. The predictive core is a two-layer unidirectional LSTM with
 per-step cost $\mathcal{O}(4(DH{+}H^2))$, compatible with automotive-grade edge
 budgets.
-{\color{red}The sensor stream at the input of Figure~\ref{fig:tera_operational}
+{\color{\revcolor}The sensor stream at the input of Figure~\ref{fig:tera_operational}
 is the frame-synchronous concatenation of the four on-board modality groups
 detailed in Section~\ref{sec:tera_gen}: behavioral-visual channels from the
 cabin-facing detector, kinematic channels (speed, longitudinal accelerations,
@@ -1002,7 +1012,7 @@ levels.
 \ENDFOR
 \end{algorithmic}
 \end{algorithm}
-{\color{red}The per-timestep complexity of Algorithm~\ref{alg:inferencia} is
+{\color{\revcolor}The per-timestep complexity of Algorithm~\ref{alg:inferencia} is
 dominated by line~5. Lines~2--4 and 8--10 cost $\mathcal{O}(D)$ and
 $\mathcal{O}(1)$, respectively (a maximum over $|\mathcal{K}| \le D$ channel
 differences, one closed-form binary entropy, and three threshold comparisons),
@@ -1114,7 +1124,10 @@ Table~\ref{tab:receitas} summarizes the full recipe taxonomy.
 \bottomrule
 \end{tabular}
 \end{table}
-The dataset consolidates 4,160 episodes across four seeds (42--45) with
+The dataset consolidates {\color{\revcolor}12,480 episodes across twelve seeds
+(42--53); the factorial study was expanded from the original four seeds (42--45)
+to twelve in this revision, with the four original seeds verified to reproduce
+the initially reported campaign exactly. Each seed follows} the
 70/15/15\% split. Each sequence has $T=96$ timesteps at $\approx$9.6\,fps,
 $D=31$, and deterministic onset $t_0$ at frame-level precision. That onset makes
 the induced organization verifiable, since it fixes the reference against which
@@ -1223,7 +1236,7 @@ suppressed intervals concentrate in low-entropy periods while LSTM computation
 is preserved near onset, so the scheduler invests at emergence windows and
 reuses buffers at redundant timesteps. In the Baseline, suppressions distribute
 uniformly and the scheduler allocates without temporal basis.
-{\color{red}Concretely, each panel of Figure~\ref{fig:temporal_trace} tracks
+{\color{\revcolor}Concretely, each panel of Figure~\ref{fig:temporal_trace} tracks
 one episode of seed~42 frame by frame: the solid curve is the emitted
 probability $p_t$, the dashed curve the entropy $H_t$ that the gate reads, the
 vertical line the deterministic onset $t_0$, the marker $\triangledown$ the
@@ -1290,23 +1303,26 @@ Table~\ref{tab:resultados_principais}.
 \textbf{Configuration} & \textbf{AF-TOI} & \textbf{MHEG} & \textbf{Seeds}
   & \textbf{Methodological Role} \\
 \midrule
-Baseline Fixed & \ding{55} & \ding{55} & 4/4
+Baseline Fixed & \ding{55} & \ding{55} & {\color{\revcolor}12/12}
   & Basal reference without temporal organization \\
-\textbf{Baseline+MHEG} & \ding{55} & \checkmark & 4/4
+\textbf{Baseline+MHEG} & \ding{55} & \checkmark & {\color{\revcolor}12/12}
   & \textbf{Negative control: unsafe scheduling without temporal org.} \\
-\mbox{AF-TOI} Fixed  & \checkmark & \ding{55} & 4/4
+\mbox{AF-TOI} Fixed  & \checkmark & \ding{55} & {\color{\revcolor}12/12}
   & Temporal organization isolated; no scheduler \\
-\mbox{AF-TOI}+MHEG  & \checkmark & \checkmark & 4/4
+\mbox{AF-TOI}+MHEG  & \checkmark & \checkmark & {\color{\revcolor}12/12}
   & Complete ecosystem: trustworthy selective computation \\
 \bottomrule
 \multicolumn{5}{p{0.96\columnwidth}}{\footnotesize Seeds: number of seeds
-(42--45) producing valid runs per configuration.}
+({\color{\revcolor}42--53}) producing valid runs per configuration.}
 \end{tabularx}
 \end{table}
 \begin{table*}[!tbp]
 \centering
 \caption{Global factorial study results under continuous causal streaming
-(mean $\pm$ inter-seed standard deviation).}
+(mean $\pm$ inter-seed standard deviation{\color{\revcolor}; twelve seeds,
+42--53}). {\color{\revcolor}Values updated in this revision from the four-seed
+to the twelve-seed campaign, executed with the same frozen pipeline; ms/f is
+measured wall-clock time and is homogeneous within this campaign.}}
 \label{tab:resultados_principais}
 \footnotesize
 \setlength{\tabcolsep}{4.5pt}
@@ -1335,7 +1351,7 @@ ECE: auxiliary indicator.
 Applying \MHEG to unorganized trajectories has non-neutral effects on allocation
 quality. Baseline+MHEG holds $\text{FR} = \resBaseHibrFail \pm \stdBaseHibrFail$
 at the fixed-baseline level, so it does not reduce misses, and it still degrades
-$\mathrm{TTD}_{\mathrm{ef}}$ by 11.8\%, from $\resBaseFixoTTDef$\,s to
+$\mathrm{TTD}_{\mathrm{ef}}$ by {\color{\revcolor}13.9\%}, from $\resBaseFixoTTDef$\,s to
 $\resBaseHibrTTDef$\,s. The scheduler allocates without temporal discrimination,
 suppressing emerging-risk timesteps as often as redundant ones. This is the
 unsafe regime: apparent per-frame cost drops with no coverage guarantee while
@@ -1344,59 +1360,82 @@ property, not a scheduler design flaw.
 \paragraph{The complete ecosystem and trustworthy selective computation}
 Under \AFTOI organization, \MHEG operates on differentiated trajectories. The
 miss rate is preserved at $\resAlvoHibrFail \pm \stdAlvoHibrFail$, with
-$\mathrm{TTD}_{\mathrm{ef}}$ rising only 0.015\,s relative to \AFTOI fixed. The
-latency impact of scheduling is about 4.7$\times$ smaller in the complete
-ecosystem than in the negative control (0.015\,s vs.\ 0.071\,s), and absolute
-$\mathrm{TTD}_{\mathrm{ef}}$ with active scheduling is 0.101\,s versus 0.673\,s.
+$\mathrm{TTD}_{\mathrm{ef}}$ rising only {\color{\revcolor}0.016}\,s relative to \AFTOI fixed. The
+latency impact of scheduling is about {\color{\revcolor}4.3}$\times$ smaller in the complete
+ecosystem than in the negative control {\color{\revcolor}(0.016\,s vs.\ 0.070\,s)}, and absolute
+$\mathrm{TTD}_{\mathrm{ef}}$ with active scheduling is {\color{\revcolor}0.099\,s versus 0.570\,s}.
 In this synthetic scenario, that convergence is consistent with efficiency and
 coverage coexisting once the scheduler has temporally organized trajectories.
 \paragraph{Regime asymmetry in progressive episodes}
-\AFTOI Fixed shows $\text{TTD}_p = 1.419 \pm 0.391$\,s in progressive episodes,
-above the Baseline ($0.476 \pm 0.099$\,s): reorganizing dynamics at transition
+\AFTOI Fixed shows {\color{\revcolor}$\text{TTD}_p = 1.200 \pm 0.437$}\,s in progressive episodes,
+above the Baseline {\color{\revcolor}($0.657 \pm 0.325$\,s)}: reorganizing dynamics at transition
 regions can delay classification consolidation in slowly developing episodes.
 The benefit concentrates in the abrupt regime, where the miss rate falls from
-0.099 to 0.010, exactly where misses cost most.
+{\color{\revcolor}0.082 to 0.004}, exactly where misses cost most.
 \paragraph{TTD$_b$ vs.\ TTD$_{\mathrm{ef}}$}
 Gross delay counts only detected episodes and reads optimistically because it
 hides misses. $\mathrm{TTD}_{\mathrm{ef}}$ corrects this for edge systems where
 coverage across all episodes matters more than mean latency on successful
 detections.
 \paragraph{Statistical analysis}
-The \AFTOI F1-Score ($0.751 \pm 0.275$, CV $\approx$37\%) shows greater
-inter-seed variance than Baseline ($0.357 \pm 0.096$), reflecting sensitivity of
-the alignment process to initialization. With $n=4$ seeds the Wilcoxon test
-saturates ranks ($p$-floor $0.0625$), so analysis relies on
-$\delta_{\mathrm{Cliff}} = +1.000$ and direct operational means (FR 0.004 vs.\
-0.040; $\mathrm{TTD}_{\mathrm{ef}}$ 0.086\,s vs.\ 0.602\,s).
-Table~\ref{tab:cliff_delta} summarizes. {\color{red}Given $n=4$, these
-statistics are reported as descriptive effect-size characterizations; no claim
-of conventional statistical significance is made anywhere in the paper.}
+The \AFTOI F1-Score ({\color{\revcolor}$0.846 \pm 0.180$, CV $\approx$21\%}) shows greater
+inter-seed variance than Baseline ({\color{\revcolor}$0.366 \pm 0.069$}), reflecting sensitivity of
+the alignment process to initialization.
+{\color{\revcolor}In response to the statistical-power concern raised in
+review, the factorial study was expanded from four to twelve seeds (42--53).
+The eight additional seeds were fixed \emph{a priori}, before any $p$-value
+was computed, and all twelve are reported regardless of outcome; the expansion
+was executed with the same frozen pipeline (identical configuration and
+generator hashes), and the four original seeds were verified to reproduce the
+initially reported campaign exactly before integration. With $n=12$ the exact
+paired Wilcoxon test resolves conventional significance:
+\mbox{AF-TOI} dominates the Baseline on F1 and ECE ($p=0.0005$) and on
+$\mathrm{TTD}_{\mathrm{ef}}$ ($p=0.021$), with \mbox{AF-TOI} attaining higher
+F1 in twelve of twelve paired seeds. For FR in the fixed contrast the test
+yields $p=0.0625$: nine of the twelve Baseline seeds also have $\mathrm{FR}=0$
+and the exact test discards zero differences, a ceiling effect rather than an
+absent effect; in the scheduled contrast (Baseline+MHEG vs.\
+\mbox{AF-TOI}+MHEG) FR reaches $p=0.0156$. The negative control is likewise
+significant: adding \mbox{MHEG} to unorganized trajectories degrades
+$\mathrm{TTD}_{\mathrm{ef}}$ ($p=0.001$) without reducing FR, whereas on
+organized trajectories it reduces cost ($p=0.0005$) while leaving the miss
+count of every seed unchanged. Direct operational means preserve the published
+pattern (FR 0.001 vs.\ 0.033; $\mathrm{TTD}_{\mathrm{ef}}$ 0.083\,s vs.\
+0.500\,s). The complementary campaigns (post-hoc calibration, teacher
+ablation, stress scenarios, and gating baselines) retain the original four
+seeds (42--45).}
+Table~\ref{tab:cliff_delta} summarizes.
 \begin{table}[!tbp]
 \centering
-\caption{Cliff's delta and paired Wilcoxon test: Baseline Fixed vs.\ \mbox{AF-TOI} Fixed.}
+\caption{Cliff's delta and paired Wilcoxon test: Baseline Fixed vs.\ \mbox{AF-TOI} Fixed{\color{\revcolor}, $n=12$ seeds}.}
 \label{tab:cliff_delta}
 \footnotesize
 \setlength{\tabcolsep}{5pt}
 \renewcommand{\arraystretch}{1.15}
+{\color{\revcolor}
 \begin{tabular}{l c c c}
 \toprule
 \textbf{Metric} & \textbf{$\delta_{\mathrm{Cliff}}$}$\uparrow$
   & \textbf{Magnitude} & \textbf{$p$-value} \\
 \midrule
-ECE & $+1.000$ & Large & $0.0625$ \\
-F1  & $+1.000$ & Large & $0.0625$ \\
+F1  & $+0.986$ & Large & $0.0005$ \\
+ECE & $+0.972$ & Large & $0.0005$ \\
+$\mathrm{TTD}_{\mathrm{ef}}$ & $+0.569$ & Large & $0.0210$ \\
+FR  & $+0.361$ & Medium & $0.0625$ \\
 \bottomrule
-\multicolumn{4}{p{0.94\columnwidth}}{\footnotesize $n=4$. $p$-floor
-reflects rank saturation, not absent effect.
-$\delta_{\mathrm{Cliff}}=+1.000$: dominance across all seeds.
+\multicolumn{4}{p{0.94\columnwidth}}{\footnotesize $n=12$ seeds (42--53),
+exact two-sided paired Wilcoxon; $\delta_{\mathrm{Cliff}}$ oriented so that
+positive favors \mbox{AF-TOI}. The FR $p$-value reflects ties at zero (nine of
+twelve Baseline seeds have $\mathrm{FR}=0$; the exact test discards zero
+differences); in the scheduled contrast FR reaches $p=0.0156$.
 Magnitudes per Romano et al.~\cite{romano2006appropriate}.}
-\end{tabular}
+\end{tabular}}
 \end{table}
 Table~\ref{tab:estratificado} stratifies by operational regime, confirming that the complete ecosystem preserves coverage in both progressive and abrupt profiles. Figure~\ref{fig:tradeoff} synthesizes the trade-off. Baseline Fixed and Baseline+MHEG occupy identical FR positions, so selective computation without temporal organization gives no coverage benefit; \mbox{AF-TOI}+MHEG is the only configuration reaching low cost and FR below the safety threshold at once.
 \begin{table*}[!tbp]
 \centering
 \caption{Performance stratified by operational regime
-(mean $\pm$ sd inter-seed, seeds 42--45).}
+(mean $\pm$ sd inter-seed, {\color{\revcolor}seeds 42--53}).}
 \label{tab:estratificado}
 \footnotesize
 \setlength{\tabcolsep}{5pt}
@@ -1419,7 +1458,7 @@ Table~\ref{tab:estratificado} stratifies by operational regime, confirming that 
 \centering
 \includegraphics[width=\columnwidth]{image/7-fig_tradeoff.pdf}
 \caption{Global miss rate versus effective inference cost per frame
-(CI~95\%, seeds 42--45). The dashed line marks the $\text{FR}=0.05$
+(CI~95\%, {\color{\revcolor}seeds 42--53}). The dashed line marks the $\text{FR}=0.05$
 safety boundary; the shaded area denotes the unsafe scheduling region.}
 \label{fig:tradeoff}
 \end{figure}
@@ -1434,7 +1473,8 @@ where the scheduler failed to invest at emergence windows.
 \centering
 \includegraphics[width=0.98\textwidth]{image/8-fig_ttdef_dist.pdf}
 \caption{$\mathrm{TTD}_{\mathrm{ef}}$ frequency distributions per critical
-episode across seeds 42--45 ($n=480$ per configuration). The 10\,s value
+episode across seeds 42--45 ($n=480$ per configuration{\color{\revcolor};
+original four-seed campaign, see text for the twelve-seed counts}). The 10\,s value
 denotes the miss penalty used in $\mathrm{TTD}_{\mathrm{ef}}$.}
 \label{fig:ttdef_hist}
 \end{figure*}
@@ -1443,7 +1483,7 @@ denotes the miss penalty used in $\mathrm{TTD}_{\mathrm{ef}}$.}
 \includegraphics[width=\columnwidth]{image/9-fig_ttdef_cdf.pdf}
 \caption{Cumulative distribution functions of
 $\mathrm{TTD}_{\mathrm{ef}}$ per critical episode across seeds 42--45
-($n=480$ per configuration).}
+($n=480$ per configuration{\color{\revcolor}; original four-seed campaign}).}
 \label{fig:ttdef_cdf}
 \end{figure}
 The high standard deviations of the non-\mbox{AF-TOI} configurations are not stochastic
@@ -1454,10 +1494,15 @@ mean latency. Baseline Fixed and Baseline+MHEG share identical miss counts,
 confirming no distributional coverage benefit from selective computation without
 organization. Adding \MHEG to already organized trajectories does not shift the
 profile, since the scheduler suppresses genuinely redundant intervals without
-creating new failures.
+creating new failures. {\color{\revcolor}The figures of this movement show the
+original four-seed campaign; in the expanded twelve-seed campaign the same
+distributional pattern holds, with 47 penalized episodes for Baseline Fixed
+(50 under Baseline+MHEG) against 2 for the organized configurations, out of
+1,440 critical test episodes.}
 \subsection{Movement 5. Robustness}
 \label{sec:mov5_robustez}
-Figure~\ref{fig:multiseed} shows performance across four seeds with 95\% CI.
+Figure~\ref{fig:multiseed} shows performance across {\color{\revcolor}the
+twelve seeds} with 95\% CI.
 \mbox{AF-TOI}+MHEG stays below $\text{FR} = 0.05$ in every run with lower variability
 than the other configurations, while variants without organization cross the
 coverage threshold in at least one seed. Trustworthy selective computation thus
@@ -1465,8 +1510,8 @@ requires the enabling property to be present consistently.
 \begin{figure*}[!tbp]
 \centering
 \includegraphics[width=\textwidth]{image/10-fig_multiseed_en.pdf}
-\caption{Per-seed performance across four independent partitions
-(CI~95\%). The dashed line marks the $\text{FR}=0.05$ safety boundary.}
+\caption{Per-seed performance across {\color{\revcolor}twelve} independent partitions
+(CI~95\%{\color{\revcolor}, seeds 42--53}). The dashed line marks the $\text{FR}=0.05$ safety boundary.}
 \label{fig:multiseed}
 \end{figure*}
 Table~\ref{tab:ablacao_alpha} shows $\alpha$ sensitivity. The value
@@ -1798,7 +1843,7 @@ structural signal rather than the specific BiLSTM topology. The causal
 Transformer target collapses in coverage without external alignment, supporting
 the causal LSTM as the most robust architecture for embedded deployment.
 \input{robustness_section.tex}
-{\color{red}
+{\color{\revcolor}
 \subsection{Confidence-Threshold and Smoothed-Entropy Baselines}
 \label{sec:gating_baselines}
 Two additional scheduling baselines complete the comparison requested by the
@@ -1879,7 +1924,7 @@ suppression (\%Sup) and \CostReduction\% effective cost reduction (ms/f,
 per-frame latency relative to Baseline Fixed), two metrics that jointly
 characterize the operational economy. Estimates for dedicated embedded platforms
 come from scaling projections; physical chip validation is required before
-production. {\color{red}All embedded-viability figures in this subsection are
+production. {\color{\revcolor}All embedded-viability figures in this subsection are
 analytical (parameter counts, memory footprints, FLOP counts) or measured on a
 reference GPU; none derives from execution on physical automotive hardware.}
 \begin{table}
@@ -2019,21 +2064,24 @@ organization and trustworthy selective computation under controlled onset;
 confirmation on naturalistic datasets such as DMD~\cite{ortega2020dmd} and
 DADA~\cite{fang2022dada} remains necessary for external validity. Second, \MHEG
 thresholds are calibrated on synthetic data and may need re-calibration under
-real-world shift from driver variability, illumination, and sensor noise. Third,
-the factorial analysis uses four seeds (42--45); with $n=4$, the Wilcoxon
-signed-rank test has a minimum one-sided $p$-value of 0.0625, which prevents
-conventional significance at the 0.05 threshold, so the Wilcoxon and Cliff's
-delta estimates are read as descriptive effect-size characterizations rather
-than definitive inferential tests. The strongest evidence is therefore the
-directionality and mechanistic consistency of the negative control, where \MHEG
-on unorganized trajectories worsens $\mathrm{TTD}_{\mathrm{ef}}$ while the same
-scheduler on organized trajectories preserves coverage and cuts computation.
-Expanding to 10--12 seeds with an a priori power analysis is a priority for the
-next iteration. Fourth, deployment feasibility is assessed through profiling and
+real-world shift from driver variability, illumination, and sensor noise.
+{\color{\revcolor}Third, the factorial analysis now uses twelve seeds (42--53),
+expanded in this revision from the original four under an a priori protocol
+(seeds fixed before any $p$-value; all reported); with $n=12$ the exact paired
+Wilcoxon test reaches conventional significance on F1, ECE, and
+$\mathrm{TTD}_{\mathrm{ef}}$ (Section~\ref{sec:mov3_consequencia}). The
+remaining statistical caveat is narrower: FR in the fixed contrast is at a
+ceiling (most seeds have zero misses in both configurations), and inter-seed
+replication under a single synthetic generator quantifies sensitivity to
+initialization, not external validity -- significance here does not substitute
+for naturalistic validation. The mechanistic anchor remains the negative
+control, where \MHEG on unorganized trajectories worsens
+$\mathrm{TTD}_{\mathrm{ef}}$ while the same scheduler on organized
+trajectories preserves coverage and cuts computation.} Fourth, deployment feasibility is assessed through profiling and
 analytical estimation rather than execution on physical automotive hardware, so
 latency, energy, thermal behavior, and sensor-noise robustness remain to be
 characterized on STM32H7-, Cortex-M55-, and SA8155P-class platforms.
-{\color{red}A related caveat is that a controlled environment could, in
+{\color{\revcolor}A related caveat is that a controlled environment could, in
 principle, favor an onset-oriented training strategy. Three design elements
 mitigate, without eliminating, this risk: episodes mix progressive and abrupt
 regimes in fixed proportion (Section~\ref{sec:tera_gen}); Movement~6 evaluates
@@ -2101,7 +2149,7 @@ What sets $\ell_t$ apart from a thresholded classifier output is its temporal
 grounding. Under \AFTOI, $\ell_t$ reflects phase-conditioned trajectory
 structure rather than instantaneous confidence, and the negative control of
 Section~\ref{sec:mov3_consequencia} shows a Baseline scheduler without this
-structure degrades $\mathrm{TTD}_{\mathrm{ef}}$ by 11.8\%. This work's
+structure degrades $\mathrm{TTD}_{\mathrm{ef}}$ by {\color{\revcolor}13.9\%}. This work's
 contribution is producing $\ell_t$ with experimentally supported temporal
 grounding; how it is consumed externally is a downstream question for future
 work.
@@ -2159,11 +2207,12 @@ on the temporal organization of the model's predictive trajectories -- the prope
 that makes uncertainty informative in the seconds around a critical transition.
 Within the controlled setting studied here, the evidence supports that reading, and
 the negative control is what makes it credible: with the scheduler applied to
-unorganized trajectories, $\mathrm{TTD}_{\mathrm{ef}}$ worsened by 11.8\% and
+unorganized trajectories, $\mathrm{TTD}_{\mathrm{ef}}$ worsened by
+{\color{\revcolor}13.9\% (twelve seeds, $p=0.001$)} and
 coverage did not improve, so activating a scheduler is not, by itself, enough. Given
 \mbox{AF-TOI}-organized trajectories, the same \MHEG scheduler reached \CostReduction\%
-effective cost reduction with $\mathrm{TTD}_{\mathrm{ef}}$ of 0.101\,s against
-0.673\,s. The post-hoc calibration control ruled out the competing explanation:
+effective cost reduction with $\mathrm{TTD}_{\mathrm{ef}}$ of
+{\color{\revcolor}0.099\,s against 0.570\,s}. The post-hoc calibration control ruled out the competing explanation:
 probabilistic rescaling improved ECE without reorganizing entropy in time, so
 marginal calibration and temporally conditioned reliability are separate properties
 with separate origins.
