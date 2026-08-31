@@ -1,0 +1,192 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# experiment_config.yaml — Fonte da Verdade de Configuração
+# TERA Pipeline v1.0
+#
+# REGRA: Nunca edite values.tex diretamente.
+#        Edite este arquivo e re-execute o pipeline.
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ── Identificação ────────────────────────────────────────────────────────────
+pipeline_version: "1.0"
+ablation_mode: "A"           # "A" = M1+M3 (configuração canônica do artigo)
+results_root: "results"
+
+# ── Seeds ────────────────────────────────────────────────────────────────────
+# INVARIANTE: todas as configs usam exatamente estas 4 seeds.
+# Qualquer desvio é uma falha de pipeline.
+seeds: [42, 43, 44, 45]
+seed_visualization: 42       # Única seed para frame logs e figuras ilustrativas
+                             # NÃO usada para métricas do paper
+
+# ── Dataset ──────────────────────────────────────────────────────────────────
+dataset:
+  generator_module: "synthetic_driver_risk_v7"
+  window: 96                 # T: frames por episódio
+  input_dim: 31              # D: dimensão de entrada
+  per_recipe: 80             # episódios por receita
+  frame_thr: 0.35            # limiar binário frame-level
+  data_dir: "dados_sinteticos"
+  reuse_if_exists: true      # false = força regeneração
+
+# ── Splits ───────────────────────────────────────────────────────────────────
+splits:
+  train_ratio: 0.70
+  val_ratio:   0.15
+  test_ratio:  0.15
+  stratify_by_recipe: true   # v19: estratificação por recipe_id nos críticos
+  force_regen: false
+
+# ── Modelo ───────────────────────────────────────────────────────────────────
+model:
+  hidden_dim: 64             # H: unidades ocultas
+  num_layers: 2
+  dropout: 0.1
+  kinematic_indices: [12, 13, 14]  # KIN: índices cinemáticos para gating
+
+# ── Treinamento ──────────────────────────────────────────────────────────────
+training:
+  models_dir: "modelos_salvos"
+
+  teacher:
+    epochs: 60
+    k_future: 8              # janela de antecipação do professor
+    lr: 0.001
+    batch_size: 64
+
+  baseline:
+    epochs: 60
+    lr: 0.001
+    batch_size: 64
+
+  student_aftkd:             # Ablação A: M1+M3 (canonical)
+    epochs: 80
+    lr: 0.001
+    batch_size: 64
+    # AF-TKD hyperparameters
+    onset_exp_alpha: 0.15    # α: ponderação exponencial pre-onset
+    temp_fixed: 2.0          # T: temperatura KD (fixa na ablação A)
+    use_temp_schedule: false
+    temp_min: 1.0
+    lambda_late: 2.0         # λ: peso da perda late
+    theta_late: 0.10         # θ_late: limiar de onset para M3
+    use_abrupt_mask: false   # M4: desativado na ablação A
+    use_hidden_kd: false     # M5: desativado na ablação A
+    gamma_hidden: 0.30
+    hidden_kd_window: 8
+    pre_onset_push_weight: 1.5
+    # Protocolo 3 fases
+    warmup_epochs: 10        # λ_KD = 0
+    rampup_epochs: 17        # λ_KD aumenta linearmente
+    lam_start: 0.20
+    lam_end: 1.00
+    beta_max: 0.35
+
+# ── Calibração ───────────────────────────────────────────────────────────────
+calibration:
+  # Grade de thresholds episódicos
+  thr_ep_grid_low:  [0.05, 0.40, 15]   # [start, stop, n_points]
+  thr_ep_grid_high: [0.40, 0.95, 12]
+
+  # Grade de theta TTD
+  theta_ttd_grid: [0.10, 0.12, 0.15, 0.18, 0.20,
+                   0.25, 0.30, 0.35, 0.40, 0.45,
+                   0.50, 0.55, 0.60, 0.70, 0.80, 0.90]
+
+  # Grade de gating (tau_delta, tau_H)
+  tau_delta_percentiles: [50, 52, 54, 56, 58, 60, 62, 64, 66, 68,
+                          70, 72, 74, 76, 78, 80, 82, 84, 86, 88,
+                          90, 92, 94]
+  tau_h_grid: [0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45,
+               0.50, 0.55, 0.70, 0.85, 0.95]
+
+  # Critério de seleção: maximizar SkipPct sob:
+  fail_rate_budget: 0.05     # FR_val ≤ 5%
+  ttdef_degradation: 0.20    # TTDef_val ≤ 120% do baseline
+
+# ── Avaliação ─────────────────────────────────────────────────────────────────
+evaluation:
+  m_detect: 3                # m: consecutivos para detecção estável
+  t_max_ef: 10.0             # T_ep: penalidade TTDef (s)
+  fail_budget: 0.05          # FR cap
+  lat_warmup_steps: 100      # warm-up para medição de latência
+  forecast_horizon_k: 0      # FIX: K=0 (antecipação vem do AF-TKD, não lookahead)
+
+  # Configs canônicas do fatorial
+  configs:
+    baseline_fixed:
+      model: "baseline"
+      gating: false
+    baseline_hybrid:
+      model: "baseline"
+      gating: true
+    aftkd_fixed:
+      model: "student"
+      gating: false
+    aftkd_hybrid:
+      model: "student"
+      gating: true
+
+# ── Frame Logging ─────────────────────────────────────────────────────────────
+logging:
+  pre_onset_window: 10       # frames antes de t0 para fase "pre_onset"
+  output_episode_logs: "logs/episode_frame_logs.csv"
+  output_borderline_logs: "logs/borderline_frame_logs.csv"
+
+# ── Figuras ──────────────────────────────────────────────────────────────────
+figures:
+  output_dir: "figures"
+  dpi: 300
+  format: "pdf"
+  seed_viz: 42               # seed exclusiva para figuras ilustrativas
+  generate:
+    - temporal_trace
+    - entropy_dist
+    - gating_heatmap
+    - tradeoff
+    - multiseed
+    - prob_dist
+
+# ── Export ────────────────────────────────────────────────────────────────────
+export:
+  metrics_dir: "metrics"
+  outputs:
+    results_all_seeds: "metrics/results_all_seeds.csv"
+    summary_by_config: "metrics/summary_by_config.csv"
+    calibration_summary: "calibration/calibration_summary.csv"
+
+# ── LaTeX ─────────────────────────────────────────────────────────────────────
+latex:
+  output_dir: "latex"
+  macros_file: "paper_metrics_macros.tex"
+  table2_file: "paper_table2_rows.tex"
+  table_stratified_file: "paper_table_stratified_rows.tex"
+  # Mapeamento: (prefixo_macro, config_id)
+  macro_mapping:
+    BaseFixo:  "baseline_fixed"
+    BaseHibr:  "baseline_hybrid"
+    AlvoFixo:  "aftkd_fixed"
+    AlvoHibr:  "aftkd_hybrid"
+  # Métricas exportadas como macros
+  metric_cmds:
+    F1:               "FUm"
+    ECE:              "ECE"
+    FailRate:         "Fail"
+    TTD:              "TTD"
+    TTDef:            "TTDef"
+    Lat_ms:           "Lat"
+    Cost_ms_per_frame: "Cost"
+    SkipPct:          "Skip"
+
+# ── Determinismo ─────────────────────────────────────────────────────────────
+determinism:
+  torch_deterministic: true
+  cudnn_deterministic: true
+  cudnn_benchmark: false
+  pythonhashseed: "fixed"    # PYTHONHASHSEED = seed value
+
+# ── Logging científico ───────────────────────────────────────────────────────
+scientific_logging:
+  level: "INFO"
+  log_file: "tera_pipeline.log"
+  log_git_commit: true
+  log_package_versions: true

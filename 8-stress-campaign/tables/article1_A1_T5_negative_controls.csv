@@ -1,0 +1,82 @@
+Method,Scenario,Cost reduction↑,Compute rate↓,Coverage↑,Miss rate↓,TTDef↓,False suppression↓,FS near onset↓,Interpretation
+always,balanced_onsets,0.0,100.0,100.0,0.0,3.61,0.0,0.0,upper-cost reference
+MHEG_hybrid,balanced_onsets,78.3,21.7,100.0,0.0,3.61,0.0,0.0,saves cost AND preserves onset (safe)
+MHEG_calibrated,balanced_onsets,78.3,21.7,100.0,0.0,3.61,0.0,0.0,saves cost AND preserves onset (safe)
+NC1_random_budget_matched,balanced_onsets,78.2,21.8,99.7,0.3,7.5,16.8,23.9,saves cost with limited near-onset harm
+NC2_entropy_unstructured_aggressive,balanced_onsets,78.2,21.8,100.0,0.0,6.89,14.8,20.3,saves cost with limited near-onset harm
+NC3_entropy_lagged,balanced_onsets,79.1,20.9,100.0,0.0,5.59,6.6,33.0,UNSAFE suppression to save cost (near-onset misses)
+NC4_entropy_miscalibrated,balanced_onsets,79.1,20.9,100.0,0.0,4.1,1.7,8.2,saves cost with limited near-onset harm
+NC5_periodic_skip,balanced_onsets,66.7,33.3,100.0,0.0,4.54,5.4,7.6,saves cost with limited near-onset harm
+NC6_cost_matched_unstructured,balanced_onsets,78.2,21.8,100.0,0.0,6.89,14.8,20.3,saves cost with limited near-onset harm
+always,abrupt_onset_dominant,0.0,100.0,100.0,0.0,1.06,0.0,0.0,upper-cost reference
+MHEG_hybrid,abrupt_onset_dominant,80.7,19.3,100.0,0.0,1.06,0.0,0.0,saves cost AND preserves onset (safe)
+MHEG_calibrated,abrupt_onset_dominant,80.7,19.3,100.0,0.0,1.06,0.0,0.0,saves cost AND preserves onset (safe)
+NC1_random_budget_matched,abrupt_onset_dominant,80.5,19.5,99.7,0.3,5.56,16.3,43.9,UNSAFE suppression to save cost (near-onset misses)
+NC2_entropy_unstructured_aggressive,abrupt_onset_dominant,80.4,19.6,99.7,0.3,4.92,14.0,41.6,UNSAFE suppression to save cost (near-onset misses)
+NC3_entropy_lagged,abrupt_onset_dominant,82.1,17.9,100.0,0.0,4.46,11.5,56.7,UNSAFE suppression to save cost (near-onset misses)
+NC4_entropy_miscalibrated,abrupt_onset_dominant,82.1,17.9,100.0,0.0,1.91,2.9,14.2,saves cost with limited near-onset harm
+NC5_periodic_skip,abrupt_onset_dominant,66.7,33.3,100.0,0.0,2.0,3.9,13.4,saves cost with limited near-onset harm
+NC6_cost_matched_unstructured,abrupt_onset_dominant,80.4,19.6,99.7,0.3,4.92,14.0,41.6,UNSAFE suppression to save cost (near-onset misses)
+always,progressive_onset_dominant,0.0,100.0,100.0,0.0,6.0,0.0,0.0,upper-cost reference
+MHEG_hybrid,progressive_onset_dominant,76.1,23.9,100.0,0.0,6.0,0.0,0.0,saves cost AND preserves onset (safe)
+MHEG_calibrated,progressive_onset_dominant,76.1,23.9,100.0,0.0,6.0,0.0,0.0,saves cost AND preserves onset (safe)
+NC1_random_budget_matched,progressive_onset_dominant,75.9,24.1,99.7,0.3,9.16,16.1,6.2,saves cost with limited near-onset harm
+NC2_entropy_unstructured_aggressive,progressive_onset_dominant,75.8,24.2,100.0,0.0,9.12,16.1,6.9,saves cost with limited near-onset harm
+NC3_entropy_lagged,progressive_onset_dominant,76.3,23.7,100.0,0.0,6.64,2.2,10.6,saves cost with limited near-onset harm
+NC4_entropy_miscalibrated,progressive_onset_dominant,76.3,23.7,100.0,0.0,6.16,0.5,2.6,saves cost with limited near-onset harm
+NC5_periodic_skip,progressive_onset_dominant,66.7,33.3,100.0,0.0,6.99,6.9,2.5,saves cost with limited near-onset harm
+NC6_cost_matched_unstructured,progressive_onset_dominant,75.8,24.2,100.0,0.0,9.12,16.1,6.9,saves cost with limited near-onset harm
+always,rare_abrupt_critical_events,0.0,100.0,100.0,0.0,0.0,0.0,0.0,upper-cost reference
+MHEG_hybrid,rare_abrupt_critical_events,93.4,6.6,100.0,0.0,0.0,0.0,0.0,saves cost AND preserves onset (safe)
+MHEG_calibrated,rare_abrupt_critical_events,93.4,6.6,100.0,0.0,0.0,0.0,0.0,saves cost AND preserves onset (safe)
+NC1_random_budget_matched,rare_abrupt_critical_events,93.4,6.6,21.9,78.1,47.19,86.2,86.2,UNSAFE suppression to save cost (near-onset misses)
+NC2_entropy_unstructured_aggressive,rare_abrupt_critical_events,93.3,6.7,24.4,75.6,45.74,85.1,85.1,UNSAFE suppression to save cost (near-onset misses)
+NC3_entropy_lagged,rare_abrupt_critical_events,93.4,6.6,64.4,35.6,23.27,78.8,78.8,UNSAFE suppression to save cost (near-onset misses)
+NC4_entropy_miscalibrated,rare_abrupt_critical_events,93.4,6.6,100.0,0.0,0.0,0.0,0.0,saves cost with limited near-onset harm
+NC5_periodic_skip,rare_abrupt_critical_events,66.7,33.3,100.0,0.0,0.98,25.6,25.6,saves cost with limited near-onset harm
+NC6_cost_matched_unstructured,rare_abrupt_critical_events,93.3,6.7,24.4,75.6,45.74,85.1,85.1,UNSAFE suppression to save cost (near-onset misses)
+always,high_noise_entropy,0.0,100.0,100.0,0.0,3.61,0.0,0.0,upper-cost reference
+MHEG_hybrid,high_noise_entropy,72.2,27.8,100.0,0.0,3.61,0.0,0.0,saves cost AND preserves onset (safe)
+MHEG_calibrated,high_noise_entropy,74.8,25.2,100.0,0.0,3.61,0.0,0.0,saves cost AND preserves onset (safe)
+NC1_random_budget_matched,high_noise_entropy,72.2,27.8,99.7,0.3,6.38,12.4,18.1,saves cost with limited near-onset harm
+NC2_entropy_unstructured_aggressive,high_noise_entropy,72.2,27.8,100.0,0.0,6.08,11.6,15.6,saves cost with limited near-onset harm
+NC3_entropy_lagged,high_noise_entropy,73.0,27.0,100.0,0.0,5.25,5.5,27.3,saves cost with limited near-onset harm
+NC4_entropy_miscalibrated,high_noise_entropy,79.1,20.9,100.0,0.0,4.11,1.7,8.3,saves cost with limited near-onset harm
+NC5_periodic_skip,high_noise_entropy,66.7,33.3,100.0,0.0,4.54,5.4,7.6,saves cost with limited near-onset harm
+NC6_cost_matched_unstructured,high_noise_entropy,72.2,27.8,100.0,0.0,6.08,11.6,15.6,saves cost with limited near-onset harm
+always,kinematic_signal_missing,0.0,100.0,100.0,0.0,2.2,0.0,0.0,upper-cost reference
+MHEG_hybrid,kinematic_signal_missing,80.8,19.2,100.0,0.0,2.89,2.3,11.5,saves cost but some near-onset suppression
+MHEG_calibrated,kinematic_signal_missing,80.8,19.2,100.0,0.0,2.89,2.3,11.5,saves cost but some near-onset suppression
+NC1_random_budget_matched,kinematic_signal_missing,80.6,19.4,99.4,0.6,6.73,17.6,35.2,UNSAFE suppression to save cost (near-onset misses)
+NC2_entropy_unstructured_aggressive,kinematic_signal_missing,80.4,19.6,99.7,0.3,6.0,14.9,33.0,UNSAFE suppression to save cost (near-onset misses)
+NC3_entropy_lagged,kinematic_signal_missing,80.8,19.2,100.0,0.0,4.96,9.3,46.1,UNSAFE suppression to save cost (near-onset misses)
+NC4_entropy_miscalibrated,kinematic_signal_missing,80.8,19.2,100.0,0.0,2.89,2.3,11.5,saves cost with limited near-onset harm
+NC5_periodic_skip,kinematic_signal_missing,66.7,33.3,100.0,0.0,3.1,4.5,10.5,saves cost with limited near-onset harm
+NC6_cost_matched_unstructured,kinematic_signal_missing,80.4,19.6,99.7,0.3,6.0,14.9,33.0,UNSAFE suppression to save cost (near-onset misses)
+always,entropy_lag,0.0,100.0,100.0,0.0,2.2,0.0,0.0,upper-cost reference
+MHEG_hybrid,entropy_lag,79.6,20.4,100.0,0.0,2.2,0.0,0.0,saves cost AND preserves onset (safe)
+MHEG_calibrated,entropy_lag,79.6,20.4,100.0,0.0,2.2,0.0,0.0,saves cost AND preserves onset (safe)
+NC1_random_budget_matched,entropy_lag,79.5,20.5,100.0,0.0,6.2,16.3,33.8,UNSAFE suppression to save cost (near-onset misses)
+NC2_entropy_unstructured_aggressive,entropy_lag,79.3,20.7,100.0,0.0,5.69,14.0,31.8,UNSAFE suppression to save cost (near-onset misses)
+NC3_entropy_lagged,entropy_lag,80.8,19.2,100.0,0.0,4.96,9.3,46.1,UNSAFE suppression to save cost (near-onset misses)
+NC4_entropy_miscalibrated,entropy_lag,80.8,19.2,100.0,0.0,2.89,2.3,11.5,saves cost with limited near-onset harm
+NC5_periodic_skip,entropy_lag,66.7,33.3,100.0,0.0,3.1,4.5,10.5,saves cost with limited near-onset harm
+NC6_cost_matched_unstructured,entropy_lag,79.3,20.7,100.0,0.0,5.69,14.0,31.8,UNSAFE suppression to save cost (near-onset misses)
+always,false_onset,0.0,100.0,100.0,0.0,3.61,0.0,0.0,upper-cost reference
+MHEG_hybrid,false_onset,73.3,26.7,100.0,0.0,3.61,0.0,0.0,saves cost AND preserves onset (safe)
+MHEG_calibrated,false_onset,73.3,26.7,100.0,0.0,3.61,0.0,0.0,saves cost AND preserves onset (safe)
+NC1_random_budget_matched,false_onset,73.3,26.7,99.7,0.3,6.47,12.7,18.6,saves cost with limited near-onset harm
+NC2_entropy_unstructured_aggressive,false_onset,73.3,26.7,100.0,0.0,6.15,12.0,16.0,saves cost with limited near-onset harm
+NC3_entropy_lagged,false_onset,74.1,25.9,100.0,0.0,5.56,6.6,32.6,UNSAFE suppression to save cost (near-onset misses)
+NC4_entropy_miscalibrated,false_onset,78.4,21.6,100.0,0.0,4.1,1.7,8.2,saves cost with limited near-onset harm
+NC5_periodic_skip,false_onset,66.7,33.3,100.0,0.0,4.54,5.4,7.6,saves cost with limited near-onset harm
+NC6_cost_matched_unstructured,false_onset,73.3,26.7,100.0,0.0,6.15,12.0,16.0,saves cost with limited near-onset harm
+always,no_onset_negative_control,0.0,100.0,n/a,n/a,n/a,0.0,n/a,upper-cost reference
+MHEG_hybrid,no_onset_negative_control,100.0,0.0,n/a,n/a,n/a,0.0,n/a,saves cost but some near-onset suppression
+MHEG_calibrated,no_onset_negative_control,100.0,0.0,n/a,n/a,n/a,0.0,n/a,saves cost but some near-onset suppression
+NC1_random_budget_matched,no_onset_negative_control,100.0,0.0,n/a,n/a,n/a,0.0,n/a,saves cost with limited near-onset harm
+NC2_entropy_unstructured_aggressive,no_onset_negative_control,100.0,0.0,n/a,n/a,n/a,0.0,n/a,saves cost with limited near-onset harm
+NC3_entropy_lagged,no_onset_negative_control,100.0,0.0,n/a,n/a,n/a,0.0,n/a,saves cost with limited near-onset harm
+NC4_entropy_miscalibrated,no_onset_negative_control,100.0,0.0,n/a,n/a,n/a,0.0,n/a,saves cost with limited near-onset harm
+NC5_periodic_skip,no_onset_negative_control,66.7,33.3,n/a,n/a,n/a,0.0,n/a,saves cost with limited near-onset harm
+NC6_cost_matched_unstructured,no_onset_negative_control,100.0,0.0,n/a,n/a,n/a,0.0,n/a,saves cost with limited near-onset harm

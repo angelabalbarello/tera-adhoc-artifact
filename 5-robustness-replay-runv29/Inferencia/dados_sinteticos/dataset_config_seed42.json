@@ -1,0 +1,12 @@
+{
+  "seed": 42,
+  "window": 96,
+  "per_recipe": 80,
+  "recipe_set": "base",
+  "sensor_level": 4,
+  "frame_thr": 0.35,
+  "generator_module": "synthetic_driver_risk_v7",
+  "data_dir": "dados_sinteticos",
+  "reuse_pregenerated": false,
+  "reuse_splits": true
+}

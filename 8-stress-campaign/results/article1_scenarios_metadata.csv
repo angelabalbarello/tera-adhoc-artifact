@@ -1,0 +1,10 @@
+scenario_id,seed,onset_type,noise_level,critical_event_rate,kinematic_available,entropy_quality,expected_failure_mode,n_episodes
+balanced_onsets,"42,43,44,45",mixed,base,persistent,1.0,organized,none / cost saving,360
+abrupt_onset_dominant,"42,43,44,45",abrupt,base,persistent,1.0,organized,false suppression at abrupt onset,360
+progressive_onset_dominant,"42,43,44,45",progressive,base,persistent,1.0,organized,delayed detection (TTDef),360
+rare_abrupt_critical_events,"42,43,44,45",abrupt,base,transient,1.0,organized,missed transient critical event (coverage collapse),360
+high_noise_entropy,"42,43,44,45",mixed,high,persistent,1.0,degraded,entropy scheduler misfires (noise),360
+kinematic_signal_missing,"42,43,44,45",abrupt,base,persistent,0.0,organized,loss of kinematic protection at abrupt onset,360
+entropy_lag,"42,43,44,45",abrupt,base,persistent,1.0,degraded,lagged entropy misses abrupt onset,360
+false_onset,"42,43,44,45",mixed,base,persistent,1.0,organized,wasted compute / false trigger,360
+no_onset_negative_control,"42,43,44,45",mixed,base,persistent,1.0,organized,reference: false_suppression must be ~0,360

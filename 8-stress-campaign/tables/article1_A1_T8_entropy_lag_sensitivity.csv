@@ -1,0 +1,13 @@
+Lag frames,Scenario,Coverage↑,Miss rate↓,TTDef↓,FS near onset↓,Cost reduction↑
+1,abrupt_onset_dominant,100.0,0.0,2.76,28.3,82.1
+1,progressive_onset_dominant,100.0,0.0,6.32,5.3,76.3
+1,rare_abrupt_critical_events,100.0,0.0,1.0,26.3,93.4
+3,abrupt_onset_dominant,100.0,0.0,4.46,56.7,82.1
+3,progressive_onset_dominant,100.0,0.0,6.64,10.6,76.3
+3,rare_abrupt_critical_events,64.4,35.6,23.27,78.8,93.4
+5,abrupt_onset_dominant,100.0,0.0,6.16,85.0,82.1
+5,progressive_onset_dominant,100.0,0.0,6.95,15.8,76.3
+5,rare_abrupt_critical_events,0.0,100.0,60.0,100.0,93.4
+10,abrupt_onset_dominant,100.0,0.0,10.85,85.0,82.2
+10,progressive_onset_dominant,100.0,0.0,10.16,15.8,76.8
+10,rare_abrupt_critical_events,0.0,100.0,60.0,100.0,93.4

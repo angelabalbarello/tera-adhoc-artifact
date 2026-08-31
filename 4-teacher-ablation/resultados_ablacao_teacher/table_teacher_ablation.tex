@@ -1,0 +1,19 @@
+% Ablação de Teacher — gerado automaticamente por run_ablation_teacher_study.py
+% Student idêntico (LSTM causal) nas três primeiras linhas.
+% Ablação central: LSTM-AF-KD vs LSTM-TransKD (teacher varia; student fixo).
+\begin{tabular}{lllcccc}
+\toprule
+\textbf{Student} & \textbf{Teacher} & \textbf{Método} & \textbf{F1}$\uparrow$ & \textbf{FR}$\downarrow$ & \textbf{TTD$_{\text{ef}}$(s)}$\downarrow$ & \textbf{ECE}$\downarrow$ \\
+\midrule
+LSTM & — & Baseline & 0.443\,{\tiny$\pm$0.081} & 0.713\,{\tiny$\pm$0.069} & 7.223\,{\tiny$\pm$0.763} & 0.678\,{\tiny$\pm$0.017} \\
+\textbf{LSTM} & \textbf{BiLSTM} & \textbf{AF-KD} & \textbf{0.831\,{\tiny$\pm$0.118}} & \textbf{0.275\,{\tiny$\pm$0.189}} & \textbf{3.089\,{\tiny$\pm$1.837}} & \textbf{0.563\,{\tiny$\pm$0.107}} \\
+LSTM & Transformer & TransKD & 0.901\,{\tiny$\pm$0.098} & 0.169\,{\tiny$\pm$0.163} & 2.022\,{\tiny$\pm$1.860} & 0.395\,{\tiny$\pm$0.110} \\
+\midrule
+Transformer & — & Baseline & 0.079\,{\tiny$\pm$0.054} & 0.958\,{\tiny$\pm$0.030} & 9.814\,{\tiny$\pm$0.383} & 0.745\,{\tiny$\pm$0.004} \\
+Transformer & BiLSTM & AF-KD & 0.610\,{\tiny$\pm$0.426} & 0.467\,{\tiny$\pm$0.414} & 5.468\,{\tiny$\pm$4.811} & 0.597\,{\tiny$\pm$0.182} \\
+\bottomrule
+\end{tabular}
+
+% Nota: TTD$_{\text{ef}}$ = TTD$_{\text{bruto}}$ + FR $\times$ 10\,s
+% (penalidade para episódios não detectados; Eq.~\ref{eq:ttdef_sys}).
+% $n{=}4$ sementes. Negrito: configuração canônica do artigo.

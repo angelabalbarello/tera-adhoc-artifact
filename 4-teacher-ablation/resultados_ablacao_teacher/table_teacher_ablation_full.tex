@@ -1,0 +1,13 @@
+% Ablação de Teacher — tabela completa
+\begin{tabular}{lllccccccc}
+\toprule
+\textbf{Student} & \textbf{Teacher} & \textbf{Método} & \textbf{F1} & \textbf{FR} & \textbf{TTD$_{\text{ef}}$} & \textbf{TTD$_b$} & \textbf{TTD$_p$} & \textbf{ECE} & \textbf{ms/q} \\
+\midrule
+LSTM & — & Baseline & 0.443{\tiny$\pm$0.081} & 0.713{\tiny$\pm$0.069} & 7.223{\tiny$\pm$0.763} & 0.098{\tiny$\pm$0.096} & 0.014{\tiny$\pm$0.005} & 0.678{\tiny$\pm$0.017} & 0.946{\tiny$\pm$1.152} \\
+LSTM & BiLSTM & AF-KD & 0.831{\tiny$\pm$0.118} & 0.275{\tiny$\pm$0.189} & 3.089{\tiny$\pm$1.837} & 0.339{\tiny$\pm$0.246} & 0.021{\tiny$\pm$0.021} & 0.563{\tiny$\pm$0.107} & 0.972{\tiny$\pm$1.243} \\
+LSTM & Transformer & TransKD & 0.901{\tiny$\pm$0.098} & 0.169{\tiny$\pm$0.163} & 2.022{\tiny$\pm$1.860} & 0.335{\tiny$\pm$0.288} & 0.010{\tiny$\pm$0.008} & 0.395{\tiny$\pm$0.110} & 1.799{\tiny$\pm$2.860} \\
+\midrule
+Transformer & — & Baseline & 0.079{\tiny$\pm$0.054} & 0.958{\tiny$\pm$0.030} & 9.814{\tiny$\pm$0.383} & 0.230{\tiny$\pm$0.242} & 0.600{\tiny$\pm$0.567} & 0.745{\tiny$\pm$0.004} & 5.631{\tiny$\pm$7.969} \\
+Transformer & BiLSTM & AF-KD & 0.610{\tiny$\pm$0.426} & 0.467{\tiny$\pm$0.414} & 5.468{\tiny$\pm$4.811} & 0.801{\tiny$\pm$0.848} & 1.130{\tiny$\pm$1.407} & 0.597{\tiny$\pm$0.182} & 5.519{\tiny$\pm$7.735} \\
+\bottomrule
+\end{tabular}

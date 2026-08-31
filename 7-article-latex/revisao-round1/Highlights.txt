@@ -1,0 +1,7 @@
+Highlights
+
+• Temporal organization enables trustworthy selective computation.
+• AF-TOI induces entropy stratification near critical risk onset.
+• MHEG reduces computation while preserving detection coverage.
+• Unorganized selective computation worsens effective detection delay.
+• Calibration alone does not reproduce temporal uncertainty dynamics.

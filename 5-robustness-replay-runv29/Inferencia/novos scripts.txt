@@ -1,0 +1,30 @@
+O que cada script faz e como usar
+generate_episode_frame_logs.py
+Gera episode_frame_logs.csv com uma linha por (seed, config, episódio, frame) — alimenta as três figuras de traces, entropia e heatmap.
+Como rodar (no mesmo diretório do run_v29):
+bashpython generate_episode_frame_logs.py
+O que ele faz automaticamente:
+
+Reproduz os splits idênticos ao run_v29 (mesma semente, mesmo make_splits)
+Carrega os .npy de frame_probs já existentes para baseline_fixed e afkd_fixed — se não existirem, roda a inferência
+Lê tau_d e tau_h da coluna Politica do exp_abl_A_results_all_seeds.csv; se não encontrar, recalibra no VAL
+Roda infer_hybrid_with_mask (variante nova de infer_stream_hybrid que rastreia quais frames foram suprimidos) para baseline_hybrid e afkd_hybrid
+Computa H(p_t) e phase (stable / pre_onset / post_onset) por frame
+
+Colunas produzidas:
+seed | config | episode_id | regime | recipe | is_critical | t0_frame | t0_time_s | t | time_s | p_t | H_t | is_suppressed | y_frame_clean | phase
+
+generate_borderline_frame_logs.py
+Gera borderline_frame_logs.csv — alimenta fig:prob_dist.
+Como rodar:
+bashpython generate_borderline_frame_logs.py
+O que ele faz:
+
+Pega os Críticos diretamente do test set (já avaliados)
+Pega os Normais do test set + gera extras com receitas N01–N03
+Gera Atenção (A01–A03) e Alerta (L01–L03) com RECIPES_BORDERLINE do synthetic_driver_risk_v7.py — receitas que o modelo nunca viu no treino
+Roda inferência fixa em todos os grupos, para baseline_fixed e afkd_fixed
+
+Nenhum script novo precisa ser feito — apenas esses dois. O run_v29 não precisa ser modificado.
+Único pré-requisito que pode estar faltando
+Se exp_abl_A_results_all_seeds.csv não existir no diretório (contendo a coluna Politica com "Hibrida (tau=0.019, H=0.95)"), o script de frames recalibra automaticamente a política híbrida rodando no VAL — leva alguns minutos a mais mas funciona sem intervenção manual.
