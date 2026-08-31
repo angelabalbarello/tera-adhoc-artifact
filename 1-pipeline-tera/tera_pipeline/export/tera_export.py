@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 tera_pipeline/export/tera_export.py
-═══════════════════════════════════════════════════════════════════════════════
 Exportação de resultados do TERA Pipeline.
 
 Responsabilidades:
-  · Agregar results_all_seeds.csv → summary_by_config.csv
+  · Agregar results_all_seeds.csv -> summary_by_config.csv
   · Verificar cobertura completa de seeds (invariante: 4 seeds × 4 configs)
   · Escrever calibration_summary.csv consolidado
   · Calcular métricas derivadas (CostReduction, SkipRate, melhoria TTDef)
@@ -14,7 +13,6 @@ Responsabilidades:
 SAÍDAS em exp_dir/metrics/:
   summary_by_config.csv   — média ± std por config_id
   integrity_report.txt    — verificação de cobertura e consistência
-═══════════════════════════════════════════════════════════════════════════════
 """
 
 import json
@@ -53,7 +51,7 @@ class ResultsExporter:
         """Executa exportação completa."""
         results_path = self.out_dir / "results_all_seeds.csv"
         if not results_path.exists():
-            print(f"  ⚠️  results_all_seeds.csv não encontrado em {self.out_dir}")
+            print(f"  aviso: results_all_seeds.csv não encontrado em {self.out_dir}")
             return
 
         df = pd.read_csv(results_path)
@@ -65,9 +63,9 @@ class ResultsExporter:
         self._export_summary(df)
         self._check_integrity(df)
         self._export_derived_metrics(df)
-        print(f"  ✓ Export concluído → {self.out_dir}")
+        print(f"  Export concluído -> {self.out_dir}")
 
-    # ── Summary ───────────────────────────────────────────────────────────────
+    # Summary
 
     def _export_summary(self, df: pd.DataFrame) -> None:
         """Agrega por config_id: média, std, n_seeds."""
@@ -83,9 +81,9 @@ class ResultsExporter:
         summary = agg.join(n_seeds).join(seeds_col).reset_index()
         out = self.out_dir / "summary_by_config.csv"
         summary.to_csv(out, index=False)
-        print(f"  ✓ summary_by_config.csv ({len(summary)} configs)")
+        print(f"  summary_by_config.csv ({len(summary)} configs)")
 
-    # ── Verificação de integridade ────────────────────────────────────────────
+    # Verificação de integridade
 
     def _check_integrity(self, df: pd.DataFrame) -> None:
         """Verifica cobertura completa e escreve relatório."""
@@ -98,7 +96,7 @@ class ResultsExporter:
             sub = df[df["config_id"] == config_id]
             seeds_found = sorted(sub["Seed"].unique().tolist())
             missing = [s for s in REQUIRED_SEEDS if s not in seeds_found]
-            status = "✓ COMPLETO" if not missing else f"✗ FALTANDO {missing}"
+            status = "COMPLETO" if not missing else f"✗ FALTANDO {missing}"
             if missing:
                 all_ok = False
             lines.append(f"  {config_id:25s}: {seeds_found}  {status}\n")
@@ -120,22 +118,22 @@ class ResultsExporter:
                 config = row["config_id"]
                 fr  = row.get("FailRate_mean", float("nan"))
                 n   = int(row.get("N_Seeds", 0))
-                fr_ok = "✓" if (not math.isnan(fr) and fr < 0.5) else "⚠"
+                fr_ok = "ok" if (not math.isnan(fr) and fr < 0.5) else "aviso"
                 lines.append(
                     f"  {config:25s}: FR={fr:.3f} {fr_ok}  n_seeds={n}\n"
                 )
 
         lines.append(f"\n{'=' * 50}\n")
-        lines.append(f"RESULTADO GERAL: {'✓ PIPELINE COMPLETO' if all_ok else '✗ INCOMPLETO — verificar acima'}\n")
+        lines.append(f"RESULTADO GERAL: {'PIPELINE COMPLETO' if all_ok else '✗ INCOMPLETO — verificar acima'}\n")
 
         out = self.out_dir / "integrity_report.txt"
         out.write_text("".join(lines), encoding="utf-8")
-        print(f"  ✓ integrity_report.txt → {'OK' if all_ok else 'INCOMPLETO'}")
+        print(f"  integrity_report.txt -> {'OK' if all_ok else 'INCOMPLETO'}")
 
         if not all_ok:
-            print("  ⚠️  Pipeline incompleto! Veja integrity_report.txt")
+            print("  aviso: Pipeline incompleto! Veja integrity_report.txt")
 
-    # ── Métricas derivadas ────────────────────────────────────────────────────
+    # Métricas derivadas
 
     def _export_derived_metrics(self, df: pd.DataFrame) -> None:
         """Calcula e salva métricas derivadas usadas no artigo."""
@@ -186,7 +184,7 @@ class ResultsExporter:
 
         out = self.out_dir / "derived_metrics.json"
         out.write_text(json.dumps(derived, indent=2) + "\n", encoding="utf-8")
-        print(f"  ✓ derived_metrics.json")
+        print(f"  derived_metrics.json")
         print(f"      CostReduction={cost_reduction:.1f}%  "
               f"SkipRate={skip_afkd:.1f}%  "
               f"TTDef improvement={ttdef_improvement:.1f}%")

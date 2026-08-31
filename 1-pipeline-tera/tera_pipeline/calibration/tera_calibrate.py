@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 tera_pipeline/calibration/tera_calibrate.py
-═══════════════════════════════════════════════════════════════════════════════
 Calibração de limiares e parâmetros de gating do TERA Pipeline.
 
 Calibra por seed (no conjunto de validação):
@@ -23,7 +22,6 @@ Observação arquitetural importante:
 SAÍDAS em exp_dir/calibration/:
   calibration_summary.csv  — um row por seed com todos os parâmetros
   calibration_detail.csv   — grade completa para inspeção
-═══════════════════════════════════════════════════════════════════════════════
 """
 
 import math
@@ -73,7 +71,7 @@ class CalibrationManager:
         self.fail_budget = self.cal_cfg.get("fail_rate_budget", 0.05)
         self.ttdef_degrad = self.cal_cfg.get("ttdef_degradation", 0.20)
 
-    # ── Carregamento ──────────────────────────────────────────────────────────
+    # Carregamento
 
     def _load_model(self, role: str, seed: int) -> nn.Module:
         from tera_pipeline.training.tera_train import MultiTaskLSTM
@@ -100,7 +98,7 @@ class CalibrationManager:
         prog = np.load(d / f"progressive_va_seed{seed}.npy")
         return X, y_fr, y_ep, prog
 
-    # ── Calibração de thr_ep ─────────────────────────────────────────────────
+    # Calibração de thr_ep
 
     def calibrate_thr_ep(
         self, frame_probs: np.ndarray, y_ep: np.ndarray
@@ -117,7 +115,7 @@ class CalibrationManager:
                 best_f1, best_thr = f1, float(thr)
         return best_thr
 
-    # ── Calibração de theta_ttd ──────────────────────────────────────────────
+    # Calibração de theta_ttd
 
     def calibrate_theta_ttd(
         self, y_fr: np.ndarray, frame_probs: np.ndarray
@@ -155,7 +153,7 @@ class CalibrationManager:
         ttd_mean = float(np.mean(ttds)) if ttds else 0.0
         return compute_ttdef(ttd_mean, fr, self.t_max)
 
-    # ── Calibração de gating (tau_delta, tau_H) ──────────────────────────────
+    # Calibração de gating (tau_delta, tau_H)
 
     def calibrate_gating(
         self,
@@ -171,7 +169,7 @@ class CalibrationManager:
         Busca em grade (tau_delta, tau_H) usando simulação analítica do gating.
 
         ESTRATÉGIA RÁPIDA:
-          1. Roda inferência fixa UMA ÚNICA VEZ → cacheia frame_probs
+          1. Roda inferência fixa UMA ÚNICA VEZ -> cacheia frame_probs
           2. Pré-computa deltas cinemáticos e entropy por frame
           3. Para cada ponto da grade, simula o gating em numpy puro
              (sem LSTM) — propagação de prob anterior nos frames suprimidos
@@ -180,13 +178,13 @@ class CalibrationManager:
         Reduz de ~9M forward passes para 1 inferência + operações numpy.
         Retorna (tau_delta_best, tau_H_best, grade_df).
         """
-        # ── Passo 1: Inferência fixa UMA VEZ ─────────────────────────────
+        # Passo 1: Inferência fixa UMA VEZ
         print(f"      Inferência fixa (cache)...", end=" ", flush=True)
         result_fixed = infer_stream_fixed(student, X_va, self.device)
         probs_fixed  = result_fixed.frame_probs       # (N, T)
         print("OK")
 
-        # ── Passo 2: Deltas cinemáticos (N, T) ───────────────────────────
+        # Passo 2: Deltas cinemáticos (N, T)
         print(f"      Pré-computando deltas...", end=" ", flush=True)
         N, T = probs_fixed.shape
         deltas = np.zeros((N, T), dtype=np.float32)
@@ -198,12 +196,12 @@ class CalibrationManager:
                 )
         print("OK")
 
-        # ── Passo 3: Entropy auxiliar (vectorizada) ───────────────────────
+        # Passo 3: Entropy auxiliar (vectorizada)
         def _h(p: float) -> float:
             p = max(1e-7, min(1 - 1e-7, p))
             return -p * math.log2(p) - (1 - p) * math.log2(1 - p)
 
-        # ── Passo 4: Grade ────────────────────────────────────────────────
+        # Passo 4: Grade
         delta_flat = deltas[:, 1:].ravel()
         pctls = self.cal_cfg.get("tau_delta_percentiles",
                                   list(range(50, 95, 2)))
@@ -275,7 +273,7 @@ class CalibrationManager:
         tp = ((y_ep == 1) & (ep_hat == 1)).sum()
         return float(fn / max(tp + fn, 1))
 
-    # ── Orquestrador ─────────────────────────────────────────────────────────
+    # Orquestrador
 
     def run(self) -> None:
         """Calibra todos os parâmetros para todas as seeds."""
@@ -335,14 +333,14 @@ class CalibrationManager:
         summary_df = pd.DataFrame(all_rows)
         out_s = self.out_dir / "calibration_summary.csv"
         summary_df.to_csv(out_s, index=False)
-        print(f"\n  ✓ calibration_summary.csv → {out_s}")
+        print(f"\n  calibration_summary.csv -> {out_s}")
 
         # Salva grade completa
         if all_grade:
             grade_all = pd.concat(all_grade, ignore_index=True)
             out_g = self.out_dir / "calibration_detail.csv"
             grade_all.to_csv(out_g, index=False)
-            print(f"  ✓ calibration_detail.csv → {out_g}")
+            print(f"  calibration_detail.csv -> {out_g}")
 
         # Também salva no exp_dir/metrics/ para o inference manager
         metrics_dir = self.exp_dir / "metrics"

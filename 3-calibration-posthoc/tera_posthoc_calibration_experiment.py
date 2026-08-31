@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 tera_posthoc_calibration_experiment.py
-═══════════════════════════════════════════════════════════════════════════════
 TERA Pipeline — Experimento de Calibração Post-Hoc
 Validação Causal da Hipótese Epistemológica Central
 
@@ -10,8 +9,8 @@ HIPÓTESE A VALIDAR:
    reliability."
 
   Temperature Scaling, Platt Scaling e Isotonic Calibration:
-    ✓ Melhoram ECE (calibração marginal)
-    ✓ Reduzem ECE global de forma estatisticamente significativa
+    Melhoram ECE (calibração marginal)
+    Reduzem ECE global de forma estatisticamente significativa
     ✗ NÃO induzem estrutura temporal discriminativa na entropia
     ✗ NÃO reorganizam a dinâmica entrópica H(t) ao redor do onset
     ✗ NÃO tornam o gating MHEG operacionalmente seletivo
@@ -50,7 +49,6 @@ SAÍDAS:
     paper_calibration_table_rows.tex      — linhas para tabela LaTeX
 
 Referência metodológica: tera_train.py, tera_eval.py, tera_infer.py, tera_calibrate.py
-═══════════════════════════════════════════════════════════════════════════════
 """
 
 from __future__ import annotations
@@ -79,11 +77,9 @@ from sklearn.metrics import (
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # IMPORTS DO PIPELINE
 # Fonte de verdade: tera_train.py · tera_infer.py · tera_eval.py
 # Fallback local apenas para execução standalone sem o pacote instalado.
-# ══════════════════════════════════════════════════════════════════════════════
 
 try:
     # Modelo canônico e manager de treinamento — tera_train.py
@@ -124,16 +120,14 @@ except ImportError:
     _T_MAX_EF = 10.0; _TTD_M = 3; _FAIL_BUDGET = 0.05; _K_AGG_EVAL = 6
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # CONSTANTES — espelham tera_eval.py / tera_infer.py; fallback inline
-# ══════════════════════════════════════════════════════════════════════════════
 
 T_MAX_EF    = _T_MAX_EF       # tera_eval.T_MAX_EF
 TTD_M       = _TTD_M          # tera_eval.TTD_M
 FAIL_BUDGET = _FAIL_BUDGET    # tera_eval.FAIL_BUDGET
 K_AGG       = _K_AGG_INFER    # tera_infer.K_AGG
-FRAME_THR   = 0.35            # experiment_config.yaml → dataset.frame_thr
-WINDOW      = 96              # experiment_config.yaml → dataset.window
+FRAME_THR   = 0.35            # experiment_config.yaml -> dataset.frame_thr
+WINDOW      = 96              # experiment_config.yaml -> dataset.window
 DT          = 10.0 / WINDOW
 EPSILON     = 1e-7
 
@@ -174,12 +168,10 @@ PALETTE = {
 }
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # FUNÇÕES DE PROTOCOLO
 # Usa as implementações canônicas do pipeline quando disponíveis.
 # Fallback inline para execução standalone — implementação idêntica à fonte.
 # Fonte primária de cada função indicada no docstring.
-# ══════════════════════════════════════════════════════════════════════════════
 
 def binary_entropy(p: float) -> float:
     """H(p) em bits. Fonte: tera_eval.binary_entropy."""
@@ -274,9 +266,7 @@ def make_prefix_window(x_seq: np.ndarray, t: int,
     return x_slice.astype(np.float32, copy=False)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # CALIBRADORES POST-HOC
-# ══════════════════════════════════════════════════════════════════════════════
 
 class TemperatureScaler:
     """
@@ -422,7 +412,7 @@ class IsotonicCalibrator:
         return "IsotonicCalibrator(fitted)"
 
 
-# Mapeamento nome → classe
+# Mapeamento nome -> classe
 CALIBRATOR_CLASSES = {
     "ts": TemperatureScaler,
     "ps": PlattScaler,
@@ -430,9 +420,7 @@ CALIBRATOR_CLASSES = {
 }
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # FITTING DOS CALIBRADORES
-# ══════════════════════════════════════════════════════════════════════════════
 
 @dataclass
 class CalibrationBundle:
@@ -486,9 +474,7 @@ def fit_posthoc_calibrators(
     )
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # INFERÊNCIA STREAMING COM CALIBRAÇÃO
-# ══════════════════════════════════════════════════════════════════════════════
 
 @dataclass
 class CalibratedStreamEval:
@@ -675,9 +661,7 @@ def infer_calibrated_hybrid(
     )
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # CALIBRAÇÃO DO GATING PARA MODELOS CALIBRADOS
-# ══════════════════════════════════════════════════════════════════════════════
 
 def calibrate_gating_for_calibrated_model(
     frame_probs_cal_val: np.ndarray,   # (N_val, T) probs calibradas no VAL
@@ -787,9 +771,7 @@ def calibrate_gating_for_calibrated_model(
     return best_td, best_th
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # ANÁLISE TEMPORAL DE ENTROPIA
-# ══════════════════════════════════════════════════════════════════════════════
 
 @dataclass
 class TemporalEntropyProfile:
@@ -867,8 +849,8 @@ def compute_entropy_stratification_score(profile: TemporalEntropyProfile) -> flo
     Índice de estratificação temporal da entropia.
     Mede a separação entre fases stable/pre/post.
 
-    Score alto → entropia discriminativa (como AF-TOI)
-    Score baixo → entropia indiferenciada (como Baseline calibrado)
+    Score alto -> entropia discriminativa (como AF-TOI)
+    Score baixo -> entropia indiferenciada (como Baseline calibrado)
 
     Definição: (H_post − H_stable) normalizado pelo range total de H.
     """
@@ -917,9 +899,7 @@ def build_entropy_trajectory(
     }
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # AVALIAÇÃO COMPLETA (MESMO PROTOCOLO DO PIPELINE)
-# ══════════════════════════════════════════════════════════════════════════════
 
 @dataclass
 class CalibExperimentResult:
@@ -1026,9 +1006,7 @@ def evaluate_calibrated_config(
     )
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # FIGURAS DO EXPERIMENTO
-# ══════════════════════════════════════════════════════════════════════════════
 
 def _configure_mpl() -> None:
     """Configura matplotlib para estilo publication-ready (coerente com o artigo)."""
@@ -1055,7 +1033,7 @@ def _configure_mpl() -> None:
 
 
 def fig_entropy_temporal_curves(
-    trajectories: Dict[str, Dict],    # config_id → build_entropy_trajectory output
+    trajectories: Dict[str, Dict],    # config_id -> build_entropy_trajectory output
     out_path:     Path,
     seed_viz:     int = 42,
 ) -> None:
@@ -1070,7 +1048,7 @@ def fig_entropy_temporal_curves(
         import matplotlib.pyplot as plt
         import matplotlib.patches as mpatches
     except ImportError:
-        print("  ⚠️  matplotlib não disponível — fig_entropy_temporal_curves ignorada.")
+        print("  aviso: matplotlib não disponível — fig_entropy_temporal_curves ignorada.")
         return
 
     _configure_mpl()
@@ -1147,11 +1125,11 @@ def fig_entropy_temporal_curves(
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path)
     plt.close(fig)
-    print(f"    ✓ fig_entropy_temporal_curves → {out_path.name}")
+    print(f"    fig_entropy_temporal_curves -> {out_path.name}")
 
 
 def fig_ttdef_distributions(
-    ttdef_by_config: Dict[str, np.ndarray],   # config_id → array of TTDef per episode
+    ttdef_by_config: Dict[str, np.ndarray],   # config_id -> array of TTDef per episode
     out_path:        Path,
 ) -> None:
     """
@@ -1162,7 +1140,7 @@ def fig_ttdef_distributions(
     try:
         import matplotlib.pyplot as plt
     except ImportError:
-        print("  ⚠️  matplotlib não disponível — fig_ttdef_distributions ignorada.")
+        print("  aviso: matplotlib não disponível — fig_ttdef_distributions ignorada.")
         return
 
     _configure_mpl()
@@ -1215,7 +1193,7 @@ def fig_ttdef_distributions(
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path)
     plt.close(fig)
-    print(f"    ✓ fig_ttdef_distributions → {out_path.name}")
+    print(f"    fig_ttdef_distributions -> {out_path.name}")
 
 
 def fig_gating_heatmap_calibrated(
@@ -1236,7 +1214,7 @@ def fig_gating_heatmap_calibrated(
         from matplotlib.colors import Normalize
         import matplotlib.cm as cm
     except ImportError:
-        print("  ⚠️  matplotlib não disponível — fig_gating_heatmap ignorada.")
+        print("  aviso: matplotlib não disponível — fig_gating_heatmap ignorada.")
         return
 
     _configure_mpl()
@@ -1304,7 +1282,7 @@ def fig_gating_heatmap_calibrated(
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path)
     plt.close(fig)
-    print(f"    ✓ fig_gating_heatmap_calibrated → {out_path.name}")
+    print(f"    fig_gating_heatmap_calibrated -> {out_path.name}")
 
 
 def fig_ece_vs_ttdef(
@@ -1324,7 +1302,7 @@ def fig_ece_vs_ttdef(
     try:
         import matplotlib.pyplot as plt
     except ImportError:
-        print("  ⚠️  matplotlib não disponível — fig_ece_vs_ttdef ignorada.")
+        print("  aviso: matplotlib não disponível — fig_ece_vs_ttdef ignorada.")
         return
 
     _configure_mpl()
@@ -1356,7 +1334,7 @@ def fig_ece_vs_ttdef(
     ax.annotate("", xy=(0.01, 0.85), xytext=(0.12, 0.85),
                 xycoords="axes fraction", textcoords="axes fraction",
                 arrowprops=dict(arrowstyle="->", color="#1f77b4", lw=1.2))
-    ax.text(0.015, 0.88, "ECE melhora →", transform=ax.transAxes,
+    ax.text(0.015, 0.88, "ECE melhora ->", transform=ax.transAxes,
             fontsize=7, color="#1f77b4", style="italic")
 
     # Anotação: TTDef não melhora
@@ -1367,7 +1345,7 @@ def fig_ece_vs_ttdef(
     ax.text(0.87, 0.80, "TTDef\ninalterado", transform=ax.transAxes,
             fontsize=7, color="#d62728", style="italic", ha="left")
 
-    # Zona de operação segura (FR ≤ 0.05 → TTDef low)
+    # Zona de operação segura (FR ≤ 0.05 -> TTDef low)
     ax.axhline(0.5, color="orange", lw=0.8, ls=":", alpha=0.7)
     ax.text(0.02, 0.52, "TTDef limiar operacional (ref.)",
             fontsize=6.5, color="orange", alpha=0.8)
@@ -1382,12 +1360,10 @@ def fig_ece_vs_ttdef(
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path)
     plt.close(fig)
-    print(f"    ✓ fig_ece_vs_ttdef → {out_path.name}")
+    print(f"    fig_ece_vs_ttdef -> {out_path.name}")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # EXPORTAÇÃO: TABELAS E MACROS LATEX
-# ══════════════════════════════════════════════════════════════════════════════
 
 def export_latex_table(
     summary_df: pd.DataFrame,
@@ -1466,7 +1442,7 @@ def export_latex_table(
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"    ✓ paper_calibration_table_rows.tex → {out_path.name}")
+    print(f"    paper_calibration_table_rows.tex -> {out_path.name}")
 
 
 def export_macros_latex(
@@ -1533,7 +1509,7 @@ def export_macros_latex(
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"    ✓ paper_calibration_macros.tex → {out_path.name}")
+    print(f"    paper_calibration_macros.tex -> {out_path.name}")
 
 
 def export_statistical_analysis(
@@ -1544,8 +1520,8 @@ def export_statistical_analysis(
     Testes estatísticos do experimento de calibração.
 
     Comparações chave:
-      1. ECE: baseline_fixed vs calibrado → deve ser significativo (ECE melhora)
-      2. TTDef: baseline_fixed vs calibrado → NÃO deve ser significativo
+      1. ECE: baseline_fixed vs calibrado -> deve ser significativo (ECE melhora)
+      2. TTDef: baseline_fixed vs calibrado -> NÃO deve ser significativo
          (TTDef não melhora = hipótese confirmada)
       3. FR: idem
 
@@ -1588,14 +1564,14 @@ def export_statistical_analysis(
 
             # Interpretação epistemológica
             if metric == "ece_after":
-                interp = ("ECE melhora ✓ (esperado)"
+                interp = ("ECE melhora (esperado)"
                           if delta < -0.33 else "ECE não melhora (?)")
             elif metric in ("ttdef", "fail_rate"):
-                interp = ("TTDef/FR não melhora ✓ (hipótese confirmada)"
+                interp = ("TTDef/FR não melhora (hipótese confirmada)"
                           if abs(delta) < 0.33 else
                           "TTDef/FR melhora — verificar (?)")
             elif metric == "h_strat_score":
-                interp = ("H-estratificação não melhora ✓"
+                interp = ("H-estratificação não melhora ok"
                           if abs(delta) < 0.33 else "H-estratificação melhora (?)")
             else:
                 interp = ""
@@ -1617,12 +1593,10 @@ def export_statistical_analysis(
     out_path.write_text(json.dumps(df_stats.to_dict("records"), indent=2,
                                    ensure_ascii=False) + "\n",
                          encoding="utf-8")
-    print(f"    ✓ stats_posthoc_calibration.json → {out_path.name}")
+    print(f"    stats_posthoc_calibration.json -> {out_path.name}")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # ORQUESTRADOR PRINCIPAL
-# ══════════════════════════════════════════════════════════════════════════════
 
 class CalibrationExperiment:
     """
@@ -1678,7 +1652,7 @@ class CalibrationExperiment:
         for d in [self.out_cal, self.out_met, self.out_fig, self.out_latex]:
             d.mkdir(parents=True, exist_ok=True)
 
-    # ── Carregamento de modelos e dados ───────────────────────────────────────
+    # Carregamento de modelos e dados
 
     def _load_model(self, role: str, seed: int, bi: bool = False) -> nn.Module:
         """
@@ -1759,7 +1733,7 @@ class CalibrationExperiment:
         cal = self._load_calibration_params(seed)
         return float(cal.get("theta_ttd", 0.10))
 
-    # ── Fitting de calibradores ───────────────────────────────────────────────
+    # Fitting de calibradores
 
     def _fit_or_load_calibrators(
         self, seed: int,
@@ -1815,7 +1789,7 @@ class CalibrationExperiment:
 
         return bundle
 
-    # ── Inferência e avaliação por seed ──────────────────────────────────────
+    # Inferência e avaliação por seed
 
     def _run_seed(
         self,
@@ -1848,7 +1822,7 @@ class CalibrationExperiment:
             if self.verbose:
                 print(f"    [{cal_name}] seed={seed}")
 
-            # ── Braço FIXO (sem gating) ───────────────────────────────────────
+            # Braço FIXO (sem gating)
             cid_fixed = f"baseline_{cal_key}_fixed"
             res_fixed = infer_calibrated_fixed(
                 model=baseline_model,
@@ -1883,7 +1857,7 @@ class CalibrationExperiment:
                     f"frame_probs_{cid_fixed}_seed{seed}.npy",
                     res_fixed.frame_probs_cal)
 
-            # ── Braço HYBRID (com MHEG) ────────────────────────────────────────
+            # Braço HYBRID (com MHEG)
             cid_hybrid = f"baseline_{cal_key}_hybrid"
 
             # Re-calibra gating para este calibrador (máxima oportunidade)
@@ -1967,7 +1941,7 @@ class CalibrationExperiment:
                 best_f1, best_thr = fv, float(thr)
         return best_thr
 
-    # ── Coleta de probs para figuras ──────────────────────────────────────────
+    # Coleta de probs para figuras
 
     def _collect_probs_for_figures(
         self, seed_viz: int,
@@ -1991,7 +1965,7 @@ class CalibrationExperiment:
                 y_fr_te[crit_mask],
                 y_ep_te[crit_mask])
 
-    # ── Orquestrador principal ────────────────────────────────────────────────
+    # Orquestrador principal
 
     def run(
         self,
@@ -2055,13 +2029,13 @@ class CalibrationExperiment:
         df = self._results_to_df(all_results)
         csv_path = self.out_met / "results_posthoc_calibration.csv"
         df.to_csv(csv_path, index=False)
-        print(f"\n  ✓ results_posthoc_calibration.csv → {csv_path}")
+        print(f"\n  results_posthoc_calibration.csv -> {csv_path}")
 
         # 7. Summary (média ± dp por config)
         summary = self._compute_summary(df)
         summ_path = self.out_met / "summary_posthoc_calibration.csv"
         summary.to_csv(summ_path, index=False)
-        print(f"  ✓ summary_posthoc_calibration.csv → {summ_path}")
+        print(f"  summary_posthoc_calibration.csv -> {summ_path}")
 
         # 8. Análise estatística
         export_statistical_analysis(
@@ -2161,7 +2135,7 @@ class CalibrationExperiment:
         try:
             _, y_fr_te, y_ep_te, _ = self._load_data(seed_viz, "te")
         except Exception as e:
-            print(f"  ⚠️  Não foi possível carregar dados para figuras: {e}")
+            print(f"  aviso: Não foi possível carregar dados para figuras: {e}")
             return
 
         probs_by_cfg, y_fr_crit, y_ep_crit = self._collect_probs_for_figures(
@@ -2269,10 +2243,10 @@ class CalibrationExperiment:
             hs   = r.get("h_strat_score_mean", float("nan"))
             skip = r.get("skip_pct_mean", float("nan"))
 
-            ece_ok  = "✓" if (not math.isnan(dece) and dece > 0.001) else "−"
-            fr_ok   = "✗" if (not math.isnan(fr)   and fr  > 0.10)   else "✓"
-            ttd_ok  = "✗" if (not math.isnan(ttdf) and ttdf > 1.0)   else "✓"
-            hs_ok   = "✗" if (not math.isnan(hs)   and hs  < 0.20)   else "✓"
+            ece_ok  = "ok" if (not math.isnan(dece) and dece > 0.001) else "−"
+            fr_ok   = "✗" if (not math.isnan(fr)   and fr  > 0.10)   else "ok"
+            ttd_ok  = "✗" if (not math.isnan(ttdf) and ttdf > 1.0)   else "ok"
+            hs_ok   = "✗" if (not math.isnan(hs)   and hs  < 0.20)   else "ok"
 
             print(f"  [{label}]")
             if not math.isnan(ece):
@@ -2283,17 +2257,15 @@ class CalibrationExperiment:
                       f"Skip={skip:.1f}%")
         print()
         print("  CONCLUSÃO:")
-        print("    Marcadores ✓ indicam resultado esperado pela hipótese.")
-        print("    ECE melhora → calibração marginal funciona.")
-        print("    FR alto + TTDef degradado → confiabilidade operacional intacta.")
-        print("    HStrat baixo → H(t) permanece temporalmente indiferenciada.")
-        print("    → Hipótese CONFIRMADA: calibração ≠ organização temporal.")
+        print("    Marcadores indicam resultado esperado pela hipótese.")
+        print("    ECE melhora -> calibração marginal funciona.")
+        print("    FR alto + TTDef degradado -> confiabilidade operacional intacta.")
+        print("    HStrat baixo -> H(t) permanece temporalmente indiferenciada.")
+        print("    -> Hipótese CONFIRMADA: calibração ≠ organização temporal.")
         print("═" * 68 + "\n")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # TEXTO INTERPRETATIVO CIENTÍFICO (FGCS)
-# ══════════════════════════════════════════════════════════════════════════════
 
 INTERPRETIVE_TEXT_FGCS = """
 % ─────────────────────────────────────────────────────────────────────────────
@@ -2380,9 +2352,7 @@ def print_interpretive_text() -> None:
     print(INTERPRETIVE_TEXT_FGCS)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # ENTRY POINT STANDALONE
-# ══════════════════════════════════════════════════════════════════════════════
 
 def _load_cfg(yaml_path: str = "experiment_config.yaml") -> dict:
     try:

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 run_ablation_v8.py
-══════════════════════════════════════════════════════════════════════════════
 ABLAÇÃO COMPLETA v8: TEACHER STUDY  ─  BiLSTM / Transformer / None
 
-MUDANÇAS v7 → v8 (CORREÇÕES DE PROTOCOLO — ALINHAMENTO COM run_v29):
+MUDANÇAS v7 -> v8 (CORREÇÕES DE PROTOCOLO — ALINHAMENTO COM run_v29):
 
-  CORREÇÃO 1 — Gerador sintético: v6 → v7
+  CORREÇÃO 1 — Gerador sintético: v6 -> v7
     • DEFAULT_GENERATOR_MODULE = "synthetic_driver_risk_v7"
     • quick_generate() chamado sem recipe_set / SENSOR_LEVEL (interface v7)
     • y_frame_obs carregado de forma defensiva (fallback para y_frame_clean se
@@ -31,40 +30,38 @@ MUDANÇAS v7 → v8 (CORREÇÕES DE PROTOCOLO — ALINHAMENTO COM run_v29):
     • Análises 1–5 de robustez inalteradas
 
 REGRA DE OURO DO PROTOCOLO (paper):
-  ✅ TTD_efetivo = penalizado: USAR no paper (métrica justa)
-  ⚠  TTD_bruto  = sem pena:   somente análise auxiliar (exclui misses → otimista)
-══════════════════════════════════════════════════════════════════════════════
+  ok TTD_efetivo = penalizado: USAR no paper (métrica justa)
+  aviso: TTD_bruto  = sem pena:   somente análise auxiliar (exclui misses -> otimista)
 
 EXPERIMENTOS (5 modelos × 4 seeds = 20 treinos):
   ┌──────────────────────────┬─────────────┬────────────────────────────────┐
   │ Experimento              │ Teacher     │ Pergunta respondida            │
   ├──────────────────────────┼─────────────┼────────────────────────────────┤
   │ LSTM-Baseline            │ —           │ baseline sem KD                │
-  │ LSTM-AF-KD               │ BiLSTM      │ teacher recorrente → student   │
-  │ LSTM-TransKD ★ NOVO      │ Transformer │ teacher atencional → student   │
+  │ LSTM-AF-KD               │ BiLSTM      │ teacher recorrente -> student   │
+  │ LSTM-TransKD ★ NOVO      │ Transformer │ teacher atencional -> student   │
   │ Transformer-Baseline     │ —           │ baseline sem KD                │
-  │ Transformer-AF-KD        │ BiLSTM      │ teacher recorrente → atencional│
+  │ Transformer-AF-KD        │ BiLSTM      │ teacher recorrente -> atencional│
   └──────────────────────────┴─────────────┴────────────────────────────────┘
 
   Ablação científica central:
-    LSTM-AF-KD (BiLSTM→LSTM)  vs  LSTM-TransKD (Transformer→LSTM)
-    → Student (LSTM causal) idêntico; apenas o teacher muda.
-    → Isola o efeito do teacher atencional (full-sequence) vs. recorrente.
+    LSTM-AF-KD (BiLSTM->LSTM)  vs  LSTM-TransKD (Transformer->LSTM)
+    -> Student (LSTM causal) idêntico; apenas o teacher muda.
+    -> Isola o efeito do teacher atencional (full-sequence) vs. recorrente.
 
 PROTOCOLO IDÊNTICO GARANTIDO:
-  ✅ Mesmo dataset sintético  (synthetic_driver_risk_v7.py)  [v8: atualizado de v6]
-  ✅ Mesmas seeds             [42, 43, 44, 45]
-  ✅ Mesmos splits train/val/test  (salvos em JSON e reutilizados)
-  ✅ Mesma estratificação     por recipe_id (críticos)
-  ✅ Mesmo m=3                para TTD (consecutivos)
-  ✅ Mesmo FailRate_max=0.05
-  ✅ Mesmo K_AGG=6            (agregação causal)
-  ✅ Mesma calibração de θ    via validação (θ global simétrico)
-  ✅ Mesmo formato de saída   CSV + LaTeX
-  ✅ TTDef = TTD_bruto + FR × T_EP  [v8: alinhado com run_v29]
+  ok Mesmo dataset sintético  (synthetic_driver_risk_v7.py)  [v8: atualizado de v6]
+  ok Mesmas seeds             [42, 43, 44, 45]
+  ok Mesmos splits train/val/test  (salvos em JSON e reutilizados)
+  ok Mesma estratificação     por recipe_id (críticos)
+  ok Mesmo m=3                para TTD (consecutivos)
+  ok Mesmo FailRate_max=0.05
+  ok Mesmo K_AGG=6            (agregação causal)
+  ok Mesma calibração de θ    via validação (θ global simétrico)
+  ok Mesmo formato de saída   CSV + LaTeX
+  ok TTDef = TTD_bruto + FR × T_EP  [v8: alinhado com run_v29]
 
 COMO RODAR:
-──────────────────────────────────────────────────────────────────────────────
   Pré-requisito: o gerador sintético deve estar no mesmo diretório:
     synthetic_driver_risk_v7.py
 
@@ -78,20 +75,20 @@ COMO RODAR:
     python run_ablation_teacher_study.py --seed 42
 
   Reutilizar dataset já gerado (padrão = True):
-    REUSE_PREGENERATED_DATASET = False  (obrigatório ao trocar gerador v4→v5)
+    REUSE_PREGENERATED_DATASET = False  (obrigatório ao trocar gerador v4->v5)
 
   Forçar regerar splits:
     FORCE_REGEN_SPLITS = True   (edite a constante no código)
 
 SAÍDAS (em ./resultados_unified/):
-  ├─ results_all_seeds_unified.csv    ← valores por seed × modelo
-  ├─ summary_unified.csv              ← média ± std por (Modelo, Método, Teacher)
-  └─ table_comparison_latex.tex       ← tabela LaTeX com coluna Teacher
+  ├─ results_all_seeds_unified.csv    <- valores por seed × modelo
+  ├─ summary_unified.csv              <- média ± std por (Modelo, Método, Teacher)
+  └─ table_comparison_latex.tex       <- tabela LaTeX com coluna Teacher
 
   Frame probs (em ./dados_sinteticos/frame_probs/):
   ├─ lstm_base_seedXX.npy
   ├─ lstm_afkd_seedXX.npy
-  ├─ lstm_transkd_seedXX.npy    ← NOVO: Transformer→LSTM
+  ├─ lstm_transkd_seedXX.npy    <- NOVO: Transformer->LSTM
   ├─ trans_base_seedXX.npy
   ├─ trans_afkd_seedXX.npy
   └─ yfr_test_seedXX.npy
@@ -104,7 +101,6 @@ TEMPO ESTIMADO:
   CPU: ~90–120 min (20 treinos × ~5min cada)
   GPU: ~20–30 min
 
-══════════════════════════════════════════════════════════════════════════════
 """
 
 import argparse
@@ -133,16 +129,14 @@ import matplotlib.gridspec as gridspec
 
 warnings.filterwarnings("ignore")
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 0) CONFIGURAÇÃO GLOBAL — PROTOCOLO UNIFICADO
 #    Altere apenas aqui; o resto do código não deve precisar de edições.
-# ══════════════════════════════════════════════════════════════════════════════
 
 SEEDS            = [42, 43, 44, 45]
 
-# ── Identificador do experimento ─────────────────────────────────────────────
+# Identificador do experimento
 # Prefixo aplicado em TODOS os arquivos de saída para distinguir dos resultados
-# do experimento principal (run_v22_otimizado.py → EXP_NAME = "exp_main").
+# do experimento principal (run_v22_otimizado.py -> EXP_NAME = "exp_main").
 # Permite comparação direta: exp_ablacao_* vs exp_main_*
 EXP_NAME         = "exp_ablacao_v8"  # [v8] separado dos resultados gerados com v6
 T                = 96       # janela temporal (frames por episódio)
@@ -190,11 +184,11 @@ RUN_HYBRID_V3 = True
 # Configuração de dataset
 DATA_ROOT                  = Path(".")
 DATA_DIR                   = DATA_ROOT / "dados_sinteticos"
-REUSE_PREGENERATED_DATASET = False  # IMPORTANTE: False obrigatório ao trocar gerador (v4→v5)
-REUSE_SPLITS               = True   # True → reutiliza splits_seedXX.json
+REUSE_PREGENERATED_DATASET = False  # IMPORTANTE: False obrigatório ao trocar gerador (v4->v5)
+REUSE_SPLITS               = True   # True -> reutiliza splits_seedXX.json
 USE_STRATIFIED_SPLITS      = True   # estratificação por recipe_id
-FORCE_REGEN_SPLITS         = True   # True → força novo split mesmo que JSON exista
-DEFAULT_GENERATOR_MODULE   = "synthetic_driver_risk_v7"  # [v8] atualizado de v6 → v7
+FORCE_REGEN_SPLITS         = True   # True -> força novo split mesmo que JSON exista
+DEFAULT_GENERATOR_MODULE   = "synthetic_driver_risk_v7"  # [v8] atualizado de v6 -> v7
 # v6: RECIPES_TRAIN = Normal + Crítico apenas (Atenção e Alerta movidos para RECIPES_BORDERLINE)
 # Label principal = y_episode_severity (0.7·mean + 0.3·p95), suavização
 # temporal 3 frames, decaimento pós-plateau, +2 receitas progressivas (60%)
@@ -236,9 +230,7 @@ LSTM_CONFIG = {
 }
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 1) DATACLASSES E HELPERS
-# ══════════════════════════════════════════════════════════════════════════════
 
 @dataclass
 class DatasetConfig:
@@ -304,7 +296,7 @@ def _json_default(obj: Any) -> Any:
 
 
 def _cfg_to_dict(cfg: DatasetConfig) -> Dict[str, Any]:
-    """Converte DatasetConfig para dict serializável (Path → str)."""
+    """Converte DatasetConfig para dict serializável (Path -> str)."""
     d = asdict(cfg)
     d["data_dir"] = str(d["data_dir"])
     return d
@@ -327,9 +319,7 @@ def infer_class_column(meta_df: pd.DataFrame) -> str:
     raise KeyError("Nenhuma coluna de classe encontrada no CSV de metadados (esperado: class_name/categoria/class).")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 2) MODELOS — FAMÍLIA LSTM
-# ══════════════════════════════════════════════════════════════════════════════
 
 class TeacherModel(nn.Module):
     """
@@ -393,9 +383,7 @@ class LSTMStudent(nn.Module):
         return frame_logits, ep_logits
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 3) MODELOS — FAMÍLIA TRANSFORMER
-# ══════════════════════════════════════════════════════════════════════════════
 
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model: int, max_len: int = 512):
@@ -459,7 +447,7 @@ class TransformerTeacher(nn.Module):
     Professor Transformer — atenção FULL-SEQUENCE (sem máscara causal).
 
     Diferença crítica vs TransformerStudent:
-      • Sem build_causal_mask → acesso a frames futuros durante treino.
+      • Sem build_causal_mask -> acesso a frames futuros durante treino.
       • Funciona como oráculo atencional, análogo ao papel do BiLSTM teacher.
       • Usado exclusivamente para destilação no experimento LSTM-TransKD.
 
@@ -484,14 +472,12 @@ class TransformerTeacher(nn.Module):
 
     def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
         h = self.pos_enc(self.in_proj(x))
-        # SEM máscara causal → full-sequence attention (modo oráculo)
+        # SEM máscara causal -> full-sequence attention (modo oráculo)
         h = self.norm(self.encoder(h))
         return self.frame_head(h).squeeze(-1), self.ep_head(h[:, -1, :]).squeeze(-1)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 4) DATASET — GERAÇÃO E CARREGAMENTO
-# ══════════════════════════════════════════════════════════════════════════════
 
 def load_or_generate_dataset(cfg: DatasetConfig) -> Tuple[np.ndarray, ...]:
     """
@@ -512,13 +498,13 @@ def load_or_generate_dataset(cfg: DatasetConfig) -> Tuple[np.ndarray, ...]:
     set_seed(cfg.seed)
     ensure_dir(cfg.data_dir)
 
-    # ── Tentar reutilizar ────────────────────────────────────────────────────
+    # Tentar reutilizar
     if cfg.reuse_pregenerated and cfg.npz_path.exists() and cfg.config_path.exists():
         with open(cfg.config_path, "r") as f:
             saved_cfg = json.load(f)
         current_cfg = _cfg_to_dict(cfg)
         if _cfg_dicts_match(saved_cfg, current_cfg):
-            print(f"  ✓ Reusando dataset pré-gerado: {cfg.npz_path}")
+            print(f"  Reusando dataset pré-gerado: {cfg.npz_path}")
             data = np.load(cfg.npz_path)
             meta_df = pd.read_csv(cfg.csv_path, sep=";")
             X = data["X"]
@@ -535,7 +521,7 @@ def load_or_generate_dataset(cfg: DatasetConfig) -> Tuple[np.ndarray, ...]:
                 )
             return X, y_frame_clean, y_frame_obs, y_episode, meta_df
 
-    # ── Gerar novo ──────────────────────────────────────────────────────────
+    # Gerar novo
     print(f"  ⚙ Gerando novo dataset (seed={cfg.seed}, gerador={cfg.generator_module})...")
     sys.path.insert(0, str(Path(cfg.data_dir).parent))
     try:
@@ -573,7 +559,7 @@ def load_or_generate_dataset(cfg: DatasetConfig) -> Tuple[np.ndarray, ...]:
             0.7 * y_frame_clean.mean(axis=1)
             + 0.3 * np.percentile(y_frame_clean, 95, axis=1)
         )
-    print(f"  ✓ Dataset gerado: shape={data['X'].shape}, episódios={len(meta_df)}")
+    print(f"  Dataset gerado: shape={data['X'].shape}, episódios={len(meta_df)}")
     return X, y_frame_clean, y_frame_obs, y_episode, meta_df
 
 
@@ -598,7 +584,7 @@ def create_stratified_splits(
     split_file = cfg.split_path
 
     if cfg.reuse_splits and split_file.exists() and not FORCE_REGEN_SPLITS:
-        print(f"  ✓ Reusando splits salvos: {split_file}")
+        print(f"  Reusando splits salvos: {split_file}")
         with open(split_file, "r") as f:
             payload = json.load(f)
 
@@ -655,7 +641,7 @@ def create_stratified_splits(
     with open(split_file, "w") as f:
         json.dump(splits_dict, f, indent=2)
 
-    print(f"  ✓ Splits criados: train={len(idx_train)}, val={len(idx_val)}, test={len(idx_test)}")
+    print(f"  Splits criados: train={len(idx_train)}, val={len(idx_val)}, test={len(idx_test)}")
     return {
         "train_idx": np.asarray(splits_dict["train_idx"], dtype=np.int64),
         "val_idx":   np.asarray(splits_dict["val_idx"], dtype=np.int64),
@@ -663,9 +649,7 @@ def create_stratified_splits(
     }
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 5) TREINO — BASELINE E AF-KD  (funciona para qualquer arquitetura student)
-# ══════════════════════════════════════════════════════════════════════════════
 
 def _pos_weight(y: np.ndarray) -> torch.Tensor:
     pos = float(np.sum(y > 0.5))
@@ -700,7 +684,7 @@ def train_baseline(
     """
     Treino supervisionado padrão (sem KD).
     Funciona para BiLSTM teacher, LSTMStudent, TransformerStudent e
-    TransformerTeacher — todos compartilham a mesma interface (x) → (fr_logits, ep_logits).
+    TransformerTeacher — todos compartilham a mesma interface (x) -> (fr_logits, ep_logits).
     """
     model.to(device).train()
     opt = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
@@ -784,11 +768,11 @@ def train_afkd(
     p_min_end      = 0.86
     delta_start    = 0.12
     delta_end      = 3.20
-    warmup_epochs  = 10   # v4: 8→10  (60 épocas totais, proporções mantidas)
-    rampup_epochs  = 17   # v4: 14→17 (refine = 60-10-17 = 33)
+    warmup_epochs  = 10   # v4: 8->10  (60 épocas totais, proporções mantidas)
+    rampup_epochs  = 17   # v4: 14->17 (refine = 60-10-17 = 33)
 
     for e in range(epochs):
-        # ── Scheduler de fases ──────────────────────────────────────────────
+        # Scheduler de fases
         if e + 1 <= warmup_epochs:
             stage = "WARMUP"
             frac  = (e + 1) / max(1, warmup_epochs)
@@ -866,15 +850,13 @@ def train_afkd(
     return student
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 5b) TEMPERATURE SCALING — calibração pós-treino (v4)
-# ══════════════════════════════════════════════════════════════════════════════
 
 class TScaledModel(nn.Module):
     """
     Wrapper leve que divide os frame-logits por um escalar T aprendido.
     Transparente para o restante do pipeline: mantém a mesma interface
-    (x) → (fr_logits / T, ep_logits) sem alterar os pesos do modelo base.
+    (x) -> (fr_logits / T, ep_logits) sem alterar os pesos do modelo base.
     """
     def __init__(self, base: nn.Module, temperature: float):
         super().__init__()
@@ -928,7 +910,6 @@ def temperature_scale(
     T_final = float(T.clamp(t_min, t_max).detach().cpu())
     print(f"    temperature_scale: T={T_final:.4f}  ({n_steps} passos, NLL final={loss.item():.4f})")
     return TScaledModel(model, T_final)
-# ══════════════════════════════════════════════════════════════════════════════
 
 def infer_stream_fixed(
     model: nn.Module,
@@ -1124,8 +1105,8 @@ def select_theta_per_model(y_true_fr: np.ndarray, frame_probs: np.ndarray, m_det
     orçamento de segurança do select_thr_ep (FAIL_BUDGET=0.05).
 
     Prioridade de seleção:
-      (1) Entre candidatos com FailRate ≤ FAIL_BUDGET → min TTD;
-          se TTD empata (ambos 0 ou nan) → θ mais próximo de 0.30.
+      (1) Entre candidatos com FailRate ≤ FAIL_BUDGET -> min TTD;
+          se TTD empata (ambos 0 ou nan) -> θ mais próximo de 0.30.
       (2) Fallback (nenhum θ atinge budget): menor FailRate possível,
           desempate por menor TTD, depois por proximidade a 0.30.
     """
@@ -1238,9 +1219,9 @@ def _compute_ttd_bruto(
     """
     TTD médio calculado APENAS sobre episódios detectados (sem penalidade de miss).
 
-    ⚠  ATENÇÃO — uso restrito:
+    aviso: ATENÇÃO — uso restrito:
        • Usar SOMENTE como métrica auxiliar / análise de distribuição
-       • NÃO usar como métrica principal no paper (exclui misses → otimista)
+       • NÃO usar como métrica principal no paper (exclui misses -> otimista)
        • A métrica justa para o paper é TTD_efetivo (= campo 'TTD' em summarize_eval)
 
     Equivalente a: penalize=False em _ttd_vec()
@@ -1253,7 +1234,7 @@ def _compute_ttd_bruto(
             continue
         t0  = int(onset[0])
         det = _first_stable_m(yp, t0, theta, m)
-        if det is not None:                    # ← só episódios detectados
+        if det is not None:                    # <- só episódios detectados
             ttds.append((det - t0) * dt)
     return float(np.mean(ttds)) if ttds else float("nan")
 
@@ -1275,11 +1256,11 @@ def summarize_eval(se: StreamEval, y_ep: np.ndarray, y_fr: np.ndarray, thr_ep: f
         "F1":               round(f1,4),
         "ECE":              round(ece,4),
         "FailRate":         round(fr,4),
-        # TTD = efetivo penalizado → retrocompatibilidade com análises internas
+        # TTD = efetivo penalizado -> retrocompatibilidade com análises internas
         "TTD":              round(ttd,4)       if not math.isnan(ttd)       else ttd,
-        # TTDef = alinhado run_v29: TTD_bruto + FR × T_EP → métrica do paper
+        # TTDef = alinhado run_v29: TTD_bruto + FR × T_EP -> métrica do paper
         "TTDef":            ttdef,
-        # TTD_bruto = sem penalidade → uso auxiliar somente
+        # TTD_bruto = sem penalidade -> uso auxiliar somente
         "TTD_bruto":        round(ttd_bruto,4) if not math.isnan(ttd_bruto) else ttd_bruto,
         "ThetaTTD":         round(theta_ttd,4),
         "ThrEP":            round(thr_ep,4),
@@ -1384,21 +1365,21 @@ def evaluate_streaming_policy(
 
     PROTOCOLO JUSTO (alinhado ao paper):
       • TTD penalizado: episódio não detectado recebe (window - t0) * dt
-        → nenhum episódio é descartado do cálculo
+        -> nenhum episódio é descartado do cálculo
       • FailRate = misses / positivos  (FN / P)
-        → divide SOMENTE pelos episódios que tinham onset (positivos críticos)
-        → NÃO divide pelo total de episódios (que inclui negativos)
+        -> divide SOMENTE pelos episódios que tinham onset (positivos críticos)
+        -> NÃO divide pelo total de episódios (que inclui negativos)
     """
     dt       = 10.0 / window   # segundos por frame
     ttds, ttds_prog, ttds_abr = [], [], []
     misses   = 0
-    positives = 0   # ← contador de episódios com onset (críticos)
+    positives = 0   # <- contador de episódios com onset (críticos)
 
     for i in range(len(frame_probs)):
         onset_frames = np.where(yfr[i] > 0)[0]
         if len(onset_frames) == 0:
             continue                  # episódio negativo — não conta para FailRate
-        positives += 1                # ← incrementa antes de qualquer filtro
+        positives += 1                # <- incrementa antes de qualquer filtro
         t0  = int(onset_frames[0])
         det = _first_stable_m(frame_probs[i], t0, theta, m)
 
@@ -1408,9 +1389,9 @@ def evaluate_streaming_policy(
             ttd = (det - t0) * dt
         else:
             misses += 1
-            ttd = penalty             # ← miss NÃO descarta o episódio
+            ttd = penalty             # <- miss NÃO descarta o episódio
 
-        ttds.append(ttd)              # ← todos os episódios positivos incluídos
+        ttds.append(ttd)              # <- todos os episódios positivos incluídos
         if "progressive" in meta_rows.columns:
             is_prog = bool(meta_rows.iloc[i]["progressive"])
             (ttds_prog if is_prog else ttds_abr).append(ttd)
@@ -1467,9 +1448,7 @@ def select_theta_global_on_validation(
     return float(best["theta"]), rows
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 7) ORQUESTRAÇÃO — EXECUÇÃO COMPLETA PARA UMA SEED
-# ══════════════════════════════════════════════════════════════════════════════
 
 def run_single_seed_unified(
     seed: int,
@@ -1482,12 +1461,12 @@ def run_single_seed_unified(
       Passo 2  – Splits estratificados (train/val/test)
       Passo 3  – Treina professor BiLSTM
       Passo 4  – Treina LSTM Baseline
-      Passo 5  – Treina LSTM-AF-KD  (BiLSTM → LSTM)
+      Passo 5  – Treina LSTM-AF-KD  (BiLSTM -> LSTM)
       Passo 6  – Treina Transformer Baseline
-      Passo 7  – Treina Transformer-AF-KD  (BiLSTM → Transformer)
+      Passo 7  – Treina Transformer-AF-KD  (BiLSTM -> Transformer)
       Passo 8  – Treina TransformerTeacher  (oráculo full-sequence)
-      Passo 9  – Treina LSTM-TransKD  (Transformer → LSTM)  ★ ABLAÇÃO
-      Passo 10 – Inferência na validação → calibração de θ global
+      Passo 9  – Treina LSTM-TransKD  (Transformer -> LSTM)  ★ ABLAÇÃO
+      Passo 10 – Inferência na validação -> calibração de θ global
       Passo 11 – Inferência no teste
       Passo 12 – Avalia todos com θ global simétrico
       Passo 13 – Salva frame_probs (para fairness / robustez)
@@ -1499,7 +1478,7 @@ def run_single_seed_unified(
     set_seed(seed)
     cfg = DatasetConfig(seed=seed)
 
-    # ── 1. Dataset ───────────────────────────────────────────────────────────
+    # 1. Dataset
     print("1. Carregando/gerando dataset...")
     X, y_frame_clean, y_frame_obs, y_episode, meta_df = load_or_generate_dataset(cfg)
 
@@ -1509,7 +1488,7 @@ def run_single_seed_unified(
     y_frame_bin = (y_frame_obs >= cfg.frame_thr).astype(np.float32)
     y_episode_bin = (y_frame_bin.max(axis=1) > 0).astype(np.float32)
 
-    # ── v7: FILTRO BINÁRIO — mantém apenas Normal e Crítico ──────────────────
+    # v7: FILTRO BINÁRIO — mantém apenas Normal e Crítico
     # Atenção e Alerta são excluídos do treinamento e avaliação para consistência
     # com o experimento principal (run_v22_v6.py). O FPR é calculado apenas sobre
     # episódios Normal (condução genuinamente segura).
@@ -1527,9 +1506,8 @@ def run_single_seed_unified(
     n_critico = int((_cat_abl[_binary_mask] == "Critico").sum())
     print(f"  [v7-filtro] Normal={n_normal}  Crítico={n_critico}  "
           f"Total={len(meta_df)}  (Atenção+Alerta excluídos)")
-    # ─────────────────────────────────────────────────────────────────────────
 
-    # ── 2. Splits ────────────────────────────────────────────────────────────
+    # 2. Splits
     print("2. Criando splits estratificados...")
     splits   = create_stratified_splits(X, y_frame_bin, y_episode_bin, meta_df, cfg)
     idx_tr   = splits["train_idx"]
@@ -1549,7 +1527,7 @@ def run_single_seed_unified(
     print(f"  Frame bin threshold (frame_thr) = {cfg.frame_thr:.2f}")
     print(f"  Episódios positivos (bin): train={int(yep_tr_arr.sum())}, val={int(y_episode_bin[idx_val].sum())}, test={int(y_episode_bin[idx_te].sum())}")
 
-    # ── 3. Professor BiLSTM ──────────────────────────────────────────────────
+    # 3. Professor BiLSTM
     print("\n3. Treinando professor BiLSTM (shared teacher)...")
     bilstm_teacher = TeacherModel(input_dim=D, hidden_size=H, num_layers=2, dropout=0.1)
     bilstm_teacher = train_baseline(
@@ -1557,63 +1535,63 @@ def run_single_seed_unified(
     )
     # teacher não recebe temperature scaling (não entra em inferência final)
 
-    # ── 4. LSTM Baseline ─────────────────────────────────────────────────────
+    # 4. LSTM Baseline
     print("\n4. Treinando LSTM Baseline...")
     lstm_base = LSTMStudent(input_dim=D, hidden_size=H, num_layers=2, dropout=0.1)
     lstm_base = train_baseline(
         lstm_base, X_tr, yfr_tr, yep_tr_arr, device, epochs=60, lr=5e-4,  # ALINHADO run_v22
     )
-    print("  → Temperature scaling LSTM-Baseline (v4)...")
+    print("  -> Temperature scaling LSTM-Baseline (v4)...")
     lstm_base = temperature_scale(lstm_base, X_val, yfr_val, device)
 
-    # ── 5. LSTM-AF-KD  (BiLSTM → LSTM) ─────────────────────────────────────
-    print("\n5. Treinando LSTM-AF-KD  [BiLSTM → LSTM]...")
+    # 5. LSTM-AF-KD  (BiLSTM -> LSTM)
+    print("\n5. Treinando LSTM-AF-KD  [BiLSTM -> LSTM]...")
     lstm_afkd = LSTMStudent(input_dim=D, hidden_size=H, num_layers=2, dropout=0.1)
     lstm_afkd = train_afkd(
         lstm_afkd, bilstm_teacher, X_tr, yfr_tr, yep_tr_arr, device,
         epochs=80, lr=5e-4, beta_max=0.35, temp=2.5, yfr_soft=yfr_clean_tr,  # ALINHADO run_v22
     )
-    print("  → Temperature scaling LSTM-AF-KD (v4)...")
+    print("  -> Temperature scaling LSTM-AF-KD (v4)...")
     lstm_afkd = temperature_scale(lstm_afkd, X_val, yfr_val, device)
 
-    # ── 6. Transformer Baseline ──────────────────────────────────────────────
+    # 6. Transformer Baseline
     print("\n6. Treinando Transformer Baseline...")
     trans_base = TransformerStudent(TRANSFORMER_CONFIG)
     trans_base = train_baseline(
         trans_base, X_tr, yfr_tr, yep_tr_arr, device, epochs=60, lr=5e-4,  # ALINHADO run_v22
     )
-    print("  → Temperature scaling Trans-Baseline (v4)...")
+    print("  -> Temperature scaling Trans-Baseline (v4)...")
     trans_base = temperature_scale(trans_base, X_val, yfr_val, device)
 
-    # ── 7. Transformer-AF-KD  (BiLSTM → Transformer) ────────────────────────
-    print("\n7. Treinando Transformer-AF-KD  [BiLSTM → Transformer]...")
+    # 7. Transformer-AF-KD  (BiLSTM -> Transformer)
+    print("\n7. Treinando Transformer-AF-KD  [BiLSTM -> Transformer]...")
     trans_afkd = TransformerStudent(TRANSFORMER_CONFIG)
     trans_afkd = train_afkd(
         trans_afkd, bilstm_teacher, X_tr, yfr_tr, yep_tr_arr, device,
         epochs=80, lr=5e-4, beta_max=0.35, temp=2.5, yfr_soft=yfr_clean_tr,  # ALINHADO run_v22
     )
-    print("  → Temperature scaling Trans-AF-KD (v4)...")
+    print("  -> Temperature scaling Trans-AF-KD (v4)...")
     trans_afkd = temperature_scale(trans_afkd, X_val, yfr_val, device)
 
-    # ── 8. TransformerTeacher (oráculo full-sequence) ────────────────────────
+    # 8. TransformerTeacher (oráculo full-sequence)
     print("\n8. Treinando TransformerTeacher (full-sequence, sem máscara causal)...")
     trans_teacher = TransformerTeacher(TRANSFORMER_TEACHER_CONFIG)
     trans_teacher = train_baseline(
         trans_teacher, X_tr, yfr_tr, yep_tr_arr, device, epochs=60, lr=5e-4,  # ALINHADO run_v22
     )
-    print("  ✓ TransformerTeacher pronto (oráculo atencional — sem temperature scaling)")
+    print("  TransformerTeacher pronto (oráculo atencional — sem temperature scaling)")
 
-    # ── 9. LSTM-TransKD  (Transformer → LSTM)  ★ ABLAÇÃO CENTRAL ────────────
-    print("\n9. Treinando LSTM-TransKD  [Transformer → LSTM]  ★ ablação...")
+    # 9. LSTM-TransKD  (Transformer -> LSTM)  ★ ABLAÇÃO CENTRAL
+    print("\n9. Treinando LSTM-TransKD  [Transformer -> LSTM]  ★ ablação...")
     lstm_transkd = LSTMStudent(input_dim=D, hidden_size=H, num_layers=2, dropout=0.1)
     lstm_transkd = train_afkd(
         lstm_transkd, trans_teacher, X_tr, yfr_tr, yep_tr_arr, device,
         epochs=80, lr=5e-4, beta_max=0.35, temp=2.5, yfr_soft=yfr_clean_tr,  # ALINHADO run_v22
     )
-    print("  → Temperature scaling LSTM-TransKD (v4)...")
+    print("  -> Temperature scaling LSTM-TransKD (v4)...")
     lstm_transkd = temperature_scale(lstm_transkd, X_val, yfr_val, device)
 
-    # ── 10. Inferência na validação → calibração v3 ───────────────────────────
+    # 10. Inferência na validação -> calibração v3
     print("\n10. Inferência na validação para calibração v3 (thr_ep, θ_global, θ_adapt, derivativo, híbrido)...")
 
     progressive_val = np.asarray(meta_val["progressive"]).astype(bool) if "progressive" in meta_val.columns else None
@@ -1637,13 +1615,13 @@ def run_single_seed_unified(
 
     theta_global = select_theta_ttd(yfr_val, va_models["LSTM-Baseline"].frame_probs, m_detect=TTD_M)
     theta_scan = []
-    print(f"  ✓ θ_global (LSTM-Baseline, MISS_CAP=0.75) = {theta_global:.3f}  [usado nas Análises 1/3]")
+    print(f"  θ_global (LSTM-Baseline, MISS_CAP=0.75) = {theta_global:.3f}  [usado nas Análises 1/3]")
 
-    # ── θ por modelo: calibrado individualmente com FailRate ≤ FAIL_BUDGET ──
+    # θ por modelo: calibrado individualmente com FailRate ≤ FAIL_BUDGET
     theta_model_map: Dict[str, float] = {}
     for mdl_name, se_v in va_models.items():
         theta_model_map[mdl_name] = select_theta_per_model(yfr_val, se_v.frame_probs, m_detect=TTD_M)
-    print(f"  ✓ θ por modelo (FailRate ≤ {FAIL_BUDGET:.2f}, usado na avaliação principal):")
+    print(f"  θ por modelo (FailRate ≤ {FAIL_BUDGET:.2f}, usado na avaliação principal):")
     for mdl_name, th in theta_model_map.items():
         print(f"       {mdl_name:24s} θ={th:.3f}")
 
@@ -1666,7 +1644,7 @@ def run_single_seed_unified(
         ) if RUN_HYBRID_V3 else None
         print(f"    {mdl_name:24s} thr_ep={thr_ep_map[mdl_name]:.3f} θ_model={theta_model_map[mdl_name]:.3f} θ_adapt={theta_adapt_map[mdl_name]:.3f} deriv=({dd:.3f},{dp:.3f},w={ds}) hybrid={hybrid_params_map[mdl_name]}")
 
-    # ── 11. Inferência no teste ───────────────────────────────────────────────
+    # 11. Inferência no teste
     print("\n11. Inferência no teste (5 modelos)...")
     te_models = {
         "LSTM-Baseline": infer_stream_fixed_eval(lstm_base, X_te, device),
@@ -1676,7 +1654,7 @@ def run_single_seed_unified(
         "Transformer-AF-KD": infer_stream_fixed_eval(trans_afkd, X_te, device),
     }
 
-    # ── 12. Avaliação com protocolo v3 — θ por modelo ────────────────────────
+    # 12. Avaliação com protocolo v3 — θ por modelo
     print(f"\n12. Avaliando modelos com θ por modelo (FailRate ≤ {FAIL_BUDGET:.2f} por arquitetura)...")
     teacher_map = {
         "LSTM-Baseline": "None",
@@ -1705,7 +1683,7 @@ def run_single_seed_unified(
         )
         results[name] = {"Seed": seed, "Modelo": modelo, "Metodo": metodo, "Teacher": teacher_lbl, "Politica": "Fixa", **summ}
         print(
-            f"  {name:24s} FIXA  θ={theta_mdl:.3f} → "
+            f"  {name:24s} FIXA  θ={theta_mdl:.3f} -> "
             f"F1={summ['F1']:.4f} "
             f"FR={summ['FailRate']:.4f} "
             f"    TTDef={summ.get('TTDef', float('nan')):.4f}s "
@@ -1738,9 +1716,9 @@ def run_single_seed_unified(
                 deriv_delta=dd, deriv_prob_floor=dp, deriv_smooth_w=ds,
             )
             hybrid_results[name] = {"Seed": seed, "Modelo": modelo, "Metodo": metodo, "Teacher": teacher_lbl, "Politica": "Hibrida", **summ_h}
-            print(f"  {name:24s} HÍBR  θ={theta_mdl:.3f} → F1={summ_h['F1']:.4f} FR={summ_h['FailRate']:.4f} TTD={summ_h['TTD']:.4f}s Skip={summ_h['SkipPct']:.2f}% Cost={summ_h['Cost_ms_per_frame']:.4f}ms/fr")
+            print(f"  {name:24s} HÍBR  θ={theta_mdl:.3f} -> F1={summ_h['F1']:.4f} FR={summ_h['FailRate']:.4f} TTD={summ_h['TTD']:.4f}s Skip={summ_h['SkipPct']:.2f}% Cost={summ_h['Cost_ms_per_frame']:.4f}ms/fr")
 
-    # ── 13. Salvar frame_probs raw ────────────────────────────────────────────
+    # 13. Salvar frame_probs raw
     probs_dir = ensure_dir(DATA_DIR / "frame_probs")
     np.save(probs_dir / f"{EXP_NAME}_lstm_base_seed{seed}.npy", te_models["LSTM-Baseline"].frame_probs)
     np.save(probs_dir / f"{EXP_NAME}_lstm_afkd_seed{seed}.npy", te_models["LSTM-AF-KD"].frame_probs)
@@ -1748,14 +1726,12 @@ def run_single_seed_unified(
     np.save(probs_dir / f"{EXP_NAME}_trans_base_seed{seed}.npy", te_models["Transformer-Baseline"].frame_probs)
     np.save(probs_dir / f"{EXP_NAME}_trans_afkd_seed{seed}.npy", te_models["Transformer-AF-KD"].frame_probs)
     np.save(probs_dir / f"{EXP_NAME}_yfr_test_seed{seed}.npy", yfr_te)
-    print(f"\n  ✓ Frame probs salvos em {probs_dir}  (6 arquivos × seed {seed})")
+    print(f"\n  Frame probs salvos em {probs_dir}  (6 arquivos × seed {seed})")
 
     return {"seed": seed, "theta_global": theta_global, "theta_model_map": theta_model_map, "theta_scan": theta_scan, "results": results, "hybrid_results": hybrid_results, "calibration": calibration_rows}
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 8) AGREGAÇÃO E EXPORTAÇÃO
-# ══════════════════════════════════════════════════════════════════════════════
 
 # Ordem canônica de apresentação na tabela (para LaTeX)
 _TABLE_ORDER = [
@@ -1779,23 +1755,23 @@ def aggregate_and_export_results(
     rows_all = rows_fixed + rows_hybrid
     df = pd.DataFrame(rows_all)
     if df.empty:
-        print("⚠ Nenhum resultado para agregar.")
+        print("aviso: Nenhum resultado para agregar.")
         return pd.DataFrame()
 
     csv_path = output_dir / "results_all_seeds_unified.csv"
     df.to_csv(csv_path, index=False, float_format="%.6f")
-    print(f"\n✓ CSV completo: {csv_path}")
+    print(f"\nCSV completo: {csv_path}")
 
     calib_rows = [row for sd in all_seeds_results for row in sd.get("calibration", [])]
     if calib_rows:
         calib_path = output_dir / "calibration_summary_v8.csv"
         pd.DataFrame(calib_rows).to_csv(calib_path, index=False, float_format="%.6f")
-        print(f"✓ Calibração v8 (ThetaTTD=por modelo, ThetaGlobal=ref LSTM-Baseline): {calib_path}")
+        print(f"Calibração v8 (ThetaTTD=por modelo, ThetaGlobal=ref LSTM-Baseline): {calib_path}")
 
     grp_cols = ["Modelo", "Metodo", "Teacher", "Politica"] if "Politica" in df.columns else ["Modelo", "Metodo", "Teacher"]
     metric_cols = [c for c in [
         "F1", "FailRate",
-        "TTDef",        # [v8] alinhado run_v29: TTD_bruto + FR × T_EP → comparável às macros do artigo
+        "TTDef",        # [v8] alinhado run_v29: TTD_bruto + FR × T_EP -> comparável às macros do artigo
         "TTD",          # efetivo penalizado — métrica interna
         "TTD_bruto",    # bruto (sem penalidade) — análise auxiliar
         "TTD_Adapt", "TTD_Deriv",
@@ -1818,14 +1794,14 @@ def aggregate_and_export_results(
     df_sum = pd.DataFrame(summary_rows)
     sum_path = output_dir / "summary_unified.csv"
     df_sum.to_csv(sum_path, index=False, float_format="%.6f")
-    print(f"✓ Sumário: {sum_path}")
+    print(f"Sumário: {sum_path}")
 
     fixed_df = df_sum[df_sum["Politica"] == "Fixa"].copy() if "Politica" in df_sum.columns else df_sum.copy()
     idx_fixed = fixed_df.set_index(["Modelo", "Metodo", "Teacher"])
     lines = [
         "% Teacher Ablation Study v8 — gerador v7, protocolo alinhado ao run_v29",
         "% θ_TTD calibrado POR MODELO (FailRate ≤ FAIL_BUDGET=0.05 por arquitetura)",
-        "% TTDef     = TTD_bruto + FR × T_EP  → ALINHADO run_v29, comparável às macros do artigo",
+        "% TTDef     = TTD_bruto + FR × T_EP  -> ALINHADO run_v29, comparável às macros do artigo",
         "% TTD       = penalizado via (window-t0)*dt — análise interna",
         "% TTD_bruto = somente episódios detectados (sem penalidade) — análise auxiliar",
         "\\begin{tabular}{lllcccccc}",
@@ -1853,7 +1829,7 @@ def aggregate_and_export_results(
     lines += ["\\bottomrule", "\\end{tabular}"]
     latex_path = output_dir / "table_comparison_latex.tex"
     latex_path.write_text("\n".join(lines), encoding="utf-8")
-    print(f"✓ LaTeX: {latex_path}")
+    print(f"LaTeX: {latex_path}")
 
     if "Politica" in df_sum.columns and (df_sum["Politica"] == "Hibrida").any():
         idx_h = df_sum[df_sum["Politica"] == "Hibrida"].set_index(["Modelo", "Metodo", "Teacher"])
@@ -1878,7 +1854,7 @@ def aggregate_and_export_results(
         lines_h += ["\\bottomrule", "\\end{tabular}"]
         hybrid_path = output_dir / "table_hybrid_latex.tex"
         hybrid_path.write_text("\n".join(lines_h), encoding="utf-8")
-        print(f"✓ LaTeX híbrido: {hybrid_path}")
+        print(f"LaTeX híbrido: {hybrid_path}")
 
     print("\n" + "=" * 80)
     print("RESUMO FINAL (média ± std)")
@@ -1888,9 +1864,7 @@ def aggregate_and_export_results(
     return df_sum
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 9) ANÁLISES DE ROBUSTEZ E FAIRNESS  (embutido — sem dependência externa)
-# ══════════════════════════════════════════════════════════════════════════════
 #
 # Origem: analise_fairness_v4.py + analise_robustez_afkd_fgcs_v2.ipynb
 # Estendido para: 5 modelos (plots multi-curva) + Análise 4 (sensibilidade m)
@@ -1916,9 +1890,8 @@ def aggregate_and_export_results(
 # Análise 5 — Ablação de Teacher (multi-seed agregada)
 #   Plots de barra + intervalo de confiança: F1, FailRate, TTD por modelo.
 #   Resume as 4 seeds em um único gráfico comparativo.
-# ──────────────────────────────────────────────────────────────────────────────
 
-# ── Paleta de cores e estilos (5 modelos) ────────────────────────────────────
+# Paleta de cores e estilos (5 modelos)
 # Cores e linestyles distintos, amigáveis a daltônicos (Tableau + ajustes)
 _PALETTE: Dict[str, Tuple[str, str, str]] = {
     # nome                    cor        linestyle  marcador
@@ -1948,7 +1921,7 @@ _MODEL_ORDER = [
 ]
 
 
-# ── Primitivas TTD  ───────────────────────────────────────────────────────────
+# Primitivas TTD
 
 def _ttd_vec(
     yfr: np.ndarray,
@@ -1960,8 +1933,8 @@ def _ttd_vec(
 ) -> np.ndarray:
     """
     Vetor de TTDs (em frames) para episódios críticos.
-    penalize=True  → miss recebe (window - t0)  [métrica justa]
-    penalize=False → miss é excluído            [só para TTD bruto]
+    penalize=True  -> miss recebe (window - t0)  [métrica justa]
+    penalize=False -> miss é excluído            [só para TTD bruto]
     """
     out = []
     for yt, yp in zip(yfr, probs):
@@ -2043,8 +2016,8 @@ def _print_summary_multi(
 
     # Ablação central: LSTM-Base vs LSTM-AF-KD vs LSTM-TransKD
     print(f"\n  ── Ablação de Teacher (LSTM student fixo) ─────────────────────")
-    refs = {"LSTM-Baseline": "Base", "LSTM-AF-KD": "BiLSTM→LSTM",
-            "LSTM-TransKD": "Trans→LSTM"}
+    refs = {"LSTM-Baseline": "Base", "LSTM-AF-KD": "BiLSTM->LSTM",
+            "LSTM-TransKD": "Trans->LSTM"}
     ref_vals = {}
     for mdl, label in refs.items():
         if mdl in tg.index:
@@ -2060,13 +2033,13 @@ def _print_summary_multi(
             pct  = dttd / max(abs(float(base["TTD_efetivo_s"])), 1e-9) * 100
             dom  = "domina" if dfr >= 0 and dttd >= 0 else "pior"
             print(
-                f"  {label:<18} → ΔFailRate={dfr:+.4f}  ΔTTDef={dttd:+.4f}s ({pct:.1f}%)"
+                f"  {label:<18} -> ΔFailRate={dfr:+.4f}  ΔTTDef={dttd:+.4f}s ({pct:.1f}%)"
                 f"  [{dom}]"
             )
     print()
 
 
-# ── Tabela θ-simétrica multi-modelo  ─────────────────────────────────────────
+# Tabela θ-simétrica multi-modelo
 
 def _sym_table_multi(
     yfr: np.ndarray,
@@ -2093,7 +2066,7 @@ def _sym_table_multi(
     return pd.DataFrame(rows)
 
 
-# ── Análise 1 — θ Simétrico Global (5 modelos) ───────────────────────────────
+# Análise 1 — θ Simétrico Global (5 modelos)
 
 def _plot_a1_theta_symmetric(
     df: pd.DataFrame,
@@ -2110,8 +2083,8 @@ def _plot_a1_theta_symmetric(
     )
     panels = [
         ("FailRate",      "FailRate (↓ melhor)"),
-        ("TTD_bruto_s",   "TTD bruto — só detectados (s)\n⚠ exclui perdidos"),
-        ("TTD_efetivo_s", "TTD efetivo com penalidade (s)\n✓ métrica justa"),
+        ("TTD_bruto_s",   "TTD bruto — só detectados (s)\naviso: exclui perdidos"),
+        ("TTD_efetivo_s", "TTD efetivo com penalidade (s)\nmétrica justa"),
     ]
     for ax, (col, title) in zip(axes, panels):
         for mdl in _MODEL_ORDER:
@@ -2138,7 +2111,7 @@ def _plot_a1_theta_symmetric(
     _save_fig(fig, out_dir / f"a1_theta_simetrico_seed{seed}")
 
 
-# ── Análise 2 — Curva Cobertura × TTD (5 modelos) ────────────────────────────
+# Análise 2 — Curva Cobertura × TTD (5 modelos)
 
 def _plot_a2_coverage_ttd(
     yfr: np.ndarray,
@@ -2164,7 +2137,7 @@ def _plot_a2_coverage_ttd(
         fontsize=12, fontweight="bold",
     )
 
-    # ── Painel esquerdo: curvas de cobertura ─────────────────────────────────
+    # Painel esquerdo: curvas de cobertura
     csv_rows = []
     for mdl in _MODEL_ORDER:
         probs = model_probs[mdl]
@@ -2195,7 +2168,7 @@ def _plot_a2_coverage_ttd(
         fontsize=9,
     )
 
-    # ── Painel central: histogramas de TTD efetivo ───────────────────────────
+    # Painel central: histogramas de TTD efetivo
     bins = np.linspace(0, penalty_s * 1.08, 30)
     for mdl in _MODEL_ORDER:
         probs = model_probs[mdl]
@@ -2214,7 +2187,7 @@ def _plot_a2_coverage_ttd(
     ax2.legend(fontsize=8)
     ax2.grid(True, alpha=0.35)
 
-    # ── Painel direito: ablação explícita LSTM-AF-KD vs LSTM-TransKD ─────────
+    # Painel direito: ablação explícita LSTM-AF-KD vs LSTM-TransKD
     # Diferença de cobertura em relação ao LSTM-Baseline
     tg_ref, cov_base = _coverage_curve(
         yfr, model_probs["LSTM-Baseline"], theta_global, m, window, dt
@@ -2232,7 +2205,7 @@ def _plot_a2_coverage_ttd(
     ax3.set_ylabel("Δ Cobertura vs LSTM-Baseline", fontsize=11)
     ax3.set_title(
         "★ Ablação: Ganho de cobertura vs Baseline\n"
-        "LSTM-AF-KD [BiLSTM→LSTM] vs LSTM-TransKD [Trans→LSTM]",
+        "LSTM-AF-KD [BiLSTM->LSTM] vs LSTM-TransKD [Trans->LSTM]",
         fontsize=9,
     )
     ax3.set_xlim(0, penalty_s * 1.06)
@@ -2249,7 +2222,7 @@ def _plot_a2_coverage_ttd(
     print(f"    Salvo: a2_coverage_data_seed{seed}.csv")
 
 
-# ── Análise 3 — Sensibilidade de θ (5 modelos, 4 painéis) ────────────────────
+# Análise 3 — Sensibilidade de θ (5 modelos, 4 painéis)
 
 def _plot_a3_theta_sensitivity(
     df: pd.DataFrame,
@@ -2273,8 +2246,8 @@ def _plot_a3_theta_sensitivity(
 
     panels_abc = [
         ("FailRate",      "(a) FailRate × θ\n↓ menor é melhor"),
-        ("TTD_bruto_s",   "(b) TTD bruto × θ\n⚠ exclui não detectados"),
-        ("TTD_efetivo_s", "(c) TTD efetivo × θ\n✓ inclui penalidade"),
+        ("TTD_bruto_s",   "(b) TTD bruto × θ\naviso: exclui não detectados"),
+        ("TTD_efetivo_s", "(c) TTD efetivo × θ\ninclui penalidade"),
     ]
     for ax, (col, title) in zip(axes[:3], panels_abc):
         for mdl in _MODEL_ORDER:
@@ -2349,7 +2322,7 @@ def _plot_a3_theta_sensitivity(
     _save_fig(fig, out_dir / f"a3_theta_sensitivity_seed{seed}")
 
 
-# ── Análise 4 — Sensibilidade de m  (★ NOVO — nunca executada antes) ─────────
+# Análise 4 — Sensibilidade de m  (★ NOVO — nunca executada antes)
 
 def _plot_a4_m_sensitivity(
     yfr: np.ndarray,
@@ -2422,7 +2395,7 @@ def _plot_a4_m_sensitivity(
     return df_m
 
 
-# ── Análise 5 — Agregação multi-seed (barras + IC bootstrap) ─────────────────
+# Análise 5 — Agregação multi-seed (barras + IC bootstrap)
 
 def _plot_a5_multiseed_summary(
     all_results: List[Dict[str, Any]],
@@ -2490,7 +2463,7 @@ def _plot_a5_multiseed_summary(
     print(f"    Salvo: a5_multiseed_summary.pdf / .png")
 
 
-# ── Ponto de entrada das análises de robustez ─────────────────────────────────
+# Ponto de entrada das análises de robustez
 
 def run_robustness_analyses(
     seed: int,
@@ -2550,7 +2523,7 @@ def run_robustness_analyses(
                                    M_SENS_GRID, window, dt, seed, out_dir)
     df_m.to_csv(out_dir / f"a4_m_sensitivity_seed{seed}.csv", index=False)
 
-    print(f"\n  ✓ 4 análises concluídas para seed {seed}  →  {out_dir}")
+    print(f"\n  4 análises concluídas para seed {seed}  ->  {out_dir}")
 
 
 def run_all_robustness_analyses(
@@ -2590,7 +2563,7 @@ def run_all_robustness_analyses(
             for mdl, fname in _MODEL_FILE_MAP.items():
                 model_probs[mdl] = np.load(probs_dir / f"{EXP_NAME}_{fname}_seed{seed}.npy")
         except FileNotFoundError as e:
-            print(f"  ⚠ seed {seed}: arquivo não encontrado — {e}")
+            print(f"  aviso: seed {seed}: arquivo não encontrado — {e}")
             continue
 
         try:
@@ -2602,14 +2575,14 @@ def run_all_robustness_analyses(
                 out_dir=seed_dir,
             )
         except Exception as exc:
-            print(f"  ⚠ Erro nas análises de seed {seed}: {exc}")
+            print(f"  Erro nas análises de seed {seed}: {exc}")
 
     # Análise 5 — multi-seed agregada
     print("\n  [5/5] Análise 5 — Sumário multi-seed (barras + bootstrap)...")
     try:
         _plot_a5_multiseed_summary(all_results, rob_dir)
     except Exception as exc:
-        print(f"  ⚠ Erro na análise multi-seed: {exc}")
+        print(f"  Erro na análise multi-seed: {exc}")
 
     # CSV consolidado de m-sensitivity (todas as seeds)
     try:
@@ -2624,16 +2597,14 @@ def run_all_robustness_analyses(
         if frames_m:
             df_m_all = pd.concat(frames_m, ignore_index=True)
             df_m_all.to_csv(rob_dir / "a4_m_sensitivity_all_seeds.csv", index=False)
-            print(f"  ✓ CSV consolidado m-sensitivity: {rob_dir / 'a4_m_sensitivity_all_seeds.csv'}")
+            print(f"  CSV consolidado m-sensitivity: {rob_dir / 'a4_m_sensitivity_all_seeds.csv'}")
     except Exception as exc:
-        print(f"  ⚠ Erro ao consolidar m-sensitivity: {exc}")
+        print(f"  Erro ao consolidar m-sensitivity: {exc}")
 
-    print(f"\n  ✓ Todas as análises de robustez concluídas → {rob_dir}")
+    print(f"\n  Todas as análises de robustez concluídas -> {rob_dir}")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 10) MAIN
-# ══════════════════════════════════════════════════════════════════════════════
 
 def main():
     parser = argparse.ArgumentParser(
@@ -2671,7 +2642,7 @@ def main():
     output_dir = ensure_dir(Path(f"./resultados_{EXP_NAME}"))
     probs_dir  = ensure_dir(DATA_DIR / "frame_probs")
 
-    # ── Fase 1: Treino e inferência ──────────────────────────────────────────
+    # Fase 1: Treino e inferência
     all_results: List[Dict[str, Any]] = []
 
     if not args.skip_train:
@@ -2705,19 +2676,19 @@ def main():
                 "theta_scan": [],
                 "results": results_dict,
             })
-        print(f"  ✓ Carregados resultados para seeds: {[r['seed'] for r in all_results]}")
+        print(f"  Carregados resultados para seeds: {[r['seed'] for r in all_results]}")
 
-    # ── Fase 2: Análises de robustez embutidas ───────────────────────────────
+    # Fase 2: Análises de robustez embutidas
     print("\n" + "=" * 80)
     print("ANÁLISES DE ROBUSTEZ E FAIRNESS (embutidas)")
     print("=" * 80)
     try:
         run_all_robustness_analyses(all_results, probs_dir, output_dir)
     except Exception as exc:
-        print(f"  ⚠ Erro nas análises de robustez: {exc}")
+        print(f"  Erro nas análises de robustez: {exc}")
         import traceback; traceback.print_exc()
 
-    # ── Resumo final ─────────────────────────────────────────────────────────
+    # Resumo final
     rob_dir = output_dir / "robustez"
     print("\n" + "=" * 80)
     print("EXECUÇÃO CONCLUÍDA")
@@ -2733,16 +2704,16 @@ def main():
     print(f"  │   ├─ a2_coverage_data_seedXX.csv              (dados da curva de cobertura)")
     print(f"  │   ├─ a3_theta_sensitivity_seedXX.pdf/.png     (θ-sensitivity, 4 painéis)")
     print(f"  │   └─ a4_m_sensitivity_seedXX.csv/.pdf/.png    (m-sensitivity, 3 painéis)")
-    print(f"  ├─ a4_m_sensitivity_all_seeds.csv               ← consolidado multi-seed")
-    print(f"  └─ a5_multiseed_summary.pdf/.png                ← barras + bootstrap")
+    print(f"  ├─ a4_m_sensitivity_all_seeds.csv               <- consolidado multi-seed")
+    print(f"  └─ a5_multiseed_summary.pdf/.png                <- barras + bootstrap")
     print(f"\nFrame probs em: {probs_dir}/")
     print(f"  ├─ lstm_base_seedXX.npy | lstm_afkd_seedXX.npy | lstm_transkd_seedXX.npy")
     print(f"  ├─ trans_base_seedXX.npy | trans_afkd_seedXX.npy")
     print(f"  └─ yfr_test_seedXX.npy")
     print(f"\n★ Ablação central:")
-    print(f"  LSTM-AF-KD [BiLSTM→LSTM]  vs  LSTM-TransKD [Transformer→LSTM]")
-    print(f"  → student idêntico (LSTM causal), teacher diferente")
-    print(f"  → todas as análises destacam este par em verde tracejado")
+    print(f"  LSTM-AF-KD [BiLSTM->LSTM]  vs  LSTM-TransKD [Transformer->LSTM]")
+    print(f"  -> student idêntico (LSTM causal), teacher diferente")
+    print(f"  -> todas as análises destacam este par em verde tracejado")
 
 
 if __name__ == "__main__":

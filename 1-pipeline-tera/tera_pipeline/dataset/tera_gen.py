@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 tera_pipeline/dataset/tera_gen.py
-═══════════════════════════════════════════════════════════════════════════════
 Gerenciamento de dataset sintético do TERA Pipeline.
 
 Responsabilidades:
@@ -17,7 +16,6 @@ SAÍDAS em exp_dir/data/:
   y_ep_tr_seed{N}.npy, y_ep_va_seed{N}.npy, y_ep_te_seed{N}.npy
   progressive_tr_seed{N}.npy, progressive_va_seed{N}.npy, progressive_te_seed{N}.npy
   dataset_metadata_seed{N}.json
-═══════════════════════════════════════════════════════════════════════════════
 """
 
 import hashlib
@@ -32,7 +30,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 
-# ── Constantes ────────────────────────────────────────────────────────────────
+# Constantes
 GENERATOR_MODULE = "synthetic_driver_risk_v7"
 FRAME_THR        = 0.35     # limiar binário frame-level (alinhado com run_v29)
 
@@ -61,7 +59,7 @@ def _load_generator():
         )
 
 
-# ── DatasetManager ────────────────────────────────────────────────────────────
+# DatasetManager
 
 class DatasetManager:
     """
@@ -89,7 +87,7 @@ class DatasetManager:
         self.val_r    = self.sp_cfg.get("val_ratio",   0.15)
         self.force    = self.sp_cfg.get("force_regen", False)
 
-    # ── Geração ───────────────────────────────────────────────────────────────
+    # Geração
 
     def _npz_path(self, seed: int) -> Path:
         return self.data_dir / f"dataset_sintetico_seed{seed}.npz"
@@ -118,9 +116,9 @@ class DatasetManager:
                 window=self.window,
                 per_recipe=self.per_recipe,
             )
-            print(f"    ✓ Dataset gerado: {npz.name}")
+            print(f"    Dataset gerado: {npz.name}")
 
-    # ── Splits ────────────────────────────────────────────────────────────────
+    # Splits
 
     def _make_splits(
         self, seed: int
@@ -216,7 +214,7 @@ class DatasetManager:
         out = self.out_dir / f"dataset_metadata_seed{seed}.json"
         out.write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
 
-    # ── Orquestrador ──────────────────────────────────────────────────────────
+    # Orquestrador
 
     def run(self, reuse: bool = True) -> None:
         """Executa geração + splits para todas as seeds."""
@@ -244,4 +242,4 @@ class DatasetManager:
                 X = np.load(p)
                 assert X.ndim == 3 and X.shape[2] == self.input_dim, \
                     f"Dimensão inesperada em {p}: {X.shape}"
-        print("  ✓ Todos os datasets OK")
+        print("  Todos os datasets OK")

@@ -1,35 +1,17 @@
 # -*- coding: utf-8 -*-
 """
 run_experiment.py — TERA Pipeline v1.0
-═══════════════════════════════════════════════════════════════════════════════
-Ponto de entrada único e determinístico para todos os experimentos do artigo.
+Ponto de entrada único e determinístico para os experimentos do artigo.
 
-GARANTIAS:
-  · Todas as 4 configurações avaliadas com as 4 seeds [42, 43, 44, 45]
-  · Sem patches manuais, scripts de completion ou reruns parciais
-  · Baseline Hybrid nativa (não é um patch)
-  · CSV canônico → macros LaTeX → paper (sem edição manual)
-  · manifest.json gerado ao final para rastreabilidade completa
+Avalia as quatro configurações do fatorial nas seeds pedidas, sem patches
+manuais nem reruns parciais; a Baseline Hybrid é nativa do pipeline. O fluxo
+vai do dataset ao export (CSV canônico e macros LaTeX) e termina gravando um
+manifest.json com hashes de configuração e do gerador, para rastreabilidade.
 
-USO:
-  # Execução completa (padrão)
-  python run_experiment.py
-
-  # Apenas avaliação (modelos já treinados)
-  python run_experiment.py --stages eval,export
-
-  # Apenas figuras + export
-  python run_experiment.py --stages figures,export
-
-  # Seed específica para debug
-  python run_experiment.py --seeds 42 --stages eval
-
-  # Reusar dataset e modelos existentes
-  python run_experiment.py --reuse-data --reuse-models
-
-CONFIGURAÇÃO:
-  Edite configs/experiment_config.yaml antes de executar.
-═══════════════════════════════════════════════════════════════════════════════
+Execução completa: python run_experiment.py
+Estágios ou seeds específicos: --stages eval,export / --seeds 42
+Reuso de artefatos existentes: --reuse-data --reuse-models
+A configuração fica em configs/experiment_config.yaml.
 """
 
 import argparse
@@ -41,7 +23,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-# ── Garantir que o pacote tera_pipeline está no path ─────────────────────────
+# Garantir que o pacote tera_pipeline está no path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from tera_pipeline.utils.tera_utils import (
@@ -60,7 +42,7 @@ from tera_pipeline.figures.tera_figures import FigureGenerator
 from tera_pipeline.export.tera_export import ResultsExporter
 from tera_pipeline.latex.tera_latex import LatexGenerator
 
-# ── Configurações canônicas do fatorial 2×2 ──────────────────────────────────
+# Configurações canônicas do fatorial 2×2
 ALL_CONFIGS = ["baseline_fixed", "baseline_hybrid", "aftkd_fixed", "aftkd_hybrid"]
 ALL_SEEDS   = [42, 43, 44, 45]
 ALL_STAGES  = ["dataset", "training", "calibration", "inference",
@@ -184,7 +166,7 @@ def validate_seeds(seeds: list[int]) -> None:
     missing = set(ALL_SEEDS) - set(seeds)
     if missing:
         print(
-            f"\n⚠️  AVISO: Seeds faltantes: {sorted(missing)}\n"
+            f"\nAVISO: Seeds faltantes: {sorted(missing)}\n"
             f"   Resultados com seeds incompletas não são publicáveis.\n"
             f"   Use --seeds 42,43,44,45 para o experimento completo.\n"
         )
@@ -196,7 +178,7 @@ def main() -> None:
     exp_id = args.exp_id or f"exp_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     device = get_device()
 
-    # ── Validações iniciais ──────────────────────────────────────────────────
+    # Validações iniciais
     validate_seeds(args.seeds)
 
     log = setup_logging(name="tera_pipeline", level="INFO")
@@ -215,7 +197,7 @@ def main() -> None:
     stages_completed = []
     timing           = {}
 
-    # ── Stage 1: DATASET ─────────────────────────────────────────────────────
+    # Stage 1: DATASET
     if "dataset" in args.stages:
         t0 = time.time()
         log.info("\n[Stage 1/8] DATASET")
@@ -223,9 +205,9 @@ def main() -> None:
         dm.run(reuse=args.reuse_data)
         stages_completed.append("dataset")
         timing["dataset"] = round(time.time() - t0, 1)
-        log.info(f"  ✓ Dataset concluído ({timing['dataset']:.0f}s)")
+        log.info(f"  Dataset concluído ({timing['dataset']:.0f}s)")
 
-    # ── Stage 2: TRAINING ────────────────────────────────────────────────────
+    # Stage 2: TRAINING
     if "training" in args.stages:
         t0 = time.time()
         log.info("\n[Stage 2/8] TRAINING")
@@ -234,9 +216,9 @@ def main() -> None:
         tm.run(reuse=args.reuse_models)
         stages_completed.append("training")
         timing["training"] = round(time.time() - t0, 1)
-        log.info(f"  ✓ Treinamento concluído ({timing['training']:.0f}s)")
+        log.info(f"  Treinamento concluído ({timing['training']:.0f}s)")
 
-    # ── Stage 3: CALIBRATION ─────────────────────────────────────────────────
+    # Stage 3: CALIBRATION
     if "calibration" in args.stages:
         t0 = time.time()
         log.info("\n[Stage 3/8] CALIBRATION")
@@ -245,9 +227,9 @@ def main() -> None:
         cm.run()
         stages_completed.append("calibration")
         timing["calibration"] = round(time.time() - t0, 1)
-        log.info(f"  ✓ Calibração concluída ({timing['calibration']:.0f}s)")
+        log.info(f"  Calibração concluída ({timing['calibration']:.0f}s)")
 
-    # ── Stage 4: INFERENCE ───────────────────────────────────────────────────
+    # Stage 4: INFERENCE
     if "inference" in args.stages:
         t0 = time.time()
         log.info("\n[Stage 4/8] INFERENCE")
@@ -257,9 +239,9 @@ def main() -> None:
         im.run(configs=ALL_CONFIGS)
         stages_completed.append("inference")
         timing["inference"] = round(time.time() - t0, 1)
-        log.info(f"  ✓ Inferência concluída ({timing['inference']:.0f}s)")
+        log.info(f"  Inferência concluída ({timing['inference']:.0f}s)")
 
-    # ── Stage 5: EVALUATION ──────────────────────────────────────────────────
+    # Stage 5: EVALUATION
     if "evaluation" in args.stages:
         t0 = time.time()
         log.info("\n[Stage 5/8] EVALUATION")
@@ -268,9 +250,9 @@ def main() -> None:
         ee.print_summary(results_df)
         stages_completed.append("evaluation")
         timing["evaluation"] = round(time.time() - t0, 1)
-        log.info(f"  ✓ Avaliação concluída ({timing['evaluation']:.0f}s)")
+        log.info(f"  Avaliação concluída ({timing['evaluation']:.0f}s)")
 
-    # ── Stage 6: FRAME LOGGING ───────────────────────────────────────────────
+    # Stage 6: FRAME LOGGING
     if "logging" in args.stages:
         t0 = time.time()
         log.info("\n[Stage 6/8] FRAME LOGGING")
@@ -281,9 +263,9 @@ def main() -> None:
         fl.generate_borderline_logs(seeds=[seed_viz])
         stages_completed.append("logging")
         timing["logging"] = round(time.time() - t0, 1)
-        log.info(f"  ✓ Frame logs concluídos ({timing['logging']:.0f}s)")
+        log.info(f"  Frame logs concluídos ({timing['logging']:.0f}s)")
 
-    # ── Stage 7: FIGURES ─────────────────────────────────────────────────────
+    # Stage 7: FIGURES
     if "figures" in args.stages:
         t0 = time.time()
         log.info("\n[Stage 7/8] FIGURES")
@@ -291,9 +273,9 @@ def main() -> None:
         fg.run()
         stages_completed.append("figures")
         timing["figures"] = round(time.time() - t0, 1)
-        log.info(f"  ✓ Figuras geradas ({timing['figures']:.0f}s)")
+        log.info(f"  Figuras geradas ({timing['figures']:.0f}s)")
 
-    # ── Stage 8: EXPORT ──────────────────────────────────────────────────────
+    # Stage 8: EXPORT
     if "export" in args.stages:
         t0 = time.time()
         log.info("\n[Stage 8/8] EXPORT")
@@ -303,9 +285,9 @@ def main() -> None:
         lx.run()
         stages_completed.append("export")
         timing["export"] = round(time.time() - t0, 1)
-        log.info(f"  ✓ Export concluído ({timing['export']:.0f}s)")
+        log.info(f"  Export concluído ({timing['export']:.0f}s)")
 
-    # ── Manifesto final ──────────────────────────────────────────────────────
+    # Manifesto final
     write_manifest(exp_dir, exp_id, cfg, args, stages_completed, timing)
 
     total = sum(timing.values())

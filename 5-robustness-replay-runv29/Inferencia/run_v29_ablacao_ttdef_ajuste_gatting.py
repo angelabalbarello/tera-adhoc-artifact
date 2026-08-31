@@ -4,39 +4,36 @@
 Versão 26 — Ablações para isolar regressão de TTD observada no v26 completo.
 
   Diagnóstico v26 completo (M1+M2+M3+M4+M5):
-    ✅ F1:   0.897 → 0.951  (+0.054)
-    ✅ ECE:  0.547 → 0.472  (−0.075)
-    ❌ TTD:  0.079 → 0.216  (+0.137)  ← regressão principal
-    ❌ TTDef: 0.100 → 0.279  (+0.179)
-    ⚠️  FR_abrupto: 0.000 → 0.016
+    ok F1:   0.897 -> 0.951  (+0.054)
+    ok ECE:  0.547 -> 0.472  (−0.075)
+    erro TTD:  0.079 -> 0.216  (+0.137)  <- regressão principal
+    erro TTDef: 0.100 -> 0.279  (+0.179)
+    aviso: FR_abrupto: 0.000 -> 0.016
 
   Hipótese: M2 (temp baixa no REFINE) + M5 (hidden KD) forçam o aluno
   a aprender representações mais precisas mas menos precoces.
 
   MODO DE USO — altere apenas ABLATION_MODE antes de rodar:
-  ─────────────────────────────────────────────────────────
-  ABLATION_MODE = None   → v26 completo (M1+M2+M3+M4+M5) — baseline de comparação
-  ABLATION_MODE = "A"    → M1+M3 apenas (pressão temporal pura, sem M2/M4/M5)
-  ABLATION_MODE = "B"    → M4 apenas (oversampling isolado)
-  ABLATION_MODE = "C"    → M2 conservador (temp_min=1.5 em vez de 1.0) + M1+M3+M4
-  ABLATION_MODE = "D"    → tudo exceto M5 (sem hidden KD) — M1+M2+M3+M4
-  ─────────────────────────────────────────────────────────
+  ABLATION_MODE = None   -> v26 completo (M1+M2+M3+M4+M5) — baseline de comparação
+  ABLATION_MODE = "A"    -> M1+M3 apenas (pressão temporal pura, sem M2/M4/M5)
+  ABLATION_MODE = "B"    -> M4 apenas (oversampling isolado)
+  ABLATION_MODE = "C"    -> M2 conservador (temp_min=1.5 em vez de 1.0) + M1+M3+M4
+  ABLATION_MODE = "D"    -> tudo exceto M5 (sem hidden KD) — M1+M2+M3+M4
   EXP_NAME é ajustado automaticamente: exp_abl_A, exp_abl_B, etc.
-  Modelos salvos em subpastas separadas por ablação → sem colisão de checkpoints.
+  Modelos salvos em subpastas separadas por ablação -> sem colisão de checkpoints.
 
   Matriz de melhorias por ablação:
     Ablação │ M1(exp) │ M2(temp) │ M3(asym) │ M4(over) │ M5(hid)
     ────────┼─────────┼──────────┼──────────┼──────────┼────────
-    None    │    ✓    │    ✓     │    ✓     │    ✓     │   ✓
-    A       │    ✓    │    ✗     │    ✓     │    ✗     │   ✗
-    B       │    ✗    │    ✗     │    ✗     │    ✓     │   ✗
-    C       │    ✓    │  1.5min  │    ✓     │    ✓     │   ✗
-    D       │    ✓    │    ✓     │    ✓     │    ✓     │   ✗
+    None    │       │        │        │        │   ok
+    A       │       │    ✗     │        │    ✗     │   ✗
+    B       │    ✗    │    ✗     │    ✗     │        │   ✗
+    C       │       │  1.5min  │        │        │   ✗
+    D       │       │        │        │        │   ✗
 
   Mantidas todas as mudanças do v25 e v26.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 """
-
 
 
 # Colab setup opcional
@@ -80,15 +77,13 @@ import matplotlib.pyplot as plt
 
 """## 0) CONFIGURAÇÃO GLOBAL"""
 
-# ── Identificador do experimento (prefixo em todos os outputs) ───────────────
-# exp_main    → experimento principal (2 modelos: Baseline + AF-KD + Híbrido)
-# exp_ablacao → estudo de ablação de teacher (5 modelos) em run_ablation_v5.py
+# Identificador do experimento (prefixo em todos os outputs)
+# exp_main    -> experimento principal (2 modelos: Baseline + AF-KD + Híbrido)
+# exp_ablacao -> estudo de ablação de teacher (5 modelos) em run_ablation_v5.py
 
-# ══════════════════════════════════════════════════════════════════════════════
 # [v26-ABL] MODO DE ABLAÇÃO — ALTERE APENAS ESTE PARÂMETRO
-# None → v26 completo | "A" → M1+M3 | "B" → M4 | "C" → M2 conservador | "D" → sem M5
-ABLATION_MODE: Optional[str] = "A"   # ← MUDE AQUI  [v28: critério gating corrigido — Pareto FR=0 + max SkipPct]
-# ══════════════════════════════════════════════════════════════════════════════
+# None -> v26 completo | "A" -> M1+M3 | "B" -> M4 | "C" -> M2 conservador | "D" -> sem M5
+ABLATION_MODE: Optional[str] = "A"   # <- MUDE AQUI  [v28: critério gating corrigido — Pareto FR=0 + max SkipPct]
 
 # Configuração de cada ablação — parâmetros passados diretamente ao train_afkd
 _ABLATION_CONFIGS = {
@@ -106,7 +101,7 @@ _ABLATION_CONFIGS = {
     ),
     "A": dict(    # M1+M3: pressão temporal pura sem temperatura variável nem hidden KD
         onset_exp_alpha   = 0.15,
-        use_temp_schedule = False,   # M2 desativado → temp fixo = 2.0
+        use_temp_schedule = False,   # M2 desativado -> temp fixo = 2.0
         temp_min          = 1.0,
         lambda_late       = 2.0,
         theta_late        = 0.10,
@@ -117,7 +112,7 @@ _ABLATION_CONFIGS = {
         label             = "abl_A",
     ),
     "B": dict(    # M4 apenas: oversampling isolado, sem pressão temporal extra
-        onset_exp_alpha   = 0.01,    # alpha ≈0 → quase idêntico ao hiperbólico original
+        onset_exp_alpha   = 0.01,    # alpha ≈0 -> quase idêntico ao hiperbólico original
         use_temp_schedule = False,
         temp_min          = 1.0,
         lambda_late       = 0.0,     # M3 desativado
@@ -152,7 +147,7 @@ _ABLATION_CONFIGS = {
         hidden_kd_window  = 8,
         label             = "abl_D",
     ),
-    # ── [v27] Ablação A2 — igual a A mas com M3 operante (theta_late=0.45) ──
+    # [v27] Ablação A2 — igual a A mas com M3 operante (theta_late=0.45)
     # Diagnóstico: em A, theta_late=0.10 era trivialmente satisfeito (late=0.000
     # em todas as épocas). A2 confirma o efeito real de M3 com limiar adequado.
     # lambda_late conservador (1.0) na 1ª rodada; subir para 2.0 se estável.
@@ -161,7 +156,7 @@ _ABLATION_CONFIGS = {
         use_temp_schedule = False,   # M2 desativado (idêntico a A)
         temp_min          = 1.0,
         lambda_late       = 1.0,     # [v27] conservador; era 2.0 mas theta alto compensa
-        theta_late        = 0.45,    # [v27-FIX] era 0.10 — trivialmente satisfeito; M3 nunca ativava
+        theta_late        = 0.45,    # era 0.10 — trivialmente satisfeito; M3 nunca ativava
         use_abrupt_mask   = False,   # M4 desativado (idêntico a A)
         use_hidden_kd     = False,   # M5 desativado (idêntico a A)
         gamma_hidden      = 0.30,
@@ -174,7 +169,7 @@ _abl_cfg = _ABLATION_CONFIGS[ABLATION_MODE]
 _abl_label = _abl_cfg["label"]
 EXP_NAME = f"exp_{_abl_label}"
 print(f"\n{'='*60}")
-print(f"  ABLAÇÃO: {ABLATION_MODE!r}  →  EXP_NAME = {EXP_NAME!r}")
+print(f"  ABLAÇÃO: {ABLATION_MODE!r}  ->  EXP_NAME = {EXP_NAME!r}")
 print(f"  M1(exp α={_abl_cfg['onset_exp_alpha']:.2f})  "
       f"M2(temp={_abl_cfg['use_temp_schedule']}, min={_abl_cfg['temp_min']})  "
       f"M3(λ={_abl_cfg['lambda_late']}, θ={_abl_cfg['theta_late']})  "
@@ -193,7 +188,7 @@ KIN              = [12, 13, 14]  # índices cinemáticos para o gate
 FAIL_BUDGET      = 0.05          # usado apenas em select_thr_ep (classificação episódica)
 TTD_BUDGET_RATIO = 1.20          # mantido para compatibilidade, NÃO usado no gating com TTD_ef
 
-# ── [TTDef] Parâmetros da métrica unificada de latência de decisão ────────────
+# [TTDef] Parâmetros da métrica unificada de latência de decisão
 # TTD_ef = TTD + FR × T_MAX_EF
 # Implementação da formulação do artigo: FR não é restrição dura no gating,
 # mas penalidade proporcional à duração máxima do episódio.
@@ -205,10 +200,10 @@ FR_HARD_CAP      = 0.50          # [TTDef] cap absoluto; TTD_ef governa o trade-
 LAT_WARMUP_STEPS = 100           # Seção 5.1: warm-up de latência
 
 # Grades de busca de hiperparâmetros (VAL)
-# v23: TAU_DELTA_PERCENTILES com passo 2 (era 3) → 23 valores (era 16)
+# v23: TAU_DELTA_PERCENTILES com passo 2 (era 3) -> 23 valores (era 16)
 TAU_DELTA_PERCENTILES = list(range(50, 96, 2))
 # v23: TAU_H_GRID expandido para baixo — seeds 44/45 precisam de τH < 0.40
-# (modelo muito confiante → H(p) baixa → gate seletivo exige τH pequeno)
+# (modelo muito confiante -> H(p) baixa -> gate seletivo exige τH pequeno)
 # Seed 43 convergiu em τH=0.40 (mínimo anterior); outras seeds podem precisar de menos.
 # τH baixo = gating mais conservador = menos frames pulados = FR_val menor.
 TAU_H_GRID            = [0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.70, 0.85, 0.95]
@@ -235,29 +230,29 @@ DERIV_TARGET_PROB      = 0.18
 DERIV_MAX_MISS         = 0.10
 FORECAST_HORIZON_K    = 0   # FIX-1: K=10 causava TTD=0; antecipacao vem da AF-KD
 
-# ── v19: splits estratificados por recipe_id ──────────────────────────────────
-USE_STRATIFIED_SPLITS = True   # True → stratify por recipe_id nos críticos
-FORCE_REGEN_SPLITS    = True  # True → força regeneração mesmo se arquivo existe
+# v19: splits estratificados por recipe_id
+USE_STRATIFIED_SPLITS = True   # True -> stratify por recipe_id nos críticos
+FORCE_REGEN_SPLITS    = True  # True -> força regeneração mesmo se arquivo existe
                                # (defina True para regenerar splits 42-44 com nova lógica)
 
 """## 0) CONFIGURAÇÃO DE DATASET — DatasetConfig + helpers de reprodutibilidade"""
 
 DATA_ROOT = Path(".")
 DATA_DIR = DATA_ROOT / "dados_sinteticos"
-# [v26-ABL] Subpasta separada por ablação → sem colisão de checkpoints entre runs
+# [v26-ABL] Subpasta separada por ablação -> sem colisão de checkpoints entre runs
 MODEL_DIR = DATA_ROOT / "modelos_salvos" / _abl_label
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
-REUSE_PREGENERATED_DATASET = False   # IMPORTANTE: False obrigatório ao trocar gerador (v4→v5)
+REUSE_PREGENERATED_DATASET = False   # IMPORTANTE: False obrigatório ao trocar gerador (v4->v5)
 REUSE_SPLITS = True
 # v24: REUSE_TRAINED_MODELS removido — detecção automática por seed em main().
-# Se modelos_salvos/teacher_seed{N}.pt + baseline + student existirem → reusa.
-# Se não existirem → treina do zero e salva. Sem necessidade de alterar flag.
+# Se modelos_salvos/teacher_seed{N}.pt + baseline + student existirem -> reusa.
+# Se não existirem -> treina do zero e salva. Sem necessidade de alterar flag.
 EXPORT_DATASET_CONFIG = True
 DEFAULT_GENERATOR_MODULE = "synthetic_driver_risk_v7"
 # v5: label principal promovido para y_episode_severity (0.7·mean + 0.3·p95),
 # suavização temporal 3 frames, decaimento pós-plateau, +2 receitas progressivas
-# (C09/C10 → 6/10 críticos progressivos = 60%). REGENERAR datasets ao trocar gerador.
+# (C09/C10 -> 6/10 críticos progressivos = 60%). REGENERAR datasets ao trocar gerador.
 
 
 @dataclass
@@ -365,8 +360,8 @@ def make_splits(
     v19: suporte a stratify por recipe_id para críticos.
 
     Quando use_stratified=True e meta é fornecido:
-      - Episódios críticos → chave de estratificação = recipe_id  (ex: C01..C08)
-      - Episódios não-críticos → chave = class_name              (ex: Normal, Alerta…)
+      - Episódios críticos -> chave de estratificação = recipe_id  (ex: C01..C08)
+      - Episódios não-críticos -> chave = class_name              (ex: Normal, Alerta…)
     Isso garante que cada receita apareça em proporção uniforme em train/val/test,
     eliminando o viés de composição observado na seed 44 (C07 sobrerepresentado).
 
@@ -379,10 +374,10 @@ def make_splits(
 
     idx = np.arange(len(y_ep), dtype=np.int64)
 
-    # ── Chave de estratificação ────────────────────────────────────────────
+    # Chave de estratificação
     if use_stratified and meta is not None:
         class_col = infer_class_column(meta)
-        # críticos → recipe_id; não-críticos → class_name
+        # críticos -> recipe_id; não-críticos -> class_name
         strat_key = np.where(
             meta[class_col].astype(str).values == "Critico",
             meta["recipe_id"].astype(str).values,
@@ -420,8 +415,8 @@ def split_arrays(splits: Dict[str, np.ndarray], *arrays: np.ndarray) -> Dict[str
 class MultiTaskLSTM(nn.Module):
     """
     LSTM 2 camadas + heads de frame e episódio.
-    bi=True  → BiLSTM professor (só no treino).
-    bi=False → LSTM causal online (aluno/baseline).
+    bi=True  -> BiLSTM professor (só no treino).
+    bi=False -> LSTM causal online (aluno/baseline).
     """
     def __init__(self, input_dim: int, hidden_dim: int, bi: bool = False):
         super().__init__()
@@ -491,13 +486,11 @@ def calibrate_temperature(model: nn.Module, X_val: np.ndarray,
 
 """## 2) UTILITÁRIOS"""
 
-# =========================
 # 🔥 EARLY STOPPING (v25)
-# =========================
 class EarlyStopping:
     """
     Interrompe o treinamento quando a métrica para de melhorar.
-    Técnica: adaptive training termination — reduz épocas de ~50-80 → ~20-40.
+    Técnica: adaptive training termination — reduz épocas de ~50-80 -> ~20-40.
     """
     def __init__(self, patience: int = 5, min_delta: float = 1e-4):
         self.patience  = patience
@@ -613,7 +606,7 @@ def first_stable_detection(probs, onset, thr, m=3):
         else:
             count = 0
     return None
-    
+
 def compute_ttd_ttdef(y_true_frame, probs, thr=0.10, m=3, T_MAX_EF=10.0):
     dt = 10.0 / probs.shape[1]
     ttds = []
@@ -642,7 +635,7 @@ def compute_ttd_ttdef(y_true_frame, probs, thr=0.10, m=3, T_MAX_EF=10.0):
     ttdef = ttd + fr * T_MAX_EF
 
     return ttd, fr, ttdef
-    
+
 def run_gating_on_dataset(student, X_data, tau_delta, tau_H):
     student.eval()
 
@@ -687,12 +680,12 @@ def run_gating_on_dataset(student, X_data, tau_delta, tau_H):
     update_pct = 100.0 * gating_mat.mean()
     skip_pct = 100.0 - update_pct
 
-    return probs_hibr, update_pct, skip_pct    
+    return probs_hibr, update_pct, skip_pct
 
 def first_stable_detection_full(probs: np.ndarray,
                                  thr: float, m: int = TTD_M) -> Optional[int]:
     """
-    [v27-FIX] Busca a primeira detecção estável desde o frame 0 (não desde onset).
+    Busca a primeira detecção estável desde o frame 0 (não desde onset).
     Necessário para medir antecipação pré-onset em episódios progressivos.
     Sem isso, first_stable_detection começa no onset e retorna delay=0
     para qualquer modelo que dispare antes do onset — ocultando a antecipação real.
@@ -712,14 +705,14 @@ def compute_anticipation(y_true_fr: np.ndarray, y_pred_probs: np.ndarray,
                           window: int = T, thr: float = 0.5,
                           m: int = TTD_M) -> float:
     """
-    [v27-FIX] Antecipação = (onset - primeira_detecção) * dt.
+    Antecipação = (onset - primeira_detecção) * dt.
     Positivo quando o modelo disparou ANTES do onset (antecipação real).
     Zero quando disparou no onset ou depois (sem antecipação).
     Uso: TTD_Progressive e TTD_Abrupt — substitui compute_ttd_subset nestes casos.
 
     Diferença de compute_ttd:
-      compute_ttd      → mede atraso pós-onset (convencional, menor=melhor)
-      compute_anticipation → mede antecipação pré-onset (maior=melhor)
+      compute_ttd      -> mede atraso pós-onset (convencional, menor=melhor)
+      compute_anticipation -> mede antecipação pré-onset (maior=melhor)
 
     Diagnóstico que motivou esta função: com first_stable_detection partindo do onset,
     progressivos com disparo pré-onset retornavam TTD_Progressive=0.000 apesar de
@@ -744,7 +737,7 @@ def compute_ttd_subset(y_true_fr: np.ndarray, y_pred_probs: np.ndarray,
                                  episode_mask: np.ndarray,
                                  window: int = T, thr: float = 0.5,
                                  m: int = TTD_M) -> float:
-    """[v27-FIX] compute_anticipation restrito a um subconjunto de episódios."""
+    """compute_anticipation restrito a um subconjunto de episódios."""
     mask = np.asarray(episode_mask).astype(bool)
     if mask.ndim != 1 or mask.shape[0] != y_true_fr.shape[0]:
         raise ValueError("episode_mask deve ser vetor booleano alinhado ao nº de episódios.")
@@ -768,7 +761,6 @@ def compute_ttd(y_true_fr: np.ndarray, y_pred_probs: np.ndarray,
         delay = (det - t0) if det is not None else (window - t0)
         ttds.append(delay * dt)
     return float(np.mean(ttds)) if ttds else float("nan")
-
 
 
 def fail_rate_positive_subset(y_true_ep: np.ndarray, y_pred_ep: np.ndarray,
@@ -806,7 +798,7 @@ def select_theta_ttd(y_true_fr: np.ndarray, frame_probs: np.ndarray,
     """
     # FIX-17a: MISS_CAP=0.75 mantido, TTD_min volta a 1e-8
     # TTD_min=0.005 (FIX-13b) punia AF-KD que detecta antes de t0:
-    #   θ=0.25 → TTD=0.002s < 0.005 → rejeitado → sobe θ=0.35 → TTD maior
+    #   θ=0.25 -> TTD=0.002s < 0.005 -> rejeitado -> sobe θ=0.35 -> TTD maior
     # Com 1e-8: θ menor sempre preferido, detecção precoce não é punida
     MISS_CAP = 0.75
     positive_ttd, zero_ttd, fallback = [], [], []
@@ -1085,9 +1077,7 @@ def infer_stream_hybrid(model: nn.Module, X: np.ndarray, device: torch.device,
 
         for t in range(t_len):
 
-            # =========================
             # 🔥 FRAME 0 — SEMPRE UPDATE
-            # =========================
             if t == 0 or last_p is None:
                 x_slice = make_prefix_window(X[i], t, window)
                 xt = torch.tensor(x_slice, device=device).float().unsqueeze(0)
@@ -1107,20 +1097,14 @@ def infer_stream_hybrid(model: nn.Module, X: np.ndarray, device: torch.device,
 
                 continue
 
-            # =========================
             # CÁLCULO DOS SINAIS
-            # =========================
             dk = np.abs(X[i, t, KIN] - X[i, t - 1, KIN]).max()
             H = binary_entropy(last_p)
 
-            # =========================
             # REGRA CORRETA DO PAPER
-            # =========================
             update = (dk >= tau_delta) or (H >= tau_h)
 
-            # =========================
             # SKIP
-            # =========================
             if not update:
                 skipped += 1
                 frame_probs[i, t] = last_p
@@ -1130,9 +1114,7 @@ def infer_stream_hybrid(model: nn.Module, X: np.ndarray, device: torch.device,
 
                 continue
 
-            # =========================
             # UPDATE (RODA MODELO)
-            # =========================
             x_slice = make_prefix_window(X[i], t, window)
             xt = torch.tensor(x_slice, device=device).float().unsqueeze(0)
 
@@ -1149,9 +1131,7 @@ def infer_stream_hybrid(model: nn.Module, X: np.ndarray, device: torch.device,
             if debug:
                 print(f"[UPDATE] t={t} dk={dk:.4f} H={H:.4f} p={last_p:.4f}")
 
-    # =========================
     # MÉTRICAS
-    # =========================
     avg_lat = float(np.mean(lat_list)) if lat_list else 0.0
     skip_pct = (skipped / float(n * t_len)) * 100.0
 
@@ -1252,9 +1232,9 @@ def summarize_eval(se: StreamEval, y_ep: np.ndarray, y_fr: np.ndarray,
 
     if progressive_mask is not None:
         prog_mask = np.asarray(progressive_mask).astype(bool)
-        # [v27-FIX] usa compute_ttd_subset em vez de compute_ttd_subset.
+        # usa compute_ttd_subset em vez de compute_ttd_subset.
         # compute_ttd_subset chamava first_stable_detection(onset=t0) que NUNCA
-        # capturava disparo pré-onset → TTD_Progressive=0.000 em todas as seeds.
+        # capturava disparo pré-onset -> TTD_Progressive=0.000 em todas as seeds.
         # compute_ttd_subset busca desde frame 0 e retorna (onset - det)*dt,
         # positivo quando o modelo antecipou. Valor real confirmado: ~2.1s (seed 42).
         ttd_prog = compute_ttd_subset(y_fr, se.frame_probs, prog_mask, thr=theta_ttd, m=m_detect)
@@ -1273,7 +1253,7 @@ def summarize_eval(se: StreamEval, y_ep: np.ndarray, y_fr: np.ndarray,
 
     if abrupt_mask is not None:
         abr_mask = np.asarray(abrupt_mask).astype(bool)
-        # [v27-FIX] idem — antecipação pré-onset para abruptos
+        # idem — antecipação pré-onset para abruptos
         ttd_abr = compute_ttd_subset(y_fr, se.frame_probs, abr_mask, thr=theta_ttd, m=m_detect)
         fr_abr  = fail_rate_positive_subset(y_ep, ep_hat, abr_mask)
         out.update({
@@ -1358,7 +1338,7 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
                early_onset_thr: float = 0.12,
                early_target_hi: float = 0.75,
                aux_now_weight: float = 0.10,
-               # ── [v26] Novas melhorias de TTD ────────────────────────────
+               # [v26] Novas melhorias de TTD
                abrupt_mask: Optional[np.ndarray] = None,  # [M4] oversample abruptos
                prog_mask: Optional[np.ndarray] = None,    # [v27-M6] pre-onset push só em progressivos
                lambda_late: float = 2.0,    # [M3] peso da penalidade pós-onset
@@ -1388,17 +1368,17 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
     )
     bce_fr, bce_ep = build_loss_objects(yfr_main, yep, device)
 
-    # ── [v26-M4] Tensor de episódios abruptos para oversampling ──────────────
+    # [v26-M4] Tensor de episódios abruptos para oversampling
     abrupt_t: Optional[torch.Tensor] = None
     if abrupt_mask is not None:
         abrupt_t = torch.tensor(abrupt_mask.astype(bool), device=device)  # (B,)
 
-    # ── [v27-M6] Tensor de episódios progressivos para pre-onset push ────────
+    # [v27-M6] Tensor de episódios progressivos para pre-onset push
     prog_t: Optional[torch.Tensor] = None
     if prog_mask is not None:
         prog_t = torch.tensor(prog_mask.astype(bool), device=device)  # (B,)
 
-    # ── [v26-M5] Projeção hidden teacher→student (BiLSTM H*2 → LSTM H) ──────
+    # [v26-M5] Projeção hidden teacher->student (BiLSTM H*2 -> LSTM H)
     hidden_proj: Optional[nn.Module] = None
     opt_proj: Optional[torch.optim.Optimizer] = None
     if use_hidden_kd:
@@ -1426,9 +1406,9 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
     p_min_start = 0.50
     p_min_end   = 0.78
     # OPT-4 (v20): Entrega 4 indicou que α alto e δ alto melhoram TTD efetivo.
-    # Aumentamos delta_end conservadoramente (2.20→2.80) e o floor de alpha (0.35→0.50).
+    # Aumentamos delta_end conservadoramente (2.20->2.80) e o floor de alpha (0.35->0.50).
     delta_start = 0.30
-    delta_end   = 2.80   # OPT-4: 2.20→2.80 (mais pressão por detecção precoce)
+    delta_end   = 2.80   # OPT-4: 2.20->2.80 (mais pressão por detecção precoce)
     gamma_ep    = 0.25  # FIX-9: reforcar BCE episodico para manter prob alta no final
 
     ramp_end_epoch = warmup_epochs + rampup_epochs
@@ -1460,10 +1440,10 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
             p_min = 0.68 + (p_min_end - 0.68) * ref_frac
             alpha_curr = 0.60 - 0.20 * ref_frac
 
-        alpha_curr = max(alpha_curr, 0.50)  # OPT-4: floor 0.35→0.50 (Entrega 4: α alto melhora TTD)
+        alpha_curr = max(alpha_curr, 0.50)  # OPT-4: floor 0.35->0.50 (Entrega 4: α alto melhora TTD)
         frac = min((e + 1) / max(ramp_end_epoch, 1), 1.0)
 
-        # ── [v26-M2] Temperatura KD variável por fase ─────────────────────────
+        # [v26-M2] Temperatura KD variável por fase
         if use_temp_schedule:
             if phase == "WARMUP":
                 temp_curr = temp                          # 2.5 original
@@ -1476,7 +1456,7 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
             temp_curr = max(temp_curr, temp_min)
         else:
             temp_curr = temp
-        # OPT-5b (v20): lam_end 0.60→1.00 — frames tardios recebem peso maior
+        # OPT-5b (v20): lam_end 0.60->1.00 — frames tardios recebem peso maior
         # Força o modelo a subir probabilidade antes do onset, não só no pico.
         lam  = lam_start + (lam_end - lam_start) * frac
         w    = (1.0 + lam * (base_idx / max(t_len - 1, 1))).unsqueeze(0)
@@ -1486,7 +1466,7 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
         if opt_proj is not None:
             opt_proj.zero_grad()
 
-        # ── [v26-M5] Forward com estado oculto (se hidden_kd ativo) ──────────
+        # [v26-M5] Forward com estado oculto (se hidden_kd ativo)
         if use_hidden_kd and hidden_proj is not None:
             s_fr, s_ep, h_student = student(Xt, return_hidden=True)
         else:
@@ -1500,10 +1480,10 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
             else:
                 t_fr, _ = teacher(Xt)
                 h_teacher = None
-            # ── [v26-M2] usa temp_curr (variável) em vez de temp (fixo) ─────
+            # [v26-M2] usa temp_curr (variável) em vez de temp (fixo)
             t_p = torch.sigmoid(t_fr.squeeze(-1) / temp_curr)
 
-        # ── [v26-M4] l_hard com peso 3× para abruptos no RAMPUP ─────────────
+        # [v26-M4] l_hard com peso 3× para abruptos no RAMPUP
         _bce_raw = bce_fr(s_fr, yfr_t) * w   # (B, T)
         if abrupt_t is not None and phase == "RAMPUP":
             ep_w = torch.where(abrupt_t,
@@ -1552,7 +1532,7 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
             soft_norm = torch.clamp((seg_soft - early_onset_thr) / max(early_target_hi - early_onset_thr, 1e-6), 0.0, 1.0)
             target_curve = 0.30 + 0.60 * soft_norm
 
-            # ── [v26-M1] Ponderação exponencial — mais pressão no início do onset
+            # [v26-M1] Ponderação exponencial — mais pressão no início do onset
             # Antes: time_focus = 1.35 / (1.0 + 0.08 * steps)  (decaimento suave)
             # Agora: exp(-α·t) normalizado — muito mais concentrado no t=0 da janela
             time_focus = torch.exp(-onset_exp_alpha * steps)
@@ -1602,7 +1582,7 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
         else:
             early_pen = torch.tensor(0.0, device=device)
 
-        # ── [v26-M3] Penalidade assimétrica pós-onset ────────────────────────
+        # [v26-M3] Penalidade assimétrica pós-onset
         # Após t_0, frames com p < θ_late recebem penalidade extra ponderada
         # exponencialmente. Ataca diretamente o comportamento reativo.
         late_pen = torch.tensor(0.0, device=device)
@@ -1624,7 +1604,7 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
             if late_count_m3 > 0:
                 late_pen = late_pen / late_count_m3 * lambda_late
 
-        # ── [v27-M6] Pre-onset push — pressão pré-onset apenas em progressivos ─
+        # [v27-M6] Pre-onset push — pressão pré-onset apenas em progressivos ─
         # Ensina o modelo a começar a subir a probabilidade ANTES do onset,
         # explorando os sinais precursores injetados nos episódios progressivos.
         # Ativa somente no REFINE avançado (delta > 1.0) para não interferir com
@@ -1644,7 +1624,7 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
                 if t_pre >= t0b:
                     continue
                 pre_seg  = s_p[b, t_pre:t0b]
-                # curva crescente: 0.20 → 0.35 na janela pré-onset
+                # curva crescente: 0.20 -> 0.35 na janela pré-onset
                 # força resposta gradual aos precursores sem ultrapassar o limiar crítico
                 target_pre = torch.linspace(0.20, 0.35, pre_seg.shape[0], device=device)
                 pre_pen  = pre_pen + torch.relu(target_pre - pre_seg).mean()
@@ -1652,7 +1632,7 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
             if pre_count > 0:
                 pre_pen = pre_pen / pre_count * 1.5   # peso moderado
 
-        # ── [v26-M5] Destilação de estado oculto ─────────────────────────────
+        # [v26-M5] Destilação de estado oculto
         # Alinha h_student com proj(h_teacher) na janela [t_0, t_0+W] de críticos
         l_hidden = torch.tensor(0.0, device=device)
         if (use_hidden_kd and hidden_proj is not None
@@ -1673,8 +1653,8 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
                     l_hidden = torch.stack(hidden_losses_list).mean()
 
         # FIX-13a: supressão cauda não-críticos — floor 0.08 (gap [0.08,0.40])
-        # FIX-18a: floor 0.08→0.04, weight 2.0→3.0
-        # v17: thr_ep=0.05 → probs noncrit>0.05 → F1=0.640 trivial
+        # FIX-18a: floor 0.08->0.04, weight 2.0->3.0
+        # v17: thr_ep=0.05 -> probs noncrit>0.05 -> F1=0.640 trivial
         noncrit_tail_pen = torch.tensor(0.0, device=device)
         noncrit_count = 0
         for b in range(s_p.shape[0]):
@@ -1735,9 +1715,9 @@ def select_hybrid_policy(model: nn.Module, Xv: np.ndarray,
 
     Prioridade de seleção:
       1. Entre todos os candidatos com FR = 0: maximiza SkipPct.
-         → ponto de máxima eficiência sem custo de segurança.
+         -> ponto de máxima eficiência sem custo de segurança.
       2. Se nenhum candidato tem FR = 0: minimiza TTD_ef = TTD + FR × t_max_ef.
-         → fallback para o ponto mais seguro disponível.
+         -> fallback para o ponto mais seguro disponível.
 
     Filtros de degeneração (invariantes):
       - FR > FR_HARD_CAP (0.50): descartado (solução degenerada).
@@ -1766,18 +1746,16 @@ def select_hybrid_policy(model: nn.Module, Xv: np.ndarray,
     best, best_params = None, None
 
     def _ttd_ef_score(r: dict) -> float:
-        """TTD_ef = TTD + FR × T_max. NaN em TTD → penalidade máxima."""
+        """TTD_ef = TTD + FR × T_max. NaN em TTD -> penalidade máxima."""
         fr_val  = r.get("FailRate", 1.0)
         ttd_val = r.get("TTD", None)
         if ttd_val is None or math.isnan(float(ttd_val)):
             ttd_val = t_max_ef
         return float(ttd_val) + float(fr_val) * t_max_ef
 
-    # =========================================================================
     # Grid em 2 etapas (coarse-to-fine)
     # FASE 1: grid grosso — localiza a região promissora por TTD_ef
     # FASE 2: refino denso em torno do melhor percentil grosso (±10 pp, passo 2)
-    # =========================================================================
     COARSE_PERCENTILES = [50, 60, 70, 80, 90]
     COARSE_TAU_H       = [0.10, 0.25, 0.40, 0.70, 0.95]
 
@@ -1826,7 +1804,7 @@ def select_hybrid_policy(model: nn.Module, Xv: np.ndarray,
             score = _ttd_ef_score(r)   # [TTDef] score — usado como desempate secundário
             # [v28] Critério Pareto: prioridade primária = FR=0 + max SkipPct
             # Tupla de comparação: (fr_bin, -skip, score, cost, -f1)
-            # fr_bin=0 quando FR=0 → esses candidatos sempre vencem FR>0
+            # fr_bin=0 quando FR=0 -> esses candidatos sempre vencem FR>0
             fr_bin = 0 if r["FailRate"] == 0.0 else 1
             cand = (fr_bin, -r["SkipPct"], score,
                     r["Cost_ms_per_frame"], -r["F1"],
@@ -1841,7 +1819,7 @@ def select_hybrid_policy(model: nn.Module, Xv: np.ndarray,
         _skip_chosen  = -best[1]  # posição 1 negada
         _fr_chosen    = best[0]   # 0 = FR=0, 1 = FR>0
         _delta_ttdef  = 100.0 * (_score_chosen - ref_ttd_ef) / max(abs(ref_ttd_ef), 1e-9)
-        _fr_tag = "FR=0 ✓" if _fr_chosen == 0 else f"FR>0 (fallback TTDef)"
+        _fr_tag = "FR=0 ok" if _fr_chosen == 0 else f"FR>0 (fallback TTDef)"
         # [v28] Sem critério de rejeição por melhora de TTDef.
         # O gating sempre aumenta levemente o TTDef (confirmação atrasa m frames),
         # mas a troca por SkipPct é o objetivo Pareto da formulação.
@@ -1849,7 +1827,7 @@ def select_hybrid_policy(model: nn.Module, Xv: np.ndarray,
               f"  SkipPct={_skip_chosen:.1f}%  TTDef={_score_chosen:.4f}s  "
               f"(ref_fixo={ref_ttd_ef:.4f}s  ΔTTD={_delta_ttdef:+.1f}%)  {_fr_tag}")
     else:
-        print("  [v28] ⚠️  nenhum ponto satisfaz os filtros de degeneração — gating não aplicado.")
+        print("  [v28] aviso: nenhum ponto satisfaz os filtros de degeneração — gating não aplicado.")
     return best_params
 
 """## 7) HELPERS DE AGREGAÇÃO E EXPORTAÇÃO LaTeX"""
@@ -1899,7 +1877,7 @@ def export_latex_macros(main_summary: pd.DataFrame,
     """
     lines = ["% Auto-generated by run_critical_tradeoff_v3.py", ""]
 
-    # ── Família 1: resultados principais ──────────────────────────────
+    # Família 1: resultados principais
     lines.append("% ── Tabela 2: resultados principais ─────────────────")
     mapping = [
         ("BaseFixo", "LSTM-Baseline", "Fixa"),
@@ -1939,10 +1917,10 @@ def export_latex_macros(main_summary: pd.DataFrame,
                 lines.append(
                     rf"\newcommand{{\std{prefix}{cmd}}}{{{_fmt(row[sd_col])}}}")
 
-    # ── Família 2: sensibilidade em m ─────────────────────────────────
+    # Família 2: sensibilidade em m
     lines.append("")
     lines.append("% ── Tabela 3: sensibilidade em m ────────────────────")
-    # mapeamento: valor numérico de m → prefixo da macro LaTeX
+    # mapeamento: valor numérico de m -> prefixo da macro LaTeX
     m_prefixes = {1: "Um", 2: "Dois", 3: "Tres", 4: "Quatro", 5: "Cinco"}
     sens_metric_cmds = [
         ("F1",       "FUm"),
@@ -1966,7 +1944,7 @@ def export_latex_macros(main_summary: pd.DataFrame,
             for metric, cmd in sens_metric_cmds:
                 lines.append(rf"\newcommand{{\sensM{prefix}{cmd}}}{{0.000}}")
 
-    # ── Progressive / Abrupt breakdown macros ───────────────────────────────
+    # Progressive / Abrupt breakdown macros
     lines.append("")
     lines.append("% ── Análise estratificada: progressivo vs abrupto ────────────")
     prog_abrupt_mapping = [
@@ -1995,7 +1973,7 @@ def export_latex_macros(main_summary: pd.DataFrame,
         row = sub.iloc[0]
         lines.append(rf"\newcommand{{\res{cmd_name}}}{{{_fmt(row[col_mean])}}}")
 
-    # ── \onsetFrame — calculado via compute_onset_stats() do gerador v5 ──────
+    # \onsetFrame — calculado via compute_onset_stats() do gerador v5
     lines.append("")
     lines.append("% ── onset médio dos episódios progressivos ───────────────────")
     try:
@@ -2009,7 +1987,7 @@ def export_latex_macros(main_summary: pd.DataFrame,
                  rf"{_stats.get('onset_gap_mean_035', 21.6):.1f} frames"
                  if 'onset_gap_mean_035' in dir() else "")
 
-    # ── v19: nota sobre seed 44 ───────────────────────────────────────────────
+    # v19: nota sobre seed 44
     lines += [
         "",
         "% ── v19: nota reprodutibilidade seed 44 ────────────────────────────",
@@ -2026,7 +2004,7 @@ def export_latex_macros(main_summary: pd.DataFrame,
     ]
 
     Path(path).write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"  Macros LaTeX exportadas → {path}")
+    print(f"  Macros LaTeX exportadas -> {path}")
     print(f"    Família 1 (Tabela 2): {len(mapping) * len(metric_cmds) * 2} macros")
     print(f"    Família 2 (Tabela 3): {len(m_prefixes) * len(sens_metric_cmds)} macros")
     print(f"    Nota seed 44: \\seedFourtyFourNote")
@@ -2054,7 +2032,7 @@ def export_latex_tables(main_summary: pd.DataFrame,
                 f"{_fmt(row.get('SkipPct_std',0), 1)} \\\\"
             )
         Path(path_tab2).write_text("\n".join(rows) + "\n", encoding="utf-8")
-        print(f"  Tabela 2 LaTeX → {path_tab2}")
+        print(f"  Tabela 2 LaTeX -> {path_tab2}")
 
     # Tabela 3
     if not sens_summary.empty:
@@ -2067,7 +2045,7 @@ def export_latex_tables(main_summary: pd.DataFrame,
                 f"{_fmt(row.get('FailRate_mean',0))} \\\\"
             )
         Path(path_tab3).write_text("\n".join(rows) + "\n", encoding="utf-8")
-        print(f"  Tabela 3 LaTeX → {path_tab3}")
+        print(f"  Tabela 3 LaTeX -> {path_tab3}")
 
 """## 8) AVALIAÇÃO POR VALOR DE m — fatorada para reutilização"""
 
@@ -2110,7 +2088,7 @@ def evaluate_for_m(seed: int, device: torch.device,
     va_kd = infer_stream_fixed(student, X_va, device)
     thr_kd    = select_thr_ep(va_kd.frame_probs, yep_va)
     theta_kd  = theta_global   # FIX-17b: mesmo θ global
-    # O FIX-12 criava comparação assimétrica: θ_kd=0.35 vs θ_base=0.25 →
+    # O FIX-12 criava comparação assimétrica: θ_kd=0.35 vs θ_base=0.25 ->
     # AF-KD era testado em regime MAIS DIFÍCIL, resultando em TTD maior (pior).
     # Seed 43 chegou a −1887% de 'redução'. Com θ simétrico:
     # AF-KD detecta mais cedo PORQUE sobe mais rápido — não porque tem θ menor.
@@ -2216,7 +2194,7 @@ def evaluate_for_m(seed: int, device: torch.device,
         )
     except ModuleNotFoundError:
         print("    [aviso] analise_fairness_v4.py não encontrado — análise de fairness pulada.")
-    
+
     # Adicionar logo após a inferência de teste:
     plot_effective_ttd_comparison(
         y_true_fr      = yfr_te[yep_te == 1],   # só episódios críticos
@@ -2228,7 +2206,7 @@ def evaluate_for_m(seed: int, device: torch.device,
     if hybrid_params is not None:
         tau_d, tau_h = hybrid_params
 
-        # ── AF-KD Híbrida ─────────────────────────────────────────────────────
+        # AF-KD Híbrida
         te_h = infer_stream_hybrid(student, X_te, device,
                                     tau_delta=tau_d, tau_h=tau_h)
         rows.append({
@@ -2245,7 +2223,7 @@ def evaluate_for_m(seed: int, device: torch.device,
               f"Skip={rows[-1].get('SkipPct', float('nan')):.1f}% "
               f"Cost={rows[-1].get('Cost_ms_per_frame', float('nan')):.4f} ms/q")
 
-        # ── Baseline Híbrida (PATCH: mesmos tau_d, tau_h do AF-KD) ────────────
+        # Baseline Híbrida (PATCH: mesmos tau_d, tau_h do AF-KD)
         # Racional: isola o efeito da supervisão temporal AF-KD no gating —
         # aplica o mesmo mecanismo MHEG sobre o baseline sem AF-KD e mede
         # quanto a cobertura degrada. Gera o ponto "Baseline Híbrida" no
@@ -2453,7 +2431,7 @@ def plot_effective_ttd_comparison(
     ax2.grid(True, alpha=0.4)
 
     plt.tight_layout()
-    # [v27-FIX] plt.close garante que handle anterior não trava o arquivo
+    # plt.close garante que handle anterior não trava o arquivo
     # (causa do PermissionError observado na seed 45 quando o PDF estava aberto)
     plt.close('all')
     plt.savefig(f"{EXP_NAME}_ttd_comparison_fair.pdf", bbox_inches="tight", dpi=150)
@@ -2463,7 +2441,7 @@ def plot_effective_ttd_comparison(
     print(f"  Baseline : {np.mean(ttds_base):.3f}s")
     print(f"  AF-KD    : {np.mean(ttds_kd):.3f}s")
     print(f"\nTTD bruto (só detectados — o que a tabela mostra):")
-    print(f"  Baseline : {ttd_base_reported:.3f}s  ← número 'barato'")
+    print(f"  Baseline : {ttd_base_reported:.3f}s  <- número 'barato'")
     print(f"  AF-KD    : {ttd_kd_reported:.3f}s")
 def main() -> None:
     torch.backends.cudnn.benchmark = True
@@ -2483,7 +2461,7 @@ def main() -> None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print("Device:", device)
 
-        # ── Dataset (DatasetConfig — reutiliza NPZ+CSV ou gera online) ──
+        # Dataset (DatasetConfig — reutiliza NPZ+CSV ou gera online)
         ds_cfg = DatasetConfig(seed=SEED)
         X, y_fr_cont, y_fr_obs, meta = load_or_generate_dataset(ds_cfg)
 
@@ -2538,7 +2516,7 @@ def main() -> None:
         print(f"  Split: tr={X_tr.shape[0]}  va={X_va.shape[0]}  te={X_te.shape[0]}")
         print(f"  Forecast horizon k: {FORECAST_HORIZON_K} frames")
 
-        # ── v19: auditoria de composição dos splits (recipe × split) ──────────
+        # v19: auditoria de composição dos splits (recipe × split)
         if "recipe_id" in meta.columns:
             class_col_chk = infer_class_column(meta)
             for split_name, split_idx in [("train", splits["train_idx"]),
@@ -2551,7 +2529,7 @@ def main() -> None:
                     counts_str = "  ".join(f"{r}={n}" for r, n in recipe_counts.items())
                     print(f"  [v19-audit] {split_name:5s} crit={len(crit_sub):3d} | {counts_str}")
 
-        # ── Checkpoints (v23) ─────────────────────────────────────────
+        # Checkpoints (v23)
         ckpt_teacher  = MODEL_DIR / f"teacher_seed{SEED}.pt"
         ckpt_baseline = MODEL_DIR / f"baseline_seed{SEED}.pt"
         ckpt_student  = MODEL_DIR / f"student_seed{SEED}.pt"
@@ -2560,7 +2538,7 @@ def main() -> None:
         # v24: auto-detecção — se os três .pt existem, reusa sem flag manual
         _models_ready = ckpt_student.exists() and ckpt_baseline.exists() and ckpt_teacher.exists()
         if _models_ready:
-            # ── Carregar pesos salvos — pula treino completamente ────
+            # Carregar pesos salvos — pula treino completamente
             print(f"\n[v24] Checkpoints encontrados — carregando pesos seed {SEED} (treino pulado)...")
             teacher  = MultiTaskLSTM(D, H, bi=True).to(device)
             if ckpt_teacher.exists():
@@ -2587,7 +2565,7 @@ def main() -> None:
                 torch.save(temp_scaler.state_dict(), ckpt_scaler)
                 print(f"  Temperature scaling: T* = {temp_scaler_T:.4f} (salvo)")
         else:
-            # ── Treino ───────────────────────────────────────────────
+            # Treino
             print("\nTreinando Professor (BiLSTM)...")
             teacher  = MultiTaskLSTM(D, H, bi=True)
             # FIX-13c: professor BiLSTM com target futuro K=8
@@ -2623,7 +2601,7 @@ def main() -> None:
                 epochs=80, beta_max=0.35, temp=2.0, lam_start=0.20, lam_end=1.00,
                 yfr_soft=yfrc_tr_fc, yfr_aux=None, yfr_soft_aux=None, aux_now_weight=0.0,
                 early_onset_thr=0.35, early_target_hi=0.90,
-                # ── [v26-ABL] parâmetros controlados pela ablação ────────────
+                # [v26-ABL] parâmetros controlados pela ablação
                 abrupt_mask      = abrupt_tr if _use_abrupt else None,
                 prog_mask        = prog_tr,          # [v27-M6] pre-onset push para progressivos
                 lambda_late      = _abl_cfg["lambda_late"],
@@ -2640,7 +2618,6 @@ def main() -> None:
             # Reduz FLOPs na inferência Edge; pesos insignificantes removidos.
             # Descomente o bloco abaixo se quiser ativar (mede impacto no FailRate
             # antes de usar em produção).
-            # -------------------------------------------------------------------
             # import torch.nn.utils.prune as prune
             # _prune_amount = 0.30
             # for module in student.modules():
@@ -2648,7 +2625,6 @@ def main() -> None:
             #         prune.l1_unstructured(module, name="weight", amount=_prune_amount)
             #         prune.remove(module, "weight")
             # print(f"  [v25] Model pruning aplicado: {_prune_amount*100:.0f}% pesos removidos (L1)")
-            # -------------------------------------------------------------------
             torch.save(student.state_dict(), ckpt_student)
             print(f"  student salvo: {ckpt_student}")
 
@@ -2660,7 +2636,7 @@ def main() -> None:
             torch.save(temp_scaler.state_dict(), ckpt_scaler)
             print(f"  Temperature scaling: T* = {temp_scaler_T:.4f} (salvo)")
 
-        # ── v24: cache de frame_probs de test (pula infer_stream_fixed no test) ──
+        # v24: cache de frame_probs de test (pula infer_stream_fixed no test)
         _p_base_npy = Path(f"{EXP_NAME}_frame_probs_base_seed{SEED}.npy")
         _p_kd_npy   = Path(f"{EXP_NAME}_frame_probs_kd_seed{SEED}.npy")
         _cached_base_probs = np.load(_p_base_npy) if _p_base_npy.exists() else None
@@ -2670,7 +2646,7 @@ def main() -> None:
         else:
             print(f"  [v24] Sem cache de frame_probs — inferência de test será executada normalmente")
 
-        # ── Avaliação principal (m = TTD_M = 2) ─────────────────────
+        # Avaliação principal (m = TTD_M = 2)
         print(f"\nAvaliando (m={TTD_M}, padrão do artigo)...")
         rows_main, calib_main = evaluate_for_m(
             SEED, device, baseline, student,
@@ -2689,7 +2665,7 @@ def main() -> None:
         if _kd_fixa_rows:
             _seed_fr = float(_kd_fixa_rows[0].get("FailRate", 0.0))
             if _seed_fr > 0.30:
-                print(f"\n⚠️  [v25] Seed {SEED} descartada — FailRate AF-KD={_seed_fr:.4f} > 0.30 (outlier)")
+                print(f"\naviso: [v25] Seed {SEED} descartada — FailRate AF-KD={_seed_fr:.4f} > 0.30 (outlier)")
                 continue   # pula toda a análise desta seed (sens, curva Pareto, etc.)
 
         all_results.extend(rows_main)
@@ -2726,7 +2702,7 @@ def main() -> None:
               .to_markdown(index=False, floatfmt=".4f"))
         df_seed.to_csv(f"{EXP_NAME}_results_seed{SEED}.csv", index=False)
 
-        # ── Análise de sensibilidade em m ────────────────────────────
+        # Análise de sensibilidade em m
         # v25-fix: theta fixo (calibrado para m=TTD_M) — garante que a
         # unica variavel entre as linhas da Tabela 3 seja m, nao theta.
         # Sem isso, select_theta_ttd recalibra para cada m e o resultado
@@ -2749,9 +2725,7 @@ def main() -> None:
             all_sens_rows.extend(rows_m)
             print(f"    m={m_val} concluído.")
 
-    # ══════════════════════════════════════════════════════════════════
     # 10) CONSOLIDAÇÃO, TABELAS E EXPORTAÇÃO LaTeX
-    # ══════════════════════════════════════════════════════════════════
     final_df = pd.DataFrame(all_results)
     sens_df  = pd.DataFrame(all_sens_rows)
 
@@ -2819,10 +2793,10 @@ def main() -> None:
     # Aviso explícito quando alguma config tem < 4 seeds
     _incomplete = main_summary[main_summary["N_Seeds"].fillna(0) < 4]
     if not _incomplete.empty:
-        print("\n⚠️  AVISO: configurações com cobertura incompleta de seeds:")
+        print("\nAVISO: configurações com cobertura incompleta de seeds:")
         for _, _row in _incomplete.iterrows():
             print(f"     {_row['Modelo']:20s} [{_row['Politica']:12s}]"
-                  f"  → {int(_row['N_Seeds'])}/4 seeds")
+                  f"  -> {int(_row['N_Seeds'])}/4 seeds")
         print("   Execute run_hybrid_completion.py para completar as seeds faltantes.\n")
     ttd_method_cmp = build_ttd_method_comparison(main_df)
     ttd_method_cmp.to_csv(f"{EXP_NAME}_summary_ttd_methods.csv", index=False)

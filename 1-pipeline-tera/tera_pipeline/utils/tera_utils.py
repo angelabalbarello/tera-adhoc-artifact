@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 tera_pipeline/utils/tera_utils.py
-═══════════════════════════════════════════════════════════════════════════════
 Utilities do TERA Pipeline: determinismo, logging científico, I/O.
-═══════════════════════════════════════════════════════════════════════════════
 """
 
 import hashlib
@@ -49,11 +47,11 @@ class PipelineConfig:
     def from_yaml(cls, path: str) -> "PipelineConfig":
         with open(path, "r", encoding="utf-8") as f:
             raw = yaml.safe_load(f)
-        
+
         # Faz o parsing seguro do bloco af_tkd
         af_tkd_raw = raw["training"]["af_tkd"]
         af_tkd_obj = AfTkdConfig(**af_tkd_raw)
-        
+
         return cls(
             dataset=raw["dataset"],
             model=raw["model"],
@@ -62,7 +60,7 @@ class PipelineConfig:
             calibration=raw["calibration"]
         )
 
-# ── Determinismo ─────────────────────────────────────────────────────────────
+# Determinismo
 
 def set_global_seed(seed: int) -> None:
     """
@@ -83,7 +81,7 @@ def get_device() -> torch.device:
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-# ── Configuração ──────────────────────────────────────────────────────────────
+# Configuração
 
 def load_config(path: str) -> dict:
     """Carrega configuração YAML. Falha com mensagem clara se não encontrado."""
@@ -106,7 +104,7 @@ def save_config_snapshot(cfg: dict, out_path: Path) -> None:
     )
 
 
-# ── Logging científico ────────────────────────────────────────────────────────
+# Logging científico
 
 def setup_logging(
     name: str = "tera_pipeline",
@@ -139,7 +137,7 @@ def setup_logging(
     return logger
 
 
-# ── Rastreabilidade ───────────────────────────────────────────────────────────
+# Rastreabilidade
 
 def get_git_commit() -> str:
     """Retorna hash do commit git atual, ou 'not_in_git_repo'."""
@@ -178,7 +176,7 @@ def hash_file(path: Path) -> str:
     return sha.hexdigest()[:16]
 
 
-# ── I/O ───────────────────────────────────────────────────────────────────────
+# I/O
 
 def save_json(path: Path, payload: Dict[str, Any]) -> None:
     """Salva dicionário como JSON formatado."""
@@ -204,7 +202,7 @@ def _json_default(obj: Any) -> Any:
     raise TypeError(f"Tipo não serializável: {type(obj)!r}")
 
 
-# ── Validação de integridade do pipeline ──────────────────────────────────────
+# Validação de integridade do pipeline
 
 def assert_offline_only(*component_names: str) -> None:
     """
@@ -243,7 +241,7 @@ def verify_seed_coverage(
                             "aftkd_fixed", "aftkd_hybrid"]
 
     if not results_csv.exists():
-        print(f"⚠️  CSV não encontrado: {results_csv}")
+        print(f"aviso: CSV não encontrado: {results_csv}")
         return False
 
     df = pd.read_csv(results_csv)
@@ -255,10 +253,10 @@ def verify_seed_coverage(
         )
         missing = [s for s in required_seeds if s not in seeds_found]
         if missing:
-            print(f"⚠️  {config_id}: seeds faltantes {missing}")
+            print(f"aviso: {config_id}: seeds faltantes {missing}")
             complete = False
         else:
-            print(f"  ✓ {config_id}: seeds {seeds_found}")
+            print(f"  {config_id}: seeds {seeds_found}")
     return complete
 
 def aftkd_loss(student_fr, student_ep, teacher_fr, y_episode, onset_frames, config, lam_kd, device):
@@ -271,29 +269,29 @@ def aftkd_loss(student_fr, student_ep, teacher_fr, y_episode, onset_frames, conf
     pre_push   = config.af_tkd.pre_onset_push_weight
     lam_late   = config.af_tkd.lambda_late
     theta_late = config.af_tkd.theta_late
-    
+
     batch_size, seq_len, _ = student_fr.shape
-    
+
     # Probs convertidas para cálculo soft (KL Divergence)
     p_s = F.log_softmax(student_fr / temp, dim=-1)
     p_t = F.softmax(teacher_fr / temp, dim=-1)
     kl_loss = F.kl_div(p_s, p_t, reduction='none').sum(dim=-1) * (temp ** 2)
-    
+
     # Criar tensor de pesos temporais dinâmicos por frame
     t_weights = torch.ones((batch_size, seq_len), device=device)
-    
+
     for i in range(batch_size):
         t0 = int(onset_frames[i].item())
         if y_episode[i] > 0.5 and t0 > 0:  # Apenas episódios críticos com onset válido
             # Janela Pós-Onset: Decaimento exponencial clássico
             for t in range(t0, seq_len):
                 t_weights[i, t] = math.exp(-alpha * (t - t0))
-                
+
                 # [MECANISMO LATE PENALTY]
                 prob_estudante = torch.sigmoid(student_fr[i, t]).mean()
                 if prob_estudante < theta_late:
                     t_weights[i, t] *= lam_late
-            
+
             # [MECANISMO PRE-ONSET PUSH]
             win_start = max(0, t0 - config.af_tkd.hidden_kd_window)
             for t in range(win_start, t0):
@@ -301,10 +299,10 @@ def aftkd_loss(student_fr, student_ep, teacher_fr, y_episode, onset_frames, conf
 
     # Aplicação dos pesos construídos pelo framework sobre a perda Soft
     weighted_kl = (kl_loss * t_weights).mean()
-    
+
     # Perda de classificação base (Hard labels)
     loss_hard = nn.BCEWithLogitsLoss()(student_ep, y_episode)
-    
+
     # Combinação final orientada pelo agendador de fases
     total_loss = (1.0 - lam_kd) * loss_hard + lam_kd * weighted_kl
     return total_loss

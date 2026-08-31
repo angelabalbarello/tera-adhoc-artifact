@@ -1,37 +1,33 @@
 # -*- coding: utf-8 -*-
 """
 run_ablation_teacher_study.py
-══════════════════════════════════════════════════════════════════════════════
 ABLAÇÃO DE TEACHER — compatibilizada com o TERA Pipeline v1.0
 
 OBJETIVO
-────────
 Responder à questão de ablação do artigo (Seção 4.4):
   "O ganho vem da supervisão temporal orientada ao onset (princípio
    do AF-TKD) ou do poder representacional do teacher BiLSTM em
    particular?"
 
 MODELOS AVALIADOS (5 configurações × 4 seeds = 20 treinos)
-────────────────────────────────────────────────────────────
   ┌──────────────────────────┬─────────────┬──────────────────────────────────┐
   │ Config                   │ Teacher     │ Pergunta                         │
   ├──────────────────────────┼─────────────┼──────────────────────────────────┤
   │ LSTM-Baseline            │ —           │ baseline causal sem KD           │
-  │ LSTM-AF-KD  ★ proposto   │ BiLSTM      │ teacher recorrente → LSTM causal │
-  │ LSTM-TransKD             │ Transformer │ teacher atencional → LSTM causal │
+  │ LSTM-AF-KD  ★ proposto   │ BiLSTM      │ teacher recorrente -> LSTM causal │
+  │ LSTM-TransKD             │ Transformer │ teacher atencional -> LSTM causal │
   │ Transformer-Baseline     │ —           │ baseline causal Transformer      │
-  │ Transformer-AF-KD        │ BiLSTM      │ teacher recorrente → Trans causal │
+  │ Transformer-AF-KD        │ BiLSTM      │ teacher recorrente -> Trans causal │
   └──────────────────────────┴─────────────┴──────────────────────────────────┘
 
   Ablação central: LSTM-AF-KD vs LSTM-TransKD
-    → Student (LSTM causal) idêntico; apenas o teacher muda.
-    → Se LSTM-TransKD ≈ LSTM-AF-KD: o princípio de supervisão temporal
+    -> Student (LSTM causal) idêntico; apenas o teacher muda.
+    -> Se LSTM-TransKD ≈ LSTM-AF-KD: o princípio de supervisão temporal
       é teacher-agnóstico.
-    → Se LSTM-AF-KD > LSTM-TransKD: a natureza recorrente do professor
+    -> Se LSTM-AF-KD > LSTM-TransKD: a natureza recorrente do professor
       importa para transferência temporal ao aluno causal.
 
 COMPATIBILIDADE COM O TERA PIPELINE
-─────────────────────────────────────
   · Usa MultiTaskLSTM de tera_train.py (mesma arquitetura, ~58K params)
   · Usa aftkd_loss() de tera_train.py (protocolo 3 fases do artigo)
   · Usa synthetic_driver_risk_v7 via tera_gen.py (mesmo gerador)
@@ -41,7 +37,6 @@ COMPATIBILIDADE COM O TERA PIPELINE
     protocolo canônico do TERA para as configs LSTM-*
 
 DIFERENÇAS DELIBERADAS em relação ao run_ablation_v8.py original
-─────────────────────────────────────────────────────────────────
   · aftkd_loss() substituído pelo do tera_train.py (protocolo do artigo)
     com parâmetros do experiment_config.yaml
   · MultiTaskLSTM (tera_train) em lugar de LSTMStudent (run_ablation_v8)
@@ -53,7 +48,6 @@ DIFERENÇAS DELIBERADAS em relação ao run_ablation_v8.py original
     sejam exatamente iguais ao experimento principal
 
 SAÍDAS
-──────
   resultados_ablacao_teacher/
   ├─ results_all_seeds.csv            valores por seed × modelo
   ├─ summary.csv                      média ± std por configuração
@@ -61,17 +55,14 @@ SAÍDAS
   └─ table_teacher_ablation_full.tex  tabela completa com TTDef/TTD_bruto
 
 EXECUÇÃO
-────────
   # Requer: synthetic_driver_risk_v7.py na raiz
   python run_ablation_teacher_study.py           # todas as seeds
   python run_ablation_teacher_study.py --seed 42 # apenas seed 42 (debug)
   python run_ablation_teacher_study.py --skip-train  # só análise (se já treinou)
 
 TEMPO ESTIMADO
-──────────────
   GPU:  ~25–35 min  (20 treinos × ~1–2 min cada)
   CPU:  ~120–180 min
-══════════════════════════════════════════════════════════════════════════════
 """
 
 import argparse
@@ -96,10 +87,8 @@ from sklearn.model_selection import train_test_split
 
 warnings.filterwarnings("ignore")
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 0) CONFIGURAÇÃO GLOBAL
 #    Mantida 100% alinhada com experiment_config.yaml e tera_train.py
-# ══════════════════════════════════════════════════════════════════════════════
 
 SEEDS       = [42, 43, 44, 45]
 OUTPUT_DIR  = Path("resultados_ablacao_teacher")
@@ -156,7 +145,7 @@ THR_EP_GRID = np.concatenate([
 
 DATA_DIR = Path("dados_sinteticos")
 
-# ── Reprodutibilidade ─────────────────────────────────────────────────────────
+# Reprodutibilidade
 
 def set_seed(seed: int) -> None:
     np.random.seed(seed)
@@ -168,18 +157,16 @@ def set_seed(seed: int) -> None:
         torch.backends.cudnn.benchmark = False
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 1) MODELOS
-# ══════════════════════════════════════════════════════════════════════════════
 
-# ── 1a. MultiTaskLSTM — idêntico ao tera_train.py ────────────────────────────
+# 1a. MultiTaskLSTM — idêntico ao tera_train.py
 
 class MultiTaskLSTM(nn.Module):
     """
     LSTM canônico do TERA Pipeline.
     Idêntico ao MultiTaskLSTM de tera_train.py — mesma interface,
     mesmos ~58K params (H=64, D=31, 2 camadas).
-    bi=True → professor BiLSTM; bi=False → aluno causal embarcado.
+    bi=True -> professor BiLSTM; bi=False -> aluno causal embarcado.
     """
     def __init__(self, input_dim: int = D, hidden_dim: int = H,
                  num_layers: int = 2, dropout: float = 0.1,
@@ -205,7 +192,7 @@ class MultiTaskLSTM(nn.Module):
         return fr, ep
 
 
-# ── 1b. Transformer causal — novo para a ablação ─────────────────────────────
+# 1b. Transformer causal — novo para a ablação
 
 def _causal_mask(T_len: int, device: torch.device) -> torch.Tensor:
     return torch.triu(
@@ -284,10 +271,8 @@ def count_params(model: nn.Module) -> int:
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 2) LOSS AF-TKD — importada do tera_train.py via adaptador
 #    Usa exatamente os parâmetros do experiment_config.yaml
-# ══════════════════════════════════════════════════════════════════════════════
 
 class _AFTKDConfig:
     """Adaptador que expõe AFTKD_CFG como atributos aninhados (interface tera_train)."""
@@ -365,9 +350,7 @@ def aftkd_loss(
     return (1 - lam_kd) * l_hard + lam_kd * l_soft
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 3) DATASET — usa o mesmo gerador do TERA principal
-# ══════════════════════════════════════════════════════════════════════════════
 
 def _load_generator():
     import importlib
@@ -462,9 +445,7 @@ def make_splits(
     }
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 4) TREINAMENTO
-# ══════════════════════════════════════════════════════════════════════════════
 
 def _onset_frames_tensor(y_fr: np.ndarray, window: int = T) -> torch.Tensor:
     onsets = []
@@ -532,9 +513,9 @@ def train_aftkd_student(
     Treinamento AF-TKD com protocolo 3 fases.
     Usa aftkd_loss() com parâmetros de AFTKD_CFG (experiment_config.yaml).
     Compatível com qualquer par (teacher, student):
-      - BiLSTM → LSTM          (LSTM-AF-KD, config canônica do artigo)
-      - TransformerTeacher → LSTM  (LSTM-TransKD, ablação)
-      - BiLSTM → TransformerStudent  (Transformer-AF-KD, ablação)
+      - BiLSTM -> LSTM          (LSTM-AF-KD, config canônica do artigo)
+      - TransformerTeacher -> LSTM  (LSTM-TransKD, ablação)
+      - BiLSTM -> TransformerStudent  (Transformer-AF-KD, ablação)
     """
     from torch.utils.data import DataLoader, TensorDataset
     cfg = AFTKD_CFG
@@ -588,7 +569,7 @@ def train_aftkd_student(
     return student
 
 
-# ── Temperature scaling pós-treino (idêntico ao run_ablation_v8) ─────────────
+# Temperature scaling pós-treino (idêntico ao run_ablation_v8)
 
 class TScaledModel(nn.Module):
     def __init__(self, base: nn.Module, temperature: float):
@@ -627,9 +608,7 @@ def temperature_scale(
     return TScaledModel(model, T_final)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 5) INFERÊNCIA E AVALIAÇÃO
-# ══════════════════════════════════════════════════════════════════════════════
 
 def infer_fixed(
     model: nn.Module,
@@ -853,9 +832,7 @@ def evaluate_model(
     }
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 6) ORQUESTRAÇÃO — UMA SEED
-# ══════════════════════════════════════════════════════════════════════════════
 
 def run_seed(seed: int, device: torch.device, models_cache: Path) -> List[Dict]:
     """
@@ -867,7 +844,7 @@ def run_seed(seed: int, device: torch.device, models_cache: Path) -> List[Dict]:
     print(f"  SEED {seed}")
     print(f"{'='*72}")
 
-    # ── 1. Dataset ────────────────────────────────────────────────────────────
+    # 1. Dataset
     print("\n1. Dataset...")
     X, y_fr, y_ep, meta = load_dataset(seed)
     splits = make_splits(X, y_fr, y_ep, meta, seed)
@@ -893,7 +870,7 @@ def run_seed(seed: int, device: torch.device, models_cache: Path) -> List[Dict]:
     def _exists(name: str) -> bool:
         return _ckpt(name).exists()
 
-    # ── 2. Teacher BiLSTM ─────────────────────────────────────────────────────
+    # 2. Teacher BiLSTM
     print("\n2. Teacher BiLSTM...")
     bilstm = MultiTaskLSTM(D, H, bi=True)
     if _exists("bilstm_teacher"):
@@ -905,7 +882,7 @@ def run_seed(seed: int, device: torch.device, models_cache: Path) -> List[Dict]:
         _save(bilstm, "bilstm_teacher")
     bilstm.to(device).eval()
 
-    # ── 3. TransformerTeacher ─────────────────────────────────────────────────
+    # 3. TransformerTeacher
     print("\n3. TransformerTeacher (oráculo full-sequence)...")
     trans_teacher = TransformerTeacher()
     if _exists("trans_teacher"):
@@ -917,7 +894,7 @@ def run_seed(seed: int, device: torch.device, models_cache: Path) -> List[Dict]:
         _save(trans_teacher, "trans_teacher")
     trans_teacher.to(device).eval()
 
-    # ── 4. LSTM-Baseline ──────────────────────────────────────────────────────
+    # 4. LSTM-Baseline
     print("\n4. LSTM-Baseline...")
     lstm_base = MultiTaskLSTM(D, H, bi=False)
     if _exists("lstm_base_ts"):
@@ -932,8 +909,8 @@ def run_seed(seed: int, device: torch.device, models_cache: Path) -> List[Dict]:
         _save(lstm_base, "lstm_base_ts")
     lstm_base.to(device).eval()
 
-    # ── 5. LSTM-AF-KD (BiLSTM → LSTM) ★ canônico do artigo ──────────────────
-    print("\n5. LSTM-AF-KD [BiLSTM → LSTM]...")
+    # 5. LSTM-AF-KD (BiLSTM -> LSTM) ★ canônico do artigo
+    print("\n5. LSTM-AF-KD [BiLSTM -> LSTM]...")
     lstm_afkd = MultiTaskLSTM(D, H, bi=False)
     if _exists("lstm_afkd_ts"):
         ckpt = torch.load(_ckpt("lstm_afkd_ts"), map_location=device)
@@ -947,8 +924,8 @@ def run_seed(seed: int, device: torch.device, models_cache: Path) -> List[Dict]:
         _save(lstm_afkd, "lstm_afkd_ts")
     lstm_afkd.to(device).eval()
 
-    # ── 6. LSTM-TransKD (Transformer → LSTM) ★ ablação central ──────────────
-    print("\n6. LSTM-TransKD [Transformer → LSTM]  ★ ablação central...")
+    # 6. LSTM-TransKD (Transformer -> LSTM) ★ ablação central
+    print("\n6. LSTM-TransKD [Transformer -> LSTM]  ★ ablação central...")
     lstm_transkd = MultiTaskLSTM(D, H, bi=False)
     if _exists("lstm_transkd_ts"):
         ckpt = torch.load(_ckpt("lstm_transkd_ts"), map_location=device)
@@ -963,7 +940,7 @@ def run_seed(seed: int, device: torch.device, models_cache: Path) -> List[Dict]:
         _save(lstm_transkd, "lstm_transkd_ts")
     lstm_transkd.to(device).eval()
 
-    # ── 7. Transformer-Baseline ───────────────────────────────────────────────
+    # 7. Transformer-Baseline
     print("\n7. Transformer-Baseline (causal)...")
     trans_base = TransformerStudent()
     if _exists("trans_base_ts"):
@@ -978,8 +955,8 @@ def run_seed(seed: int, device: torch.device, models_cache: Path) -> List[Dict]:
         _save(trans_base, "trans_base_ts")
     trans_base.to(device).eval()
 
-    # ── 8. Transformer-AF-KD (BiLSTM → Transformer causal) ───────────────────
-    print("\n8. Transformer-AF-KD [BiLSTM → Transformer]...")
+    # 8. Transformer-AF-KD (BiLSTM -> Transformer causal)
+    print("\n8. Transformer-AF-KD [BiLSTM -> Transformer]...")
     trans_afkd = TransformerStudent()
     if _exists("trans_afkd_ts"):
         ckpt = torch.load(_ckpt("trans_afkd_ts"), map_location=device)
@@ -994,7 +971,7 @@ def run_seed(seed: int, device: torch.device, models_cache: Path) -> List[Dict]:
         _save(trans_afkd, "trans_afkd_ts")
     trans_afkd.to(device).eval()
 
-    # ── 9. Calibração: θ_TTD e thr_ep por modelo ─────────────────────────────
+    # 9. Calibração: θ_TTD e thr_ep por modelo
     print("\n9. Calibração (VAL)...")
     named_models = {
         "LSTM-Baseline":       lstm_base,
@@ -1015,7 +992,7 @@ def run_seed(seed: int, device: torch.device, models_cache: Path) -> List[Dict]:
         thr_ep_map[name] = select_thr_ep(fp_va, y_ep_va)
         print(f"   {name:28s}  θ={theta_map[name]:.3f}  thr_ep={thr_ep_map[name]:.3f}")
 
-    # ── 10. Inferência e avaliação no TEST ────────────────────────────────────
+    # 10. Inferência e avaliação no TEST
     print("\n10. Inferência e avaliação (TEST)...")
     rows = []
     for name, mdl in named_models.items():
@@ -1057,9 +1034,7 @@ def run_seed(seed: int, device: torch.device, models_cache: Path) -> List[Dict]:
     return rows
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 7) AGREGAÇÃO E EXPORTAÇÃO LATEX
-# ══════════════════════════════════════════════════════════════════════════════
 
 # Ordem canônica para as tabelas do artigo
 _TABLE_ORDER = [
@@ -1155,7 +1130,7 @@ def export_latex_compact(df_agg: pd.DataFrame, out_path: Path) -> None:
         "% $n{=}4$ sementes. Negrito: configuração canônica do artigo.",
     ]
     out_path.write_text("\n".join(lines), encoding="utf-8")
-    print(f"✓ Tabela compacta (artigo): {out_path}")
+    print(f"Tabela compacta (artigo): {out_path}")
 
 
 def export_latex_full(df_agg: pd.DataFrame, out_path: Path) -> None:
@@ -1196,7 +1171,7 @@ def export_latex_full(df_agg: pd.DataFrame, out_path: Path) -> None:
         )
     lines += ["\\bottomrule", "\\end{tabular}"]
     out_path.write_text("\n".join(lines), encoding="utf-8")
-    print(f"✓ Tabela completa: {out_path}")
+    print(f"Tabela completa: {out_path}")
 
 
 def print_terminal_summary(df_agg: pd.DataFrame) -> None:
@@ -1224,13 +1199,11 @@ def print_terminal_summary(df_agg: pd.DataFrame) -> None:
     print(sep)
     print("\n  ★ = configuração canônica do artigo (LSTM + BiLSTM teacher)")
     print("  ▲ = ablação central (mesmo student, teacher atencional)")
-    print("  Pergunta: LSTM-AF-KD ≈ LSTM-TransKD? → princípio teacher-agnóstico")
+    print("  Pergunta: LSTM-AF-KD ≈ LSTM-TransKD? -> princípio teacher-agnóstico")
     print(f"{'═'*80}\n")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 8) MAIN
-# ══════════════════════════════════════════════════════════════════════════════
 
 def main():
     parser = argparse.ArgumentParser(
@@ -1259,7 +1232,7 @@ def main():
 
     csv_path = OUTPUT_DIR / "results_all_seeds.csv"
 
-    # ── Fase 1: Treino e avaliação ────────────────────────────────────────────
+    # Fase 1: Treino e avaliação
     if not args.skip_train:
         all_rows: List[Dict] = []
         for seed in seeds_run:
@@ -1268,31 +1241,31 @@ def main():
 
         df = pd.DataFrame(all_rows)
         df.to_csv(csv_path, index=False, float_format="%.6f")
-        print(f"\n✓ results_all_seeds.csv → {csv_path}")
+        print(f"\nresults_all_seeds.csv -> {csv_path}")
     else:
         if not csv_path.exists():
             print(f"✗ {csv_path} não encontrado. Execute sem --skip-train primeiro.")
             sys.exit(1)
         df = pd.read_csv(csv_path)
-        print(f"✓ Resultados carregados: {csv_path}")
+        print(f"Resultados carregados: {csv_path}")
 
-    # ── Fase 2: Agregação ────────────────────────────────────────────────────
+    # Fase 2: Agregação
     df_agg = aggregate(df)
     df_agg.to_csv(OUTPUT_DIR / "summary.csv", index=False, float_format="%.6f")
-    print(f"✓ summary.csv → {OUTPUT_DIR / 'summary.csv'}")
+    print(f"summary.csv -> {OUTPUT_DIR / 'summary.csv'}")
 
-    # ── Fase 3: Exportação LaTeX ─────────────────────────────────────────────
+    # Fase 3: Exportação LaTeX
     export_latex_compact(df_agg, OUTPUT_DIR / "table_teacher_ablation.tex")
     export_latex_full(df_agg,    OUTPUT_DIR / "table_teacher_ablation_full.tex")
 
-    # ── Fase 4: Resumo no terminal ───────────────────────────────────────────
+    # Fase 4: Resumo no terminal
     print_terminal_summary(df_agg)
 
     print(f"Saídas em: {OUTPUT_DIR}/")
     print(f"  ├─ results_all_seeds.csv")
     print(f"  ├─ summary.csv")
-    print(f"  ├─ table_teacher_ablation.tex      ← colar na Seção 4.4 do artigo")
-    print(f"  └─ table_teacher_ablation_full.tex ← versão completa")
+    print(f"  ├─ table_teacher_ablation.tex      <- colar na Seção 4.4 do artigo")
+    print(f"  └─ table_teacher_ablation_full.tex <- versão completa")
 
 
 if __name__ == "__main__":

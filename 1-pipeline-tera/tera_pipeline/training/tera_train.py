@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 tera_pipeline/training/tera_train.py
-═══════════════════════════════════════════════════════════════════════════════
 Gerenciamento de treinamento do TERA Pipeline.
 
 Modelos treinados:
@@ -24,7 +23,6 @@ SAÍDAS em exp_dir/models/:
 Compatibilidade retroativa com modelos_salvos/abl_A/:
   Se os checkpoints já existirem em modelos_salvos/abl_A/ e --reuse-models
   for passado, o treinamento é pulado e os modelos são copiados para exp_dir.
-═══════════════════════════════════════════════════════════════════════════════
 """
 
 import math
@@ -40,7 +38,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader, TensorDataset
 
 
-# ── Modelo canônico ────────────────────────────────────────────────────────────
+# Modelo canônico
 
 class MultiTaskLSTM(nn.Module):
     """
@@ -115,9 +113,9 @@ def count_parameters(model: nn.Module) -> int:
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-# ── Losses ─────────────────────────────────────────────────────────────────────
+# Losses
 
-# ── Losses Parametrizadas (Framework Modular) ─────────────────────────────────
+# Losses Parametrizadas (Framework Modular)
 
 def aftkd_loss(
     student_fr:   torch.Tensor,   # (B, T, 1) — saída de fc_fr do student
@@ -131,7 +129,7 @@ def aftkd_loss(
 ) -> torch.Tensor:
     """
     Perda AF-TKD Avançada e Parametrizada integrada ao TERA Framework.
-    
+
     Implementa de forma estritamente causal:
       1. Decaimento Exponencial Pós-Onset (assimétrico).
       2. [Ajuste 1] Pre-onset Push: Força o aprendizado de precursores antes do t0.
@@ -154,12 +152,11 @@ def aftkd_loss(
     kd_window   = config.af_tkd.hidden_kd_window
 
 
-
-    # ── L_hard: BCE no head episódico dedicado (fc_ep) ───────────────────────
+    # L_hard: BCE no head episódico dedicado (fc_ep)
     y_ep_float = y_episode.float().squeeze(-1) if y_episode.ndim > 1 else y_episode.float()
     l_hard = F.binary_cross_entropy_with_logits(ep_logit, y_ep_float)
 
-    # ── L_soft: KL divergência com máscara temporal avançada ─────────────────
+    # L_soft: KL divergência com máscara temporal avançada
     p_teacher = torch.sigmoid(teacher_logits / temp)
     p_student = torch.sigmoid(student_logits / temp)
     kl = F.binary_cross_entropy(p_student, p_teacher, reduction="none")  # (B, T)
@@ -175,22 +172,22 @@ def aftkd_loss(
                 if t0 > 0:
                     # Inicializa vetor de pesos para o episódio corrente
                     w_ep = torch.ones(T, device=student_logits.device)
-                    
+
                     # 1. Janela Pós-Onset: Aplica o decaimento exponencial assimétrico
                     for t in range(t0, T):
                         w_ep[t] = torch.exp(torch.tensor(-alpha * (t - t0), device=student_logits.device))
-                        
+
                         # [MECANISMO LATE PENALTY]
                         # Se o aluno estiver reativo/atrasado (abaixo de theta_late), aplica punição severa
                         if torch.sigmoid(student_logits[i, t]) < theta_late:
                             w_ep[t] *= lam_late
-                    
+
                     # 2. [MECANISMO PRE-ONSET PUSH]
                     # Aplica peso fixo aumentado na janela de quadros precursores imediatamente anterior ao onset
                     win_start = max(0, t0 - kd_window)
                     for t in range(win_start, t0):
                         w_ep[t] = pre_push_w
-                    
+
                     # Normalização idêntica ao protocolo original para estabilidade de gradiente
                     w_ep = w_ep / (w_ep.sum() + 1e-8)
                     weights[i] = w_ep
@@ -201,7 +198,7 @@ def aftkd_loss(
 
     return (1 - lam_kd) * l_hard + lam_kd * l_soft
 
-# ── TrainingManager ─────────────────────────────────────────────────────────────
+# TrainingManager
 
 class TrainingManager:
     """Gerencia o treinamento de todos os modelos para todas as seeds."""
@@ -237,11 +234,11 @@ class TrainingManager:
             return True
         if legacy.exists():
             shutil.copy(legacy, dest)
-            print(f"    ✓ [cache] {role}_seed{seed}.pt copiado de legacy")
+            print(f"    [cache] {role}_seed{seed}.pt copiado de legacy")
             return True
         return False
 
-    # ── Carregamento de dados ──────────────────────────────────────────────────
+    # Carregamento de dados
 
     def _load_split(
         self, seed: int, split: str
@@ -265,7 +262,7 @@ class TrainingManager:
             onsets.append(idx[0].item() if len(idx) > 0 else self.window - 1)
         return torch.tensor(onsets, dtype=torch.long)
 
-    # ── Teacher (BiLSTM) ──────────────────────────────────────────────────────
+    # Teacher (BiLSTM)
 
     def train_teacher(self, seed: int) -> MultiTaskLSTM:
         if self._try_reuse("teacher", seed):
@@ -299,10 +296,10 @@ class TrainingManager:
                 print(f"      ep={ep+1:3d}  loss={total_loss/len(loader):.4f}")
 
         torch.save(model.state_dict(), self._ckpt("teacher", seed))
-        print(f"    ✓ Teacher salvo: teacher_seed{seed}.pt")
+        print(f"    Teacher salvo: teacher_seed{seed}.pt")
         return model
 
-    # ── Baseline ─────────────────────────────────────────────────────────────
+    # Baseline
 
     def train_baseline(self, seed: int) -> MultiTaskLSTM:
         if self._try_reuse("baseline", seed):
@@ -335,10 +332,10 @@ class TrainingManager:
                 print(f"      ep={ep+1:3d}  loss={total_loss/len(loader):.4f}")
 
         torch.save(model.state_dict(), self._ckpt("baseline", seed))
-        print(f"    ✓ Baseline salvo: baseline_seed{seed}.pt")
+        print(f"    Baseline salvo: baseline_seed{seed}.pt")
         return model
 
-    # ── AF-TKD Student (protocolo 3 fases) ───────────────────────────────────
+    # AF-TKD Student (protocolo 3 fases)
 
     def train_aftkd(self, seed: int, teacher: MultiTaskLSTM) -> MultiTaskLSTM:
         if self._try_reuse("student", seed):
@@ -347,7 +344,7 @@ class TrainingManager:
         print(f"    Treinando AF-TKD Student (seed={seed})...")
         s_cfg = self.train_cfg.get("student_aftkd", {})
 
-        # ── Classe Adaptadora para manter o mapeamento de Framework do config.yaml ──
+        # Classe Adaptadora para manter o mapeamento de Framework do config.yaml
         class ConfigAdapter:
             def __init__(self, raw_cfg):
                 class SubConfig:
@@ -427,10 +424,10 @@ class TrainingManager:
                       f"loss={total_loss/len(loader):.4f}  [{phase}]")
 
         torch.save(student.state_dict(), self._ckpt("student", seed))
-        print(f"    ✓ Student salvo: student_seed{seed}.pt")
+        print(f"    Student salvo: student_seed{seed}.pt")
         return student
 
-    # ── Carregamento ──────────────────────────────────────────────────────────
+    # Carregamento
 
     def _load_model(self, role: str, seed: int, bi: bool = False) -> MultiTaskLSTM:
         model = MultiTaskLSTM(self.D, self.H, bi=bi).to(self.device)
@@ -440,7 +437,7 @@ class TrainingManager:
         model.eval()
         return model
 
-    # ── Orquestrador ─────────────────────────────────────────────────────────
+    # Orquestrador
 
     def run(self, reuse: bool = True) -> None:
         """Treina teacher + baseline + student para todas as seeds."""
@@ -456,4 +453,4 @@ class TrainingManager:
             n_params = count_parameters(MultiTaskLSTM(self.D, self.H))
             print(f"  Parâmetros do student (fc_fr + fc_ep, 2 camadas): {n_params:,}"
                   f"  (~{n_params*4/1024:.0f} KB FP32)")
-        print("\n  ✓ Treinamento concluído para todas as seeds")
+        print("\n  Treinamento concluído para todas as seeds")

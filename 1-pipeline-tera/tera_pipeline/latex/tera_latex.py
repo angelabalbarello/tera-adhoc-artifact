@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 tera_pipeline/latex/tera_latex.py
-═══════════════════════════════════════════════════════════════════════════════
 Geração automática de macros LaTeX e tabelas a partir do CSV canônico.
 
 REGRA DE ORO:
@@ -10,14 +9,13 @@ REGRA DE ORO:
   Nenhum número é editado manualmente.
 
 FONTES:
-  results_all_seeds.csv → agrega → macros + tabelas
+  results_all_seeds.csv -> agrega -> macros + tabelas
 
 SAÍDAS:
-  paper_metrics_macros.tex        → \newcommand{\resXXX}{0.000}
-  paper_table2_rows.tex           → linhas da Tabela 2 (fatorial 2×2)
-  paper_table_stratified_rows.tex → linhas da Tabela estratificada
-  paper_table_seeds_coverage.tex  → tabela de cobertura de seeds
-═══════════════════════════════════════════════════════════════════════════════
+  paper_metrics_macros.tex        -> \newcommand{\resXXX}{0.000}
+  paper_table2_rows.tex           -> linhas da Tabela 2 (fatorial 2×2)
+  paper_table_stratified_rows.tex -> linhas da Tabela estratificada
+  paper_table_seeds_coverage.tex  -> tabela de cobertura de seeds
 """
 
 import json
@@ -29,7 +27,7 @@ import numpy as np
 import pandas as pd
 
 
-# ── Mapeamento canônico: (prefixo_macro, config_id) ─────────────────────────
+# Mapeamento canônico: (prefixo_macro, config_id)
 MACRO_MAPPING = [
     ("BaseFixo",  "baseline_fixed"),
     ("BaseHibr",  "baseline_hybrid"),
@@ -70,7 +68,7 @@ DERIVED_MACROS = {
 
 
 def _fmt(v, decimals: int = 3) -> str:
-    """Formata número para macro LaTeX. NaN → '--'."""
+    """Formata número para macro LaTeX. NaN -> '--'."""
     if v is None or (isinstance(v, float) and math.isnan(v)):
         return "--"
     return f"{v:.{decimals}f}"
@@ -157,7 +155,7 @@ class LatexGenerator:
         for _, row in summary.iterrows():
             n = int(row.get("N_Seeds", 0))
             if n < 4:
-                print(f"  ⚠️  {row['config_id']}: apenas {n}/4 seeds no CSV.")
+                print(f"  aviso: {row['config_id']}: apenas {n}/4 seeds no CSV.")
                 print("      Macros geradas são menos robustas estatisticamente.")
 
     def generate_macros(self, summary: pd.DataFrame) -> None:
@@ -175,12 +173,12 @@ class LatexGenerator:
             "",
         ]
 
-        # ── Família 1: métricas principais por config ─────────────────────
+        # Família 1: métricas principais por config
         lines.append("% ── Tabela 2: resultados principais (fatorial 2×2) ──────────────")
         for prefix, config_id in MACRO_MAPPING:
             row = summary[summary["config_id"] == config_id]
             if row.empty:
-                lines.append(f"% ⚠️  config '{config_id}' não encontrada no CSV")
+                lines.append(f"% aviso: config '{config_id}' não encontrada no CSV")
                 for _, cmd in METRIC_CMDS:
                     lines.append(_latex_cmd(f"res{prefix}{cmd}", "--"))
                     lines.append(_latex_cmd(f"std{prefix}{cmd}", "--"))
@@ -198,7 +196,7 @@ class LatexGenerator:
                     lines.append(_latex_cmd(f"std{prefix}{cmd}", _fmt(r[sd_col])))
             lines.append("")
 
-        # ── Família 2: métricas estratificadas ───────────────────────────
+        # Família 2: métricas estratificadas
         lines.append("% ── Análise estratificada (progressivo vs abrupto) ─────────────")
         for prefix, config_id in MACRO_MAPPING:
             row = summary[summary["config_id"] == config_id]
@@ -214,7 +212,7 @@ class LatexGenerator:
                     lines.append(_latex_cmd(f"std{prefix}{cmd}", _fmt(r[sd_col])))
         lines.append("")
 
-        # ── Família 3: macros derivadas ───────────────────────────────────
+        # Família 3: macros derivadas
         lines.append("% ── Macros derivadas ────────────────────────────────────────────")
         for macro_name, fn in DERIVED_MACROS.items():
             try:
@@ -224,7 +222,7 @@ class LatexGenerator:
                 lines.append(_latex_cmd(macro_name, "--"))
         lines.append("")
 
-        # ── Cobertura de seeds ────────────────────────────────────────────
+        # Cobertura de seeds
         lines.append("% ── Cobertura de seeds por configuração ─────────────────────────")
         for _, config_id in MACRO_MAPPING:
             row = summary[summary["config_id"] == config_id]
@@ -234,7 +232,7 @@ class LatexGenerator:
 
         out = self.out_dir / self.latex_cfg.get("macros_file", "paper_metrics_macros.tex")
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
-        print(f"  ✓ Macros LaTeX → {out}")
+        print(f"  Macros LaTeX -> {out}")
 
     def generate_table2(self, summary: pd.DataFrame) -> None:
         """
@@ -288,7 +286,7 @@ class LatexGenerator:
 
         out = self.out_dir / self.latex_cfg.get("table2_file", "paper_table2_rows.tex")
         out.write_text("\n".join(rows) + "\n", encoding="utf-8")
-        print(f"  ✓ Tabela 2 LaTeX → {out}")
+        print(f"  Tabela 2 LaTeX -> {out}")
 
     def generate_table_stratified(self, df: pd.DataFrame) -> None:
         """Gera linhas da tabela estratificada (progressivo vs abrupto)."""
@@ -323,7 +321,7 @@ class LatexGenerator:
         out = self.out_dir / self.latex_cfg.get(
             "table_stratified_file", "paper_table_stratified_rows.tex")
         out.write_text("\n".join(rows) + "\n", encoding="utf-8")
-        print(f"  ✓ Tabela estratificada LaTeX → {out}")
+        print(f"  Tabela estratificada LaTeX -> {out}")
 
     def generate_seed_coverage_table(self, summary: pd.DataFrame) -> None:
         """
@@ -370,7 +368,7 @@ class LatexGenerator:
         ]
         out = self.out_dir / "paper_table_seed_coverage.tex"
         out.write_text("\n".join(lines) + "\n", encoding="utf-8")
-        print(f"  ✓ Tabela cobertura seeds → {out}")
+        print(f"  Tabela cobertura seeds -> {out}")
 
     def _write_readme(self, summary: pd.DataFrame) -> None:
         """Escreve README no diretório latex/ explicando os arquivos."""
@@ -383,10 +381,10 @@ class LatexGenerator:
             "  python run_experiment.py --stages export",
             "",
             "## Arquivos",
-            "- `paper_metrics_macros.tex` → todas as macros \\resXXX e \\stdXXX",
-            "- `paper_table2_rows.tex`    → linhas da Tabela 2 do paper",
-            "- `paper_table_stratified_rows.tex` → linhas da tabela estratificada",
-            "- `paper_table_seed_coverage.tex`   → tabela de cobertura de seeds",
+            "- `paper_metrics_macros.tex` -> todas as macros \\resXXX e \\stdXXX",
+            "- `paper_table2_rows.tex`    -> linhas da Tabela 2 do paper",
+            "- `paper_table_stratified_rows.tex` -> linhas da tabela estratificada",
+            "- `paper_table_seed_coverage.tex`   -> tabela de cobertura de seeds",
             "",
             "## Como usar no paper",
             "```latex",

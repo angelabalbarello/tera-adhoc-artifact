@@ -12,14 +12,14 @@ Uma linha por (seed, config, episode_id, frame):
   | t | time_s | p_t | y_frame_clean | p_max_episode
 
 RECEITAS avaliadas:
-  Nível Normal  → amostras das receitas N01–N03 do treino principal
+  Nível Normal  -> amostras das receitas N01–N03 do treino principal
                   (o modelo os viu como não-críticos — FPR esperada ≈ 0)
-  Nível Atenção → receitas borderline A01, A02, A03
-  Nível Alerta  → receitas borderline L01, L02, L03
-  Nível Crítico → receitas do treino C01–C10 (subconjunto do test set)
+  Nível Atenção -> receitas borderline A01, A02, A03
+  Nível Alerta  -> receitas borderline L01, L02, L03
+  Nível Crítico -> receitas do treino C01–C10 (subconjunto do test set)
 
 Todos os episódios borderline são gerados de novo (receitas NÃO vistas
-no treino → avalia generalização do modelo calibrado).
+no treino -> avalia generalização do modelo calibrado).
 Os episódios Críticos e Normais vêm do test set da seed especificada.
 
 SEEDS_TO_RUN: por padrão [42] (basta para a figura do artigo).
@@ -46,7 +46,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-# ── Importar run_v29 ──────────────────────────────────────────────────────────
+# Importar run_v29
 RUN_V29_MODULE = "run_v29_ablacao_ttdef_ajuste_gatting"
 try:
     rv = importlib.import_module(RUN_V29_MODULE)
@@ -77,7 +77,7 @@ D                        = rv.D
 H_DIM                    = rv.H
 K_AGG                    = rv.K_AGG
 
-# ── Importar gerador sintético ────────────────────────────────────────────────
+# Importar gerador sintético
 try:
     import synthetic_driver_risk_v7 as gen
 except ModuleNotFoundError:
@@ -86,16 +86,14 @@ except ModuleNotFoundError:
         "Coloque este script na mesma pasta do gerador."
     )
 
-# ═══════════════════════════════════════════════════════════════════════
 # CONFIGURAÇÃO
-# ═══════════════════════════════════════════════════════════════════════
 SEEDS_TO_RUN    = [42]
 FRAME_THR       = 0.35
 PER_RECIPE_BL   = 80       # episódios por receita borderline (Atenção/Alerta)
 PER_RECIPE_NORM = 40       # episódios Normal gerados de novo para complementar
 OUTPUT_CSV      = "borderline_frame_logs.csv"
 
-# Mapeamento categoria → risk_level legível
+# Mapeamento categoria -> risk_level legível
 RISK_LEVEL_MAP = {
     "Normal":   "Normal",
     "Atencao":  "Atenção",
@@ -104,9 +102,7 @@ RISK_LEVEL_MAP = {
 }
 
 
-# ═══════════════════════════════════════════════════════════════════════
-# HELPER — inferência por episódio → frame_probs (n, T)
-# ═══════════════════════════════════════════════════════════════════════
+# HELPER — inferência por episódio -> frame_probs (n, T)
 
 def infer_fixed_batch(
     model: torch.nn.Module,
@@ -139,9 +135,7 @@ def infer_fixed_batch(
     return frame_probs
 
 
-# ═══════════════════════════════════════════════════════════════════════
 # HELPER — gerar dataset borderline (Atenção + Alerta)
-# ═══════════════════════════════════════════════════════════════════════
 
 def generate_borderline_dataset(seed: int, per_recipe: int) -> tuple:
     """
@@ -188,9 +182,7 @@ def generate_normal_dataset(seed: int, per_recipe: int) -> tuple:
     return X, Yfc, meta_list
 
 
-# ═══════════════════════════════════════════════════════════════════════
 # HELPER — extrair episódios Críticos do test set
-# ═══════════════════════════════════════════════════════════════════════
 
 def load_critical_from_test(
     seed: int,
@@ -222,9 +214,7 @@ def load_critical_from_test(
     }
 
 
-# ═══════════════════════════════════════════════════════════════════════
 # HELPER — construir linhas do CSV para um grupo de episódios
-# ═══════════════════════════════════════════════════════════════════════
 
 def build_rows(
     seed: int,
@@ -268,9 +258,7 @@ def build_rows(
     return rows
 
 
-# ═══════════════════════════════════════════════════════════════════════
 # LOOP PRINCIPAL
-# ═══════════════════════════════════════════════════════════════════════
 
 def main() -> None:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -285,7 +273,7 @@ def main() -> None:
         print(f"  SEED {SEED}")
         print(f"{'='*60}")
 
-        # ── 1. Carregar modelos ──────────────────────────────────────
+        # 1. Carregar modelos
         ckpt_base = MODEL_DIR / f"baseline_seed{SEED}.pt"
         ckpt_stud = MODEL_DIR / f"student_seed{SEED}.pt"
         if not ckpt_base.exists() or not ckpt_stud.exists():
@@ -302,7 +290,7 @@ def main() -> None:
         student.eval()
         print(f"  Modelos carregados.")
 
-        # ── 2. Dataset principal + splits (para Crítico e Normal) ────
+        # 2. Dataset principal + splits (para Crítico e Normal)
         ds_cfg = DatasetConfig(seed=SEED)
         X, y_fr_cont, _, meta = load_or_generate_dataset(ds_cfg)
 
@@ -325,7 +313,7 @@ def main() -> None:
         yfrc_te = sliced["test"][2]
         meta_te = meta.iloc[splits["test_idx"]].reset_index(drop=True)
 
-        # ── 3. Frame probs do test set (Crítico + Normal) ───────────
+        # 3. Frame probs do test set (Crítico + Normal)
         def _load_or_infer(model, name: str, label: str) -> np.ndarray:
             npy = Path(f"{EXP_NAME}_frame_probs_{name}_seed{SEED}.npy")
             if npy.exists():
@@ -340,7 +328,7 @@ def main() -> None:
         fp_base_te = _load_or_infer(baseline, "base", "baseline_fixed")
         fp_kd_te   = _load_or_infer(student,  "kd",   "afkd_fixed")
 
-        # ── 4. Críticos do test set ──────────────────────────────────
+        # 4. Críticos do test set
         crit_mask   = yep_te.astype(bool)
         norm_mask   = (~crit_mask)
 
@@ -358,7 +346,7 @@ def main() -> None:
                     risk_level="Crítico",
                 )
                 all_rows.extend(rows)
-                print(f"  [{cfg_name}] Crítico: {crit_mask.sum()} eps → "
+                print(f"  [{cfg_name}] Crítico: {crit_mask.sum()} eps -> "
                       f"{len(rows):,} linhas")
 
             # Normal do test set
@@ -377,10 +365,10 @@ def main() -> None:
                         risk_level="Normal",
                     )
                     all_rows.extend(rows)
-                    print(f"  [{cfg_name}] Normal (test): {is_normal.sum()} eps → "
+                    print(f"  [{cfg_name}] Normal (test): {is_normal.sum()} eps -> "
                           f"{len(rows):,} linhas")
 
-        # ── 5. Gerar episódios Normal extras ─────────────────────────
+        # 5. Gerar episódios Normal extras
         # Complementa os Normais do test set com episódios gerados
         print("  Gerando episódios Normal extras...")
         X_norm, yfc_norm_gen, meta_norm_gen = generate_normal_dataset(
@@ -395,14 +383,14 @@ def main() -> None:
                 meta_norm_gen, risk_level="Normal",
             )
             all_rows.extend(rows)
-            print(f"  [{cfg_name}] Normal (gerado): {X_norm.shape[0]} eps → "
+            print(f"  [{cfg_name}] Normal (gerado): {X_norm.shape[0]} eps -> "
                   f"{len(rows):,} linhas")
 
-        # ── 6. Gerar episódios Atenção + Alerta ──────────────────────
+        # 6. Gerar episódios Atenção + Alerta
         print("  Gerando episódios Atenção + Alerta (RECIPES_BORDERLINE)...")
         X_bl, yfc_bl, meta_bl = generate_borderline_dataset(SEED, PER_RECIPE_BL)
 
-        # Mapa de recipe_id → risk_level
+        # Mapa de recipe_id -> risk_level
         recipe_to_level = {}
         for k, spec in gen.RECIPES_BORDERLINE.items():
             cat_bl = spec.get("categoria", "")
@@ -431,12 +419,12 @@ def main() -> None:
                     risk_level=level_key,
                 )
                 all_rows.extend(rows)
-                print(f"  [{cfg_name}] {level_key}: {len(idx_level)} eps → "
+                print(f"  [{cfg_name}] {level_key}: {len(idx_level)} eps -> "
                       f"{len(rows):,} linhas")
 
         print(f"  Total de linhas acumuladas: {len(all_rows):,}")
 
-    # ── 7. Salvar CSV ───────────────────────────────────────────────
+    # 7. Salvar CSV
     if not all_rows:
         print("\n[ERRO] Nenhuma linha gerada.")
         return
@@ -458,7 +446,7 @@ def main() -> None:
         print(ep_stats.round(4))
 
     df_out.to_csv(OUTPUT_CSV, index=False)
-    print(f"\n✅ CSV salvo: {OUTPUT_CSV}")
+    print(f"\nok CSV salvo: {OUTPUT_CSV}")
     print(f"   Linhas: {len(df_out):,}")
     print(f"   Tamanho aprox.: {Path(OUTPUT_CSV).stat().st_size / 1e6:.1f} MB")
     print(f"\nNíveis de risco presentes:\n{df_out['risk_level'].value_counts()}")

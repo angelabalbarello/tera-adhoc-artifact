@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 tera_pipeline/logging/tera_log.py
-═══════════════════════════════════════════════════════════════════════════════
 Geração de frame logs para as figuras do artigo.
 
 REGRA CANÔNICA:
@@ -14,7 +13,6 @@ REGRA CANÔNICA:
 SAÍDAS em exp_dir/logs/:
   episode_frame_logs.csv    — p(t), H(t), supressões, por frame
   borderline_frame_logs.csv — distribuição de risco em episódios borderline
-═══════════════════════════════════════════════════════════════════════════════
 """
 
 import math
@@ -103,7 +101,7 @@ class FrameLogger:
             return "pre_onset"
         return "stable"
 
-    # ── Episode frame logs ────────────────────────────────────────────────────
+    # Episode frame logs
 
     @torch.no_grad()
     def generate_episode_logs(self, seeds: List[int]) -> None:
@@ -139,7 +137,7 @@ class FrameLogger:
 
         df = pd.DataFrame(all_rows)
         df.to_csv(out_path, index=False)
-        print(f"    ✓ episode_frame_logs.csv → {out_path} ({len(df):,} linhas)")
+        print(f"    episode_frame_logs.csv -> {out_path} ({len(df):,} linhas)")
 
     @torch.no_grad()
     def _log_config(
@@ -205,7 +203,7 @@ class FrameLogger:
                 })
         return rows
 
-    # ── Borderline frame logs ─────────────────────────────────────────────────
+    # Borderline frame logs
 
     @torch.no_grad()
     def generate_borderline_logs(self, seeds: List[int]) -> None:
@@ -233,9 +231,9 @@ class FrameLogger:
         if all_rows:
             df = pd.DataFrame(all_rows)
             df.to_csv(out_path, index=False)
-            print(f"    ✓ borderline_frame_logs.csv → {out_path} ({len(df):,} linhas)")
+            print(f"    borderline_frame_logs.csv -> {out_path} ({len(df):,} linhas)")
         else:
-            print("    ⚠️  Nenhum episódio borderline gerado.")
+            print("    aviso: Nenhum episódio borderline gerado.")
 
     def _log_borderline_seed(
         self, seed: int, student: nn.Module, baseline: nn.Module,

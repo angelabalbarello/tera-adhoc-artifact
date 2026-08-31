@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 borderline_analysis_gpu.py  (v23)
-══════════════════════════════════════════════════════════════════════
 Análise qualitativa dos episódios borderline (Atenção + Alerta) para
 a Seção 5.5 do artigo FGCS.
 
@@ -32,7 +31,6 @@ Uso:
   python borderline_analysis_gpu.py                  # usa checkpoints
   python borderline_analysis_gpu.py --no_reuse       # re-treina do zero
   python borderline_analysis_gpu.py --seeds 42 43 --per_recipe 80 --theta 0.10
-══════════════════════════════════════════════════════════════════════
 """
 
 import argparse
@@ -55,18 +53,16 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
-# ─── Importa o gerador v6 ────────────────────────────────────────────────────
+# Importa o gerador v6
 try:
     import synthetic_driver_risk_v7 as gen
-    print("✓ synthetic_driver_risk_v7 carregado")
+    print("synthetic_driver_risk_v7 carregado")
 except ImportError:
     print("ERRO: synthetic_driver_risk_v7.py não encontrado no diretório atual.")
     print(f"  Diretório atual: {os.getcwd()}")
     sys.exit(1)
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 1. CONSTANTES — idênticas ao run_v22_v6.py
-# ══════════════════════════════════════════════════════════════════════════════
 SEEDS        = [42, 43, 44, 45]
 T            = 96        # frames por episódio
 D            = 31        # dimensão de entrada
@@ -74,7 +70,7 @@ H            = 64        # hidden size LSTM
 K_AGG        = 6         # agregador causal (últimos k frames)
 M_DETECT     = 3         # m consecutivos para detecção estável
 THETA        = 0.10      # limiar operacional do artigo
-FRAME_THR    = 0.35      # threshold do y_frame_clean → label binário
+FRAME_THR    = 0.35      # threshold do y_frame_clean -> label binário
 PER_RECIPE   = 80        # episódios por receita
 LAT_WARMUP   = 100       # warm-up de latência
 
@@ -93,20 +89,18 @@ EARLY_TARGET_HI = 0.90
 BORDERLINE_CATS = {"Atencao", "Alerta"}
 OUT_PREFIX      = "borderline"
 
-# ── v23: checkpoints ─────────────────────────────────────────────────────────
+# v23: checkpoints
 # MODEL_DIR deve apontar para o mesmo diretório usado pelo run_v23.py.
 # Por padrão ambos os scripts rodam na mesma pasta de trabalho.
 MODEL_DIR            = Path("modelos_salvos")
 MODEL_DIR.mkdir(parents=True, exist_ok=True)
-# REUSE_TRAINED_MODELS=True → carrega student_seed{N}.pt do run_v23.py
-# REUSE_TRAINED_MODELS=False → re-treina do zero e salva novos checkpoints
+# REUSE_TRAINED_MODELS=True -> carrega student_seed{N}.pt do run_v23.py
+# REUSE_TRAINED_MODELS=False -> re-treina do zero e salva novos checkpoints
 # ATENÇÃO: use True para garantir consistência com os resultados do artigo.
 REUSE_TRAINED_MODELS = True
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 2. UTILITÁRIOS
-# ══════════════════════════════════════════════════════════════════════════════
 def set_seed(seed: int):
     random.seed(seed)
     np.random.seed(seed)
@@ -168,9 +162,7 @@ def first_stable_detection(probs: np.ndarray, thr: float, m: int) -> int:
     return -1
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 3. MODELO — idêntico ao run_v22_v6.py
-# ══════════════════════════════════════════════════════════════════════════════
 class MultiTaskLSTM(nn.Module):
     def __init__(self, input_dim: int = D, hidden_dim: int = H, bi: bool = False):
         super().__init__()
@@ -187,9 +179,7 @@ class MultiTaskLSTM(nn.Module):
         return fr, ep
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 4. TREINO — idêntico ao run_v22_v6.py
-# ══════════════════════════════════════════════════════════════════════════════
 def train_teacher(model: nn.Module, X: np.ndarray, yfr: np.ndarray,
                   yep: np.ndarray, device: torch.device,
                   epochs: int = TEACHER_EPOCHS) -> nn.Module:
@@ -215,7 +205,7 @@ def train_teacher(model: nn.Module, X: np.ndarray, yfr: np.ndarray,
 def train_afkd(student: nn.Module, teacher: nn.Module,
                X: np.ndarray, yfr_main: np.ndarray, yep: np.ndarray,
                device: torch.device,
-               yfr_soft: Optional[np.ndarray] = None,   # ← y_frame_clean CONTÍNUO
+               yfr_soft: Optional[np.ndarray] = None,   # <- y_frame_clean CONTÍNUO
                epochs: int         = STUDENT_EPOCHS,
                beta_max: float     = STUDENT_BETA,
                temp: float         = STUDENT_TEMP,
@@ -258,7 +248,7 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
     ramp_end_epoch = warmup_epochs + rampup_epochs
 
     for e in range(epochs):
-        # ── Fase e parâmetros ────────────────────────────────────────────────
+        # Fase e parâmetros
         if e < warmup_epochs:
             beta_curr  = 0.0
             phase      = "WARMUP"
@@ -295,7 +285,7 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
             t_fr, _ = teacher(Xt)
             t_p     = torch.sigmoid(t_fr.squeeze(-1) / temp)
 
-        # ── Perdas ──────────────────────────────────────────────────────────
+        # Perdas
         l_hard = (bce_fr(s_fr, yfr_t) * w).mean()
         l_ep   = bce_ep(s_ep, yep_t)
 
@@ -401,9 +391,7 @@ def train_afkd(student: nn.Module, teacher: nn.Module,
     return student
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 5. INFERÊNCIA FRAME-A-FRAME
-# ══════════════════════════════════════════════════════════════════════════════
 @torch.no_grad()
 def warmup_model(model: nn.Module, x_ref: np.ndarray, device: torch.device,
                  steps: int = LAT_WARMUP):
@@ -437,9 +425,7 @@ def infer_episodes(model: nn.Module, X: np.ndarray,
     return frame_probs
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 6. ANÁLISE BORDERLINE
-# ══════════════════════════════════════════════════════════════════════════════
 def analyse_borderline(frame_probs: np.ndarray,
                        metas: List[dict],
                        theta: float = THETA,
@@ -485,9 +471,7 @@ def aggregate(ep_df: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 7. FIGURAS
-# ══════════════════════════════════════════════════════════════════════════════
 def plot_results(ep_df: pd.DataFrame,
                  frame_probs_all: Dict,
                  theta: float,
@@ -499,7 +483,7 @@ def plot_results(ep_df: pd.DataFrame,
     fig = plt.figure(figsize=(16, 10))
     gs  = gridspec.GridSpec(2, 3, figure=fig, hspace=0.42, wspace=0.35)
 
-    # ── Linha 1: violin plots ───────────────────────────────────────────────
+    # Linha 1: violin plots
     metrics = [
         ("max_prob",  "Prob. máxima por episódio"),
         ("mean_prob", "Prob. média por episódio"),
@@ -526,7 +510,7 @@ def plot_results(ep_df: pd.DataFrame,
         ax.set_ylim(-0.03, 1.03)
         ax.grid(axis="y", alpha=0.30)
 
-    # ── Linha 2: trajetórias médias frame-a-frame ───────────────────────────
+    # Linha 2: trajetórias médias frame-a-frame
     for col_idx, cat in enumerate(cats):
         ax = fig.add_subplot(gs[1, col_idx])
         sub    = ep_df[ep_df["categoria"] == cat]
@@ -554,7 +538,7 @@ def plot_results(ep_df: pd.DataFrame,
         ax.legend(fontsize=8)
         ax.grid(alpha=0.30)
 
-    # ── Linha 2, col 3: % que dispararia alerta ─────────────────────────────
+    # Linha 2, col 3: % que dispararia alerta
     ax  = fig.add_subplot(gs[1, 2])
     agg = ep_df.groupby("categoria")["would_alert"].mean() * 100
     bar_colors = [colors.get(c, "gray") for c in agg.index]
@@ -579,12 +563,10 @@ def plot_results(ep_df: pd.DataFrame,
     out = f"{out_prefix}_figure.png"
     plt.savefig(out, dpi=150, bbox_inches="tight")
     plt.close()
-    print(f"  → Figura salva: {out}")
+    print(f"  -> Figura salva: {out}")
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 8. RELATÓRIO PARA O ARTIGO
-# ══════════════════════════════════════════════════════════════════════════════
 def print_report(ep_df: pd.DataFrame, agg_df: pd.DataFrame, theta: float):
     print("\n" + "═" * 72)
     print("  RESULTADOS — ANÁLISE BORDERLINE (AF-KD v22_v6, seeds 42–45)")
@@ -608,7 +590,7 @@ def print_report(ep_df: pd.DataFrame, agg_df: pd.DataFrame, theta: float):
         print(f"    Frames ≥ θ={theta:.2f}     : {d['fa']*100:.1f}%")
         print(f"    Dispararia alerta (m={M_DETECT}): {d['pct']:.1f}%")
 
-    # ── Texto pronto para Seção 5.5 ─────────────────────────────────────────
+    # Texto pronto para Seção 5.5
     at = consolidated.get("Atencao", {})
     al = consolidated.get("Alerta",  {})
     print("\n" + "─" * 72)
@@ -648,9 +630,7 @@ objective risk of alert-level events.
     print("═" * 72)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 9. PIPELINE PRINCIPAL
-# ══════════════════════════════════════════════════════════════════════════════
 def main(seeds: List[int], per_recipe: int, theta: float, reuse: bool = True):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"\nDevice: {device}")
@@ -666,7 +646,7 @@ def main(seeds: List[int], per_recipe: int, theta: float, reuse: bool = True):
         print(f"{'='*60}")
         set_seed(SEED)
 
-        # ── 1) Gerar dataset de TREINO (Normal + Crítico) ─────────────────
+        # 1) Gerar dataset de TREINO (Normal + Crítico)
         print(f"\n[1/4] Gerando dataset de treino (seed {SEED})...")
         X_all, y_ep_all, y_fr_clean, _, metas_list = gen.build_dataset(
             gen.RECIPES_TRAIN,
@@ -689,7 +669,7 @@ def main(seeds: List[int], per_recipe: int, theta: float, reuse: bool = True):
         n_norm = int((y_ep == 0).sum())
         print(f"  Total: {len(y_ep)} | Crítico: {n_crit} | Normal: {n_norm}")
 
-        # ── 2) Splits 70/15/15 estratificados por recipe_id ──────────────
+        # 2) Splits 70/15/15 estratificados por recipe_id
         idx = np.arange(len(y_ep), dtype=np.int64)
         strat_key = np.where(
             meta_df[cat_col].astype(str).values == "Critico",
@@ -717,26 +697,26 @@ def main(seeds: List[int], per_recipe: int, theta: float, reuse: bool = True):
                 counts_str = "  ".join(f"{r}={n}" for r, n in rc.items())
                 print(f"  [v23-audit] {split_name:5s} crit={len(crit_sub):3d} | {counts_str}")
 
-        # ── 3) Carregar ou treinar modelos ────────────────────────────────
+        # 3) Carregar ou treinar modelos
         ckpt_student  = MODEL_DIR / f"student_seed{SEED}.pt"
         ckpt_teacher  = MODEL_DIR / f"teacher_seed{SEED}.pt"
 
         use_reuse = reuse and REUSE_TRAINED_MODELS and ckpt_student.exists()
         if use_reuse:
-            # ── Carregar pesos do run_v23.py — GARANTE CONSISTÊNCIA ──────
+            # Carregar pesos do run_v23.py — GARANTE CONSISTÊNCIA
             print(f"\n[v23] Carregando student_seed{SEED}.pt de {MODEL_DIR}/ ...")
             student = MultiTaskLSTM(D, H, bi=False).to(device)
             student.load_state_dict(torch.load(ckpt_student, map_location=device))
             student.eval()
-            print(f"  ✓ student carregado — resultados consistentes com artigo")
+            print(f"  student carregado — resultados consistentes com artigo")
         else:
             if reuse and not ckpt_student.exists():
-                print(f"\n⚠️  Checkpoint não encontrado: {ckpt_student}")
+                print(f"\naviso: Checkpoint não encontrado: {ckpt_student}")
                 print(f"   Execute run_v23.py primeiro para gerar os pesos,")
                 print(f"   ou use --no_reuse para re-treinar do zero.")
                 print(f"   Continuando com re-treino (resultados podem divergir do artigo).\n")
 
-            # ── Treinar professor BiLSTM ──────────────────────────────────
+            # Treinar professor BiLSTM
             print(f"\n[2/4] Treinando professor BiLSTM...")
             teacher = MultiTaskLSTM(D, H, bi=True)
             yfr_tr_teacher = np.zeros_like(yfr_tr)
@@ -745,7 +725,7 @@ def main(seeds: List[int], per_recipe: int, theta: float, reuse: bool = True):
             torch.save(teacher.state_dict(), ckpt_teacher)
             print(f"  professor salvo: {ckpt_teacher}")
 
-            # ── Treinar aluno AF-KD ───────────────────────────────────────
+            # Treinar aluno AF-KD
             print(f"\n[3/4] Treinando aluno AF-KD...")
             student = MultiTaskLSTM(D, H, bi=False)
             student = train_afkd(student, teacher, X_tr, yfr_tr, yep_tr, device,
@@ -754,9 +734,9 @@ def main(seeds: List[int], per_recipe: int, theta: float, reuse: bool = True):
             print(f"  student salvo: {ckpt_student}")
             del teacher
 
-        # ── 4) Gerar episódios BORDERLINE para esta seed ──────────────────
+        # 4) Gerar episódios BORDERLINE para esta seed
         print(f"\n[{'reuse' if use_reuse else '4'}/4] Gerando e inferindo episódios borderline...")
-        set_seed(SEED)   # mesma seed → reprodutibilidade
+        set_seed(SEED)   # mesma seed -> reprodutibilidade
         X_b, _, _, _, metas_b = gen.build_dataset(
             gen.RECIPES_BORDERLINE,
             window     = T,
@@ -770,14 +750,14 @@ def main(seeds: List[int], per_recipe: int, theta: float, reuse: bool = True):
         print(f"  Borderline gerado: {len(metas_b)} episódios "
               f"(Atenção:{n_atencao} Alerta:{n_alerta})")
 
-        # ── 6) Inferência frame-a-frame em todos os borderlines ───────────
+        # 6) Inferência frame-a-frame em todos os borderlines
         print(f"  Rodando inferência (frame-a-frame, causal)...")
         t0 = time.perf_counter()
         fp = infer_episodes(student, X_b, device)
         t1 = time.perf_counter()
         print(f"  Inferência concluída em {t1-t0:.1f}s")
 
-        # ── 7) Montar DataFrame de resultados ─────────────────────────────
+        # 7) Montar DataFrame de resultados
         for i, meta in enumerate(metas_b):
             meta["_seed"] = SEED
             meta["episode_idx"] = i
@@ -790,7 +770,7 @@ def main(seeds: List[int], per_recipe: int, theta: float, reuse: bool = True):
 
         del student  # libera VRAM entre seeds
 
-    # ── Consolidar e salvar ───────────────────────────────────────────────
+    # Consolidar e salvar
     ep_df  = pd.concat(all_ep_rows, ignore_index=True)
     agg_df = aggregate(ep_df)
 
@@ -798,19 +778,17 @@ def main(seeds: List[int], per_recipe: int, theta: float, reuse: bool = True):
     agg_out = f"{OUT_PREFIX}_summary.csv"
     ep_df.to_csv(ep_out,  index=False)
     agg_df.to_csv(agg_out, index=False)
-    print(f"\n  → {ep_out}  ({len(ep_df)} linhas)")
-    print(f"  → {agg_out}")
+    print(f"\n  -> {ep_out}  ({len(ep_df)} linhas)")
+    print(f"  -> {agg_out}")
 
-    # ── Figura ────────────────────────────────────────────────────────────
+    # Figura
     plot_results(ep_df, frame_probs_all, theta)
 
-    # ── Relatório terminal ────────────────────────────────────────────────
+    # Relatório terminal
     print_report(ep_df, agg_df, theta)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
 # 10. ENTRADA
-# ══════════════════════════════════════════════════════════════════════════════
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Análise borderline AF-KD v23 — GPU")
     parser.add_argument("--seeds",      type=int, nargs="+", default=SEEDS)

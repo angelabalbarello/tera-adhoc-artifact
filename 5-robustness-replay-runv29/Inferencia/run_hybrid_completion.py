@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 """
 run_hybrid_completion.py
-═══════════════════════════════════════════════════════════════════════════════
 Completa a matriz experimental de seeds para as configurações híbridas:
 
   TABELA ALVO
   ┌─────────────┬────────────────┬─────────────────┬─────────────┬──────────────┐
   │ Seed        │ Baseline Fixed │ Baseline Hybrid │ AF-KD Fixed │ AF-KD Hybrid │
   ├─────────────┼────────────────┼─────────────────┼─────────────┼──────────────┤
-  │ 42          │ ✓              │ ✓               │ ✓           │ ✓            │
-  │ 43          │ ✓              │ → PREENCHE      │ ✓           │ → PREENCHE   │
-  │ 44          │ ✓              │ → PREENCHE      │ ✓           │ → PREENCHE   │
-  │ 45          │ ✓              │ → PREENCHE      │ ✓           │ → PREENCHE   │
+  │ 42          │              │               │           │            │
+  │ 43          │              │ -> PREENCHE      │           │ -> PREENCHE   │
+  │ 44          │              │ -> PREENCHE      │           │ -> PREENCHE   │
+  │ 45          │              │ -> PREENCHE      │           │ -> PREENCHE   │
   └─────────────┴────────────────┴─────────────────┴─────────────┴──────────────┘
 
 MODO DE OPERAÇÃO
@@ -19,7 +18,7 @@ MODO DE OPERAÇÃO
   - Carrega modelos de modelos_salvos/abl_A/
   - Carrega frame_probs de exp_abl_A_frame_probs_*_seed{N}.npy (se existirem)
   - Para cada seed em TARGET_SEEDS:
-      1. Roda select_hybrid_policy no VAL → calibra (tau_d, tau_h)
+      1. Roda select_hybrid_policy no VAL -> calibra (tau_d, tau_h)
       2. Avalia AF-KD Híbrida no TEST
       3. Avalia Baseline Híbrida no TEST (com os mesmos tau_d, tau_h)
   - Salva exp_abl_A_hybrid_completion.csv
@@ -36,7 +35,6 @@ USO
   python run_hybrid_completion.py
   # ou para seeds específicas:
   python run_hybrid_completion.py --seeds 43 44 45
-═══════════════════════════════════════════════════════════════════════════════
 """
 
 import argparse
@@ -48,7 +46,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-# ─── Importa helpers do run_v29 ──────────────────────────────────────────────
+# Importa helpers do run_v29
 # Estes imports devem funcionar se este script estiver na mesma pasta do run_v29.
 try:
     from run_v29_ablacao_ttdef_ajuste_gatting import (
@@ -74,11 +72,11 @@ try:
         MODEL_DIR,
     )
 except ImportError as e:
-    print(f"❌ Erro ao importar run_v29: {e}")
+    print(f"Erro ao importar run_v29: {e}")
     print("   Certifique-se de que run_v29_ablacao_ttdef_ajuste_gatting.py está na mesma pasta.")
     sys.exit(1)
 
-# ─── Configuração ─────────────────────────────────────────────────────────────
+# Configuração
 ALL_SEEDS      = [42, 43, 44, 45]
 DEFAULT_SEEDS  = [43, 44, 45]   # seeds a completar (42 já está feita)
 DEVICE         = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -86,7 +84,7 @@ OUT_CSV        = f"{EXP_NAME}_hybrid_completion.csv"
 MERGED_CSV     = f"{EXP_NAME}_results_all_seeds_merged.csv"
 MERGED_MACROS  = f"{EXP_NAME}_paper_metrics_macros_merged.tex"
 
-# ─── CLI ──────────────────────────────────────────────────────────────────────
+# CLI
 def parse_args():
     p = argparse.ArgumentParser(description="Completa seeds faltantes das configs híbridas")
     p.add_argument("--seeds", type=int, nargs="+", default=DEFAULT_SEEDS,
@@ -98,7 +96,7 @@ def parse_args():
     return p.parse_args()
 
 
-# ─── Helpers de carregamento ──────────────────────────────────────────────────
+# Helpers de carregamento
 
 def load_model(seed: int, role: str) -> torch.nn.Module:
     """Carrega baseline ou student de modelos_salvos/abl_A/."""
@@ -111,7 +109,7 @@ def load_model(seed: int, role: str) -> torch.nn.Module:
     model = MultiTaskLSTM(D, H, bi=False).to(DEVICE)
     model.load_state_dict(torch.load(ckpt, map_location=DEVICE))
     model.eval()
-    print(f"    ✓ {role}_seed{seed}.pt carregado")
+    print(f"    {role}_seed{seed}.pt carregado")
     return model
 
 
@@ -119,7 +117,7 @@ def load_frame_probs_cache(seed: int, role: str) -> np.ndarray | None:
     """Tenta carregar frame_probs do cache .npy; retorna None se não existir."""
     npy = Path(f"{EXP_NAME}_frame_probs_{role}_seed{seed}.npy")
     if npy.exists():
-        print(f"    ✓ Cache .npy carregado: {npy.name}")
+        print(f"    Cache .npy carregado: {npy.name}")
         return np.load(npy)
     return None
 
@@ -169,7 +167,7 @@ def load_dataset_splits(seed: int):
     return X_va, X_te, yep_va, yep_te, yfr_va, yfr_te, prog_va, prog_te
 
 
-# ─── Avaliação híbrida para uma seed ─────────────────────────────────────────
+# Avaliação híbrida para uma seed
 
 def run_hybrid_for_seed(seed: int) -> list[dict]:
     """
@@ -216,11 +214,11 @@ def run_hybrid_for_seed(seed: int) -> list[dict]:
     )
 
     if hybrid_params is None:
-        print(f"  ⚠️  Seed {seed}: nenhum (τΔ, τH) satisfaz as restrições no VAL → seed ignorada")
+        print(f"  aviso: Seed {seed}: nenhum (τΔ, τH) satisfaz as restrições no VAL -> seed ignorada")
         return []
 
     tau_d, tau_h = hybrid_params
-    print(f"  ✓ Limiares calibrados: τΔ={tau_d:.4f}  τH={tau_h:.2f}")
+    print(f"  Limiares calibrados: τΔ={tau_d:.4f}  τH={tau_h:.2f}")
 
     # 4. Frame_probs TEST — cache ou inferência
     probs_kd_te   = load_frame_probs_cache(seed, "kd")
@@ -255,7 +253,7 @@ def run_hybrid_for_seed(seed: int) -> list[dict]:
                          progressive_mask=progressive_te_mask,
                          abrupt_mask=abrupt_te_mask),
     }
-    print(f"    AF-KD Híbrida  → FR={row_afkd_h.get('FailRate', float('nan')):.4f}"
+    print(f"    AF-KD Híbrida  -> FR={row_afkd_h.get('FailRate', float('nan')):.4f}"
           f"  Skip={row_afkd_h.get('SkipPct', float('nan')):.1f}%"
           f"  Cost={row_afkd_h.get('Cost_ms_per_frame', float('nan')):.4f} ms/q")
 
@@ -271,14 +269,14 @@ def run_hybrid_for_seed(seed: int) -> list[dict]:
                          progressive_mask=progressive_te_mask,
                          abrupt_mask=abrupt_te_mask),
     }
-    print(f"    Baseline Híbrida→ FR={row_base_h.get('FailRate', float('nan')):.4f}"
+    print(f"    Baseline Híbrida-> FR={row_base_h.get('FailRate', float('nan')):.4f}"
           f"  Skip={row_base_h.get('SkipPct', float('nan')):.1f}%"
           f"  Cost={row_base_h.get('Cost_ms_per_frame', float('nan')):.4f} ms/q")
 
     return [row_afkd_h, row_base_h]
 
 
-# ─── Agregação e exportação de macros ────────────────────────────────────────
+# Agregação e exportação de macros
 
 def rebuild_macros_from_merged(merged_csv: str, out_tex: str) -> None:
     """
@@ -307,7 +305,7 @@ def rebuild_macros_from_merged(merged_csv: str, out_tex: str) -> None:
     sens_summary = build_sensitivity_table(sens_df) if not sens_df.empty else pd.DataFrame()
 
     export_latex_macros(main_summary, sens_summary, path=out_tex)
-    print(f"\n  ✓ Macros LaTeX (merged) → {out_tex}")
+    print(f"\n  Macros LaTeX (merged) -> {out_tex}")
 
     # Imprime resumo por configuração
     print("\n  === RESUMO MERGED (média entre seeds disponíveis) ===")
@@ -327,7 +325,7 @@ def rebuild_macros_from_merged(merged_csv: str, out_tex: str) -> None:
               f"FR={fr:.3f}  F1={f1:.3f}  Skip={skip:.1f}%  Cost={cost:.3f}ms/q")
 
 
-# ─── Main ─────────────────────────────────────────────────────────────────────
+# Main
 
 def main():
     args = parse_args()
@@ -375,15 +373,15 @@ def main():
                 skipped.append(seed)
 
         if skipped:
-            print(f"\n  ⚠️  Seeds ignoradas (sem (τΔ,τH) viável no VAL): {skipped}")
+            print(f"\n  aviso: Seeds ignoradas (sem (τΔ,τH) viável no VAL): {skipped}")
 
         if new_rows:
             df_new = pd.DataFrame(new_rows)
             df_new.to_csv(OUT_CSV, index=False)
-            print(f"\n  ✓ Novos resultados salvos: {OUT_CSV}  ({len(df_new)} linhas)")
+            print(f"\n  Novos resultados salvos: {OUT_CSV}  ({len(df_new)} linhas)")
         else:
             df_new = pd.DataFrame()
-            print("\n  ⚠️  Nenhum novo resultado gerado.")
+            print("\n  aviso: Nenhum novo resultado gerado.")
 
     # Mesclagem
     if not args.no_merge:
@@ -406,7 +404,7 @@ def main():
             ).drop(columns=["_pol_norm"])
 
             df_merged.to_csv(MERGED_CSV, index=False)
-            print(f"  ✓ Merged CSV: {MERGED_CSV}  ({len(df_merged)} linhas)")
+            print(f"  Merged CSV: {MERGED_CSV}  ({len(df_merged)} linhas)")
 
             # Conta seeds por config
             print("\n  === COBERTURA DE SEEDS NO MERGED ===")
@@ -416,13 +414,13 @@ def main():
             )
             for (modelo, pol), g in m_df.groupby(["Modelo", "pol_norm"]):
                 seeds_found = sorted(g["Seed"].unique().tolist())
-                status = "✓" if len(seeds_found) == 4 else f"⚠️  ({len(seeds_found)}/4)"
+                status = "ok" if len(seeds_found) == 4 else f"aviso: ({len(seeds_found)}/4)"
                 print(f"    {modelo:20s} [{pol:8s}]  seeds: {seeds_found}  {status}")
 
             # Regenera macros
             rebuild_macros_from_merged(MERGED_CSV, MERGED_MACROS)
         else:
-            print("  ⚠️  Nenhum dado para mesclar.")
+            print("  aviso: Nenhum dado para mesclar.")
 
     print(f"\n{'='*60}")
     print("  Arquivos gerados:")

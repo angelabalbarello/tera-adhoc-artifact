@@ -55,7 +55,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-# ── Importar run_v29 ──────────────────────────────────────────────────────────
+# Importar run_v29
 # O arquivo deve estar no mesmo diretório com o nome exato abaixo.
 RUN_V29_MODULE = "run_v29_ablacao_ttdef_ajuste_gatting"
 try:
@@ -66,7 +66,7 @@ except ModuleNotFoundError:
         "Coloque este script na mesma pasta do run_v29."
     )
 
-# ── Re-exportar símbolos necessários ─────────────────────────────────────────
+# Re-exportar símbolos necessários
 MultiTaskLSTM            = rv.MultiTaskLSTM
 DatasetConfig            = rv.DatasetConfig
 load_or_generate_dataset = rv.load_or_generate_dataset
@@ -96,17 +96,13 @@ USE_STRATIFIED_SPLITS    = rv.USE_STRATIFIED_SPLITS
 FORCE_REGEN_SPLITS       = rv.FORCE_REGEN_SPLITS
 infer_class_column       = rv.infer_class_column
 
-# ═══════════════════════════════════════════════════════════════════════
 # CONFIGURAÇÃO — ajuste aqui se necessário
-# ═══════════════════════════════════════════════════════════════════════
 SEEDS_TO_RUN     = [42]        # adicione mais sementes se quiser entrop. dist. completa
 FRAME_THR        = 0.35        # limiar de onset (igual ao run_v29)
 PRE_ONSET_WINDOW = 10          # frames antes do onset = "pre_onset" (~1 s)
 OUTPUT_CSV       = "episode_frame_logs.csv"
 
-# ═══════════════════════════════════════════════════════════════════════
 # HELPER — inferência híbrida com máscara de gating por frame
-# ═══════════════════════════════════════════════════════════════════════
 
 @torch.no_grad()
 def infer_hybrid_with_mask(
@@ -142,7 +138,7 @@ def infer_hybrid_with_mask(
         last_p = None
 
         for t in range(t_len):
-            # Frame 0 → sempre atualiza
+            # Frame 0 -> sempre atualiza
             if t == 0 or last_p is None:
                 x_slice = make_prefix_window(X[i], t, window)
                 xt = torch.tensor(x_slice, dtype=torch.float32,
@@ -195,9 +191,7 @@ def infer_hybrid_with_mask(
     return frame_probs, gating_mask, avg_lat, skip_pct, cost_ms
 
 
-# ═══════════════════════════════════════════════════════════════════════
 # HELPER — carregar tau_delta e tau_h do CSV de resultados
-# ═══════════════════════════════════════════════════════════════════════
 
 def load_tau_params(seed: int, exp_name: str) -> tuple:
     """
@@ -226,9 +220,7 @@ def load_tau_params(seed: int, exp_name: str) -> tuple:
     return None, None
 
 
-# ═══════════════════════════════════════════════════════════════════════
 # HELPER — derivar fase temporal
-# ═══════════════════════════════════════════════════════════════════════
 
 def compute_phase(t: int, t0: int, pre_window: int) -> str:
     """Classifica o frame t em relação ao onset t0."""
@@ -241,9 +233,7 @@ def compute_phase(t: int, t0: int, pre_window: int) -> str:
     return "stable"
 
 
-# ═══════════════════════════════════════════════════════════════════════
 # LOOP PRINCIPAL
-# ═══════════════════════════════════════════════════════════════════════
 
 def main() -> None:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -260,7 +250,7 @@ def main() -> None:
         print(f"  SEED {SEED}")
         print(f"{'='*60}")
 
-        # ── 1. Dataset + splits ──────────────────────────────────────
+        # 1. Dataset + splits
         ds_cfg = DatasetConfig(seed=SEED)
         X, y_fr_cont, y_fr_obs, meta = load_or_generate_dataset(ds_cfg)
 
@@ -301,7 +291,7 @@ def main() -> None:
               f"{yep_te.sum()} críticos | "
               f"{prog_te.astype(int).sum()} progressivos")
 
-        # ── 2. Carregar modelos ──────────────────────────────────────
+        # 2. Carregar modelos
         ckpt_base = MODEL_DIR / f"baseline_seed{SEED}.pt"
         ckpt_stud = MODEL_DIR / f"student_seed{SEED}.pt"
         if not ckpt_base.exists() or not ckpt_stud.exists():
@@ -318,7 +308,7 @@ def main() -> None:
         student.eval()
         print(f"  Modelos carregados: {ckpt_base.name}, {ckpt_stud.name}")
 
-        # ── 3. Frame probs para configs FIXAS ──────────────────────
+        # 3. Frame probs para configs FIXAS
         # Tenta carregar cache .npy; se não existir, roda inferência.
 
         def _load_or_infer_fixed(model, name: str, label: str) -> np.ndarray:
@@ -336,7 +326,7 @@ def main() -> None:
         fp_base = _load_or_infer_fixed(baseline, "base", "baseline_fixed")
         fp_kd   = _load_or_infer_fixed(student,  "kd",   "afkd_fixed")
 
-        # ── 4. Política híbrida (tau_d, tau_h) ──────────────────────
+        # 4. Política híbrida (tau_d, tau_h)
         tau_d, tau_h = load_tau_params(SEED, EXP_NAME)
 
         if tau_d is None:
@@ -361,7 +351,7 @@ def main() -> None:
         else:
             print(f"  Gating (do CSV): tau_d={tau_d:.4f}  tau_h={tau_h:.2f}")
 
-        # ── 5. Frame probs + máscara de gating para configs HÍBRIDAS ─
+        # 5. Frame probs + máscara de gating para configs HÍBRIDAS ─
         print("  Inferindo baseline_hybrid (com rastreamento de gating)...")
         fp_base_h, mask_base_h, _, skip_b, _ = infer_hybrid_with_mask(
             baseline, X_te, device, tau_d, tau_h)
@@ -373,7 +363,7 @@ def main() -> None:
         print(f"  Skip rates: baseline_hybrid={skip_b:.1f}%  "
               f"afkd_hybrid={skip_k:.1f}%")
 
-        # ── 6. Construir linhas do CSV ───────────────────────────────
+        # 6. Construir linhas do CSV
         configs = [
             ("baseline_fixed",  fp_base,   None),
             ("afkd_fixed",      fp_kd,     None),
@@ -425,14 +415,14 @@ def main() -> None:
 
         print(f"  Linhas acumuladas: {len(all_rows):,}")
 
-    # ── 7. Salvar CSV ───────────────────────────────────────────────
+    # 7. Salvar CSV
     if not all_rows:
         print("\n[ERRO] Nenhuma linha gerada. Verifique os erros acima.")
         return
 
     df_out = pd.DataFrame(all_rows)
     df_out.to_csv(OUTPUT_CSV, index=False)
-    print(f"\n✅ CSV salvo: {OUTPUT_CSV}")
+    print(f"\nok CSV salvo: {OUTPUT_CSV}")
     print(f"   Linhas: {len(df_out):,}")
     print(f"   Tamanho aprox.: {Path(OUTPUT_CSV).stat().st_size / 1e6:.1f} MB")
     print(f"\nColunas: {list(df_out.columns)}")

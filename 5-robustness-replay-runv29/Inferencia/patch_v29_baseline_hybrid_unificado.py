@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 patch_v29_baseline_hybrid_unificado.py
-═══════════════════════════════════════════════════════════════════════════════
 Aplica TRÊS patches no run_v29_ablacao_ttdef_ajuste_gatting.py:
 
   PATCH 1 — evaluate_for_m:
@@ -37,7 +36,6 @@ SEGURANÇA
   - Cria backup automático antes de qualquer modificação.
   - Cada patch verifica o trecho original antes de aplicar.
   - Em caso de falha em qualquer patch, o arquivo original é restaurado.
-═══════════════════════════════════════════════════════════════════════════════
 """
 
 from pathlib import Path
@@ -47,18 +45,16 @@ import sys
 TARGET = Path("run_v29_ablacao_ttdef_ajuste_gatting.py")
 
 if not TARGET.exists():
-    print(f"❌  {TARGET} não encontrado. Execute na mesma pasta do run_v29.")
+    print(f"erro  {TARGET} não encontrado. Execute na mesma pasta do run_v29.")
     sys.exit(1)
 
 backup = TARGET.with_suffix(".py.bak_baseline_hybrid_unif")
 shutil.copy(TARGET, backup)
-print(f"✓  Backup: {backup.name}")
+print(f" Backup: {backup.name}")
 
 content = TARGET.read_text(encoding="utf-8")
 
-# ──────────────────────────────────────────────────────────────────────────────
 # PATCH 1 — evaluate_for_m: Baseline Hybrid após AF-KD Hybrid
-# ──────────────────────────────────────────────────────────────────────────────
 
 OLD_P1 = '''\
     if hybrid_params is not None:
@@ -80,7 +76,7 @@ NEW_P1 = '''\
     if hybrid_params is not None:
         tau_d, tau_h = hybrid_params
 
-        # ── AF-KD Híbrida ─────────────────────────────────────────────────────
+        # AF-KD Híbrida
         te_h = infer_stream_hybrid(student, X_te, device,
                                     tau_delta=tau_d, tau_h=tau_h)
         rows.append({
@@ -97,7 +93,7 @@ NEW_P1 = '''\
               f"Skip={rows[-1].get('SkipPct', float('nan')):.1f}% "
               f"Cost={rows[-1].get('Cost_ms_per_frame', float('nan')):.4f} ms/q")
 
-        # ── Baseline Híbrida (PATCH: mesmos tau_d, tau_h do AF-KD) ────────────
+        # Baseline Híbrida (PATCH: mesmos tau_d, tau_h do AF-KD)
         # Racional: isola o efeito da supervisão temporal AF-KD no gating —
         # aplica o mesmo mecanismo MHEG sobre o baseline sem AF-KD e mede
         # quanto a cobertura degrada. Gera o ponto "Baseline Híbrida" no
@@ -121,17 +117,15 @@ NEW_P1 = '''\
     elif run_hybrid:'''
 
 if OLD_P1 not in content:
-    print("❌  PATCH 1: trecho original não encontrado. Arquivo já foi modificado?")
+    print("PATCH 1: trecho original não encontrado. Arquivo já foi modificado?")
     print("   Verifique se este é o run_v29 correto e sem patches anteriores aplicados.")
     TARGET.write_text(backup.read_text(encoding="utf-8"), encoding="utf-8")
     sys.exit(1)
 
 content = content.replace(OLD_P1, NEW_P1, 1)
-print("✓  PATCH 1: Baseline Híbrida adicionada em evaluate_for_m")
+print(" PATCH 1: Baseline Híbrida adicionada em evaluate_for_m")
 
-# ──────────────────────────────────────────────────────────────────────────────
 # PATCH 2 — export_latex_macros: adiciona BaseHibr ao mapping
-# ──────────────────────────────────────────────────────────────────────────────
 
 OLD_P2 = '''\
     mapping = [
@@ -149,16 +143,14 @@ NEW_P2 = '''\
     ]'''
 
 if OLD_P2 not in content:
-    print("❌  PATCH 2: mapping original não encontrado.")
+    print("PATCH 2: mapping original não encontrado.")
     TARGET.write_text(backup.read_text(encoding="utf-8"), encoding="utf-8")
     sys.exit(1)
 
 content = content.replace(OLD_P2, NEW_P2, 1)
-print("✓  PATCH 2: BaseHibr adicionado ao mapping de export_latex_macros")
+print(" PATCH 2: BaseHibr adicionado ao mapping de export_latex_macros")
 
-# ──────────────────────────────────────────────────────────────────────────────
 # PATCH 3 — main_summary: adiciona coluna N_Seeds por (Modelo, Politica)
-# ──────────────────────────────────────────────────────────────────────────────
 # Insere contagem de seeds no main_summary para rastrear cobertura
 # e gerar aviso explícito no console quando N_Seeds < 4.
 
@@ -184,27 +176,23 @@ NEW_P3 = '''\
     # Aviso explícito quando alguma config tem < 4 seeds
     _incomplete = main_summary[main_summary["N_Seeds"].fillna(0) < 4]
     if not _incomplete.empty:
-        print("\\n⚠️  AVISO: configurações com cobertura incompleta de seeds:")
+        print("\\nAVISO: configurações com cobertura incompleta de seeds:")
         for _, _row in _incomplete.iterrows():
             print(f"     {_row['Modelo']:20s} [{_row['Politica']:12s}]"
-                  f"  → {int(_row['N_Seeds'])}/4 seeds")
+                  f"  -> {int(_row['N_Seeds'])}/4 seeds")
         print("   Execute run_hybrid_completion.py para completar as seeds faltantes.\\n")'''
 
 if OLD_P3 not in content:
-    print("⚠️   PATCH 3: linha de main_summary não encontrada — pulando (não crítico).")
+    print("aviso: PATCH 3: linha de main_summary não encontrada — pulando (não crítico).")
 else:
     content = content.replace(OLD_P3, NEW_P3, 1)
-    print("✓  PATCH 3: N_Seeds adicionado ao main_summary com aviso de cobertura")
+    print(" PATCH 3: N_Seeds adicionado ao main_summary com aviso de cobertura")
 
-# ──────────────────────────────────────────────────────────────────────────────
 # SALVAR
-# ──────────────────────────────────────────────────────────────────────────────
 TARGET.write_text(content, encoding="utf-8")
-print(f"\n✓  Arquivo patched salvo: {TARGET.name}")
+print(f"\n Arquivo patched salvo: {TARGET.name}")
 
-# ──────────────────────────────────────────────────────────────────────────────
 # RESUMO
-# ──────────────────────────────────────────────────────────────────────────────
 print()
 print("Macros geradas automaticamente na próxima execução do run_v29:")
 macros = [
@@ -230,6 +218,6 @@ print()
 print("Fluxo recomendado para completar a matriz:")
 print("  1) python patch_v29_baseline_hybrid_unificado.py  (este script)")
 print("  2) python run_hybrid_completion.py --seeds 43 44 45")
-print("     → completa apenas as seeds faltantes sem retreinar")
+print("     -> completa apenas as seeds faltantes sem retreinar")
 print("  3) Conferir exp_abl_A_results_all_seeds_merged.csv")
 print("  4) Conferir exp_abl_A_paper_metrics_macros_merged.tex")

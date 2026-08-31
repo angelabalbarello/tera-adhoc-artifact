@@ -1,22 +1,15 @@
 # -*- coding: utf-8 -*-
 """
 tera_pipeline/evaluation/tera_eval.py
-═══════════════════════════════════════════════════════════════════════════════
 Engine de avaliação canônica do TERA Pipeline.
 
-CORREÇÕES APLICADAS (vs versão anterior):
-  [FIX-2] ep_probs = mean(frame_probs[:, -K_AGG:]) com K_AGG=6.
-          Versão anterior: probs.max(axis=1) → F1≈1, FR≈0 trivialmente.
-          Adicionado episode_probs_from_frames() idêntico ao run_v29.
-
-  [FIX-3] select_thr_ep() calibra thr_ep no VAL maximizando F1 com
-          FR ≤ FAIL_BUDGET=0.05. Versão anterior usava thr_ep=0.050 fixo
-          (confundindo FAIL_BUDGET com thr_ep).
-          _calibrate_thr_ep() usa VAL frame_probs salvas pelo tera_infer [FIX-3].
-
-Referência: run_v29_ablacao_ttdef_ajuste_gatting.py
-  episode_probs_from_frames (l.584), select_thr_ep (l.968), fail_rate (l.528).
-═══════════════════════════════════════════════════════════════════════════════
+A probabilidade episódica é a média dos últimos K_AGG=6 frames da trajetória
+(usar o máximo tornaria F1 e FR triviais). O limiar de classificação
+episódica thr_ep é calibrado na partição de validação por select_thr_ep,
+maximizando F1 sujeito a FR <= FAIL_BUDGET=0.05, a partir das frame_probs de
+validação salvas pela inferência. As definições de episode_probs_from_frames,
+select_thr_ep e fail_rate seguem as do protocolo de replay
+(run_v29_ablacao_ttdef_ajuste_gatting.py).
 """
 
 import json
@@ -31,15 +24,15 @@ from scipy.stats import wilcoxon
 from sklearn.metrics import confusion_matrix, f1_score, precision_score, recall_score
 
 
-# ── Constantes canônicas ─────────────────────────────────────────────────────
+# Constantes canônicas
 T_MAX_EF    = 10.0   # penalidade por episódio crítico não detectado (s)
 TTD_M       = 3      # m = 3 consecutivos acima de theta_ttd
 FAIL_BUDGET = 0.05   # restrição de FR na calibração (≠ thr_ep!)
 
-# [FIX-2] K_AGG=6 — idêntico ao run_v29 linha 189.
+# K_AGG=6  (mesma definicao do run_v29)
 K_AGG = 6
 
-# [FIX-3] Grid de thresholds para select_thr_ep — idêntico ao run_v29 linha 216.
+# Grid de thresholds para select_thr_ep  (mesma definicao do run_v29)
 THR_EP_GRID = np.concatenate([
     np.linspace(0.05, 0.40, 15),
     np.linspace(0.40, 0.95, 12),
@@ -91,14 +84,14 @@ class AggregatedResult:
     stds:      Dict[str, float] = field(default_factory=dict)
 
 
-# ── Funções de protocolo ──────────────────────────────────────────────────────
+# Funções de protocolo
 
 def binary_entropy(p: float) -> float:
     p = float(np.clip(p, 1e-7, 1 - 1e-7))
     return -p * math.log2(p) - (1 - p) * math.log2(1 - p)
 
 
-# [FIX-2] Idêntico ao run_v29 linha 584.
+# (mesma definicao do run_v29)
 def episode_probs_from_frames(frame_probs: np.ndarray,
                                k: int = K_AGG) -> np.ndarray:
     """
@@ -109,7 +102,7 @@ def episode_probs_from_frames(frame_probs: np.ndarray,
 
 
 def _fail_rate_vec(y_true: np.ndarray, y_pred: np.ndarray) -> float:
-    """FR = FN/(TP+FN) — idêntico ao run_v29 linha 528."""
+    """FR = FN/(TP+FN)  (mesma definicao do run_v29)"""
     try:
         cm = confusion_matrix(y_true, y_pred, labels=[0, 1])
         tn, fp, fn, tp = cm.ravel()
@@ -121,14 +114,14 @@ def _fail_rate_vec(y_true: np.ndarray, y_pred: np.ndarray) -> float:
         return float(fn / pos) if pos > 0 else 0.0
 
 
-# [FIX-3] Idêntico ao run_v29 linha 968.
+# (mesma definicao do run_v29)
 def select_thr_ep(frame_probs_val: np.ndarray,
                   y_true_ep_val: np.ndarray) -> float:
     """
     Calibra thr_ep no VAL: maximiza F1 com FR <= FAIL_BUDGET=0.05.
 
-    NÃO confunda FAIL_BUDGET (restrição=0.05) com thr_ep (threshold resultante).
-    thr_ep típico: 0.10–0.40 dependendo do modelo.
+    FAIL_BUDGET é a restrição (0.05); thr_ep é o threshold resultante da
+    busca, tipicamente entre 0.10 e 0.40 dependendo do modelo.
     """
     ep_probs = episode_probs_from_frames(frame_probs_val, k=K_AGG)
     feasible, fallback = [], []
@@ -165,9 +158,9 @@ def first_stable_detection(probs: np.ndarray, onset: int,
 def first_stable_detection_full(probs: np.ndarray,
                                  thr: float, m: int = TTD_M) -> Optional[int]:
     """
-    [v27-FIX] Busca a primeira detecção estável desde o frame 0 (não desde onset).
+    Busca a primeira detecção estável desde o frame 0 (não desde onset).
     Usada para calcular antecipação pré-onset em episódios progressivos.
-    Idêntica ao run_v29 linha 692.
+ (mesma definicao do run_v29)
     """
     count = 0
     for t in range(len(probs)):
@@ -241,7 +234,7 @@ def wilcoxon_paired(a: List[float], b: List[float]) -> Tuple[float, float]:
         return float("nan"), float("nan")
 
 
-# ── Engine principal ──────────────────────────────────────────────────────────
+# Engine principal
 
 class EvaluationEngine:
 
@@ -258,7 +251,7 @@ class EvaluationEngine:
     def _load_inference_results(self, seed: int, config_id: str):
         """
         Carrega frame_probs, episode_probs, y_fr, y_ep, prog.
-        [FIX-2] episode_probs carregados do cache ou recomputados via K_AGG=6.
+        episode_probs carregados do cache ou recomputados via K_AGG=6.
         """
         base  = self.exp_dir / "metrics"
         probs = np.load(base / f"frame_probs_{config_id}_seed{seed}.npy")
@@ -271,7 +264,7 @@ class EvaluationEngine:
             ep_probs = np.load(ep_path)
         else:
             # Retrocompatibilidade: recomputa se tera_infer antigo não salvou
-            print(f"    ⚠️  episode_probs não encontrado — recomputando (K_AGG={K_AGG})")
+            print(f"    aviso: episode_probs não encontrado — recomputando (K_AGG={K_AGG})")
             ep_probs = episode_probs_from_frames(probs, K_AGG)
 
         return probs, ep_probs, y_fr, y_ep, prog
@@ -283,7 +276,7 @@ class EvaluationEngine:
     def _compute_latency(self, skip_mask: Optional[np.ndarray],
                          role: str = "student", seed: Optional[int] = None):
         """
-        [FIX-LAT] Carrega latência por role (baseline ou student) do JSON
+        Carrega latência por role (baseline ou student) do JSON
         gerado pelo tera_infer.
 
         Prioridade de busca:
@@ -325,11 +318,11 @@ class EvaluationEngine:
         active_frac = 1.0 - skip_pct / 100
         return lat_raw, lat_raw * active_frac, skip_pct
 
-    # [FIX-3] Calibra thr_ep via select_thr_ep no VAL.
+    # Calibra thr_ep via select_thr_ep no VAL.
     def _calibrate_thr_ep(self, seed: int, role: str) -> float:
         """
         Calibra thr_ep para uma seed usando os VAL frame_probs salvos pelo
-        InferenceManager [FIX-3 de tera_infer.py].
+        InferenceManager pelo InferenceManager.
 
         role: 'baseline' | 'student'
 
@@ -342,7 +335,7 @@ class EvaluationEngine:
         y_ep_path  = base / f"y_ep_val_seed{seed}.npy"
 
         if not probs_path.exists() or not y_ep_path.exists():
-            print(f"    ⚠️  [FIX-3] VAL probs ausentes (seed={seed}, role={role}).")
+            print(f"    aviso: VAL probs ausentes (seed={seed}, role={role}).")
             print(f"         Execute --stages inference para gerar os arquivos VAL.")
             print(f"         Fallback: thr_ep=0.50.")
             return 0.50
@@ -350,7 +343,7 @@ class EvaluationEngine:
         fp_val = np.load(probs_path)
         y_val  = np.load(y_ep_path)
         thr    = select_thr_ep(fp_val, y_val)
-        print(f"    [FIX-3] thr_ep calibrado: {thr:.3f} (seed={seed}, role={role})")
+        print(f"    thr_ep calibrado: {thr:.3f} (seed={seed}, role={role})")
         return thr
 
     def _evaluate_config_seed(self, seed: int, config_id: str) -> ConfigResult:
@@ -361,7 +354,7 @@ class EvaluationEngine:
         is_baseline = config_cfg.get("model", "baseline") == "baseline"
         role        = "baseline" if is_baseline else "student"
 
-        # [FIX-3] thr_ep calibrado via select_thr_ep — NÃO usa calibration_summary.csv
+        # thr_ep calibrado via select_thr_ep — NÃO usa calibration_summary.csv
         thr_ep = self._calibrate_thr_ep(seed, role)
 
         # theta_ttd vem do calibration_summary (valor correto: 0.10)
@@ -375,15 +368,15 @@ class EvaluationEngine:
 
         skip_mask = self._load_skip_mask(seed, config_id)
 
-        # ── Classificação episódica ────────────────────────────────────────────
-        # [FIX-2] ep_probs = mean(last K_AGG frames)
+        # Classificação episódica
+        # ep_probs = mean(last K_AGG frames)
         ep_hat = (ep_probs >= thr_ep).astype(int)
         f1v    = float(f1_score(y_ep, ep_hat, zero_division=0))
         prec   = float(precision_score(y_ep, ep_hat, zero_division=0))
         rec    = float(recall_score(y_ep, ep_hat, zero_division=0))
         ece    = expected_calibration_error(y_ep.astype(float), ep_probs)
 
-        # ── TTD e TTDef global ─────────────────────────────────────────────────
+        # TTD e TTDef global
         crit_mask   = y_ep == 1
         ttd_results = compute_ttd_list(
             y_true_fr=y_fr[crit_mask], frame_probs=probs[crit_mask],
@@ -391,11 +384,11 @@ class EvaluationEngine:
             m=self.m, frame_thr=self.frame_thr)
         n_crit     = int(crit_mask.sum())
 
-        # [FIX-FR] FailRate via critério TTD — alinhado com o artigo em anexo.
+        # FailRate via critério TTD — alinhado com o artigo em anexo.
         # O artigo usa FR = FN/(FN+TP) onde "detectado" = primeiro tdet tal que
         # p[t],p[t+1],p[t+2] ≥ θ_TTD após onset. Isso é o critério de detecção
         # estável, NÃO o K_AGG=6 (que mede confiança sustentada ao fim do episódio).
-        # Com K_AGG=6: baseline FR=0.752 (decai após onset → último frames low)
+        # Com K_AGG=6: baseline FR=0.752 (decai após onset -> último frames low)
         # Com TTD-critério: baseline FR≈0.225 (dispara no onset em 3 frames)
         detected_arr = np.array([r.detected for r in ttd_results], dtype=bool)
         n_detected   = int(detected_arr.sum())
@@ -406,7 +399,7 @@ class EvaluationEngine:
                       if n_detected > 0 else 0.0)
         ttdef      = compute_ttdef(ttd_det, fail_rate, self.t_max)
 
-        # ── Estratificado ──────────────────────────────────────────────────────
+        # Estratificado
         prog_mask   = prog.astype(bool) & crit_mask
         abrupt_mask = (~prog.astype(bool)) & crit_mask
 
@@ -422,8 +415,8 @@ class EvaluationEngine:
         ttd_prog = self._ttd_progressive_anticipation(
             y_fr[prog_mask], probs[prog_mask], theta_ttd)
         # TTDef_Progressive: atraso pós-onset + FR × T_ep (convenção do artigo)
-        # Quando detectado antes do onset: delay_post=0 → TTDef_prog = FR_prog × T_ep
-        # Com FR_prog=0 e detecção pré-onset: TTDef_prog = 0.000 ✓
+        # Quando detectado antes do onset: delay_post=0 -> TTDef_prog = FR_prog × T_ep
+        # Com FR_prog=0 e detecção pré-onset: TTDef_prog = 0.000 ok
         delay_post_prog = self._ttd_progressive_post_onset_delay(
             y_fr[prog_mask], probs[prog_mask], theta_ttd)
         ttd_abr  = self._ttd_subset_mean(
@@ -491,7 +484,7 @@ class EvaluationEngine:
           TTDef_Progressive = max(0, t_det - onset) × dt + FR_prog × T_ep
 
           Quando a detecção ocorre ANTES do onset (antecipação real),
-          o atraso pós-onset é zero → TTDef_prog = FR_prog × T_ep.
+          o atraso pós-onset é zero -> TTDef_prog = FR_prog × T_ep.
           Com FR_prog=0, TTDef_prog = 0.000 — sem penalidade operacional.
 
         Isso distingue TTD_Progressive (antecipação, maior=melhor) de
@@ -532,11 +525,11 @@ class EvaluationEngine:
                     result = self._evaluate_config_seed(seed, config_id)
                     rows.append(self._result_to_dict(result))
                 except Exception as e:
-                    print(f"    ⚠️ Erro: {e}")
+                    print(f"    Erro: {e}")
         df  = pd.DataFrame(rows)
         out = self.exp_dir / "metrics" / "results_all_seeds.csv"
         df.to_csv(out, index=False)
-        print(f"\n  ✓ results_all_seeds.csv salvo: {out}")
+        print(f"\n  results_all_seeds.csv salvo: {out}")
         return df
 
     def _result_to_dict(self, r: ConfigResult) -> dict:
@@ -574,7 +567,7 @@ class EvaluationEngine:
 
     def print_summary(self, df: pd.DataFrame) -> None:
         if df.empty or "config_id" not in df.columns:
-            print("\n  ⚠️  Nenhum resultado para resumir.")
+            print("\n  aviso: Nenhum resultado para resumir.")
             return
         agg = self.aggregate(df)
         if agg.empty:
@@ -590,7 +583,7 @@ class EvaluationEngine:
             ttdef  = row.get("TTDef_mean",             float("nan"))
             cost   = row.get("Cost_ms_per_frame_mean", float("nan"))
             skip   = row.get("SkipPct_mean",           float("nan"))
-            status = "✓" if n == 4 else f"⚠️ {n}/4 seeds"
+            status = "ok" if n == 4 else f"aviso: {n}/4 seeds"
             print(f"  {config:20s} n={n} {status}")
             print(f"    F1={f1v:.3f}  FR={fr:.3f}  TTDef={ttdef:.3f}s"
                   f"  Cost={cost:.3f}ms/q  Skip={skip:.1f}%")
@@ -630,7 +623,7 @@ class EvaluationEngine:
         return pd.DataFrame(rows)
 
 
-# ── Análise borderline ────────────────────────────────────────────────────────
+# Análise borderline
 
 def analyze_borderline(borderline_logs_path: Path, config: str = "aftkd_fixed",
                        theta: float = 0.10, m_stable: int = 3) -> pd.DataFrame:

@@ -1,27 +1,19 @@
 # -*- coding: utf-8 -*-
 """
 tera_pipeline/inference/tera_infer.py
-═══════════════════════════════════════════════════════════════════════════════
-Módulo de inferência nativa do TERA Pipeline.
+Módulo de inferência do TERA Pipeline.
 
-CORREÇÕES APLICADAS (vs versão anterior):
-  [FIX-1] infer_stream_fixed e infer_stream_hybrid usam make_prefix_window
-          frame-a-frame — protocolo causal idêntico ao run_v29.
-          Versão anterior alimentava o episódio inteiro (1,T,D) de uma vez,
-          permitindo que o LSTM visse frames futuros → TTDef≈0, FR≈0 trivial.
+infer_stream_fixed e infer_stream_hybrid processam cada episódio frame a
+frame via make_prefix_window, de modo que o modelo causal só vê os frames
+0..t (nunca frames futuros). A probabilidade episódica é a média dos últimos
+K_AGG=6 frames, e não o máximo da trajetória, que tornaria a detecção
+trivial. InferenceManager.run() também roda a inferência fixa na partição de
+validação e salva frame_probs_val_{role}_seed{N}.npy e y_ep_val_seed{N}.npy,
+usados pela avaliação para calibrar thr_ep.
 
-  [FIX-2] episode_probs = mean(frame_probs[:, -K_AGG:]) com K_AGG=6.
-          Versão anterior usava probs.max(axis=1) → detecção trivialmente fácil.
-          StreamEval agora carrega campo episode_probs separado.
-
-  [FIX-3] InferenceManager.run() roda infer_stream_fixed no VAL e salva
-          frame_probs_val_{role}_seed{N}.npy + y_ep_val_seed{N}.npy.
-          Tera_eval usa esses arquivos para chamar select_thr_ep corretamente.
-
-Referência: run_v29_ablacao_ttdef_ajuste_gatting.py, funções
-  make_prefix_window (linha 571), episode_probs_from_frames (linha 584),
-  infer_stream_fixed (linha 1020), infer_stream_hybrid (linha 1057).
-═══════════════════════════════════════════════════════════════════════════════
+As definições de make_prefix_window, episode_probs_from_frames e dos dois
+laços de streaming seguem as do protocolo de replay
+(run_v29_ablacao_ttdef_ajuste_gatting.py).
 """
 
 import json
@@ -36,8 +28,8 @@ import torch
 import torch.nn as nn
 
 
-# ── Constantes de protocolo ────────────────────────────────────────────────────
-# [FIX-2] K_AGG=6: agregador causal — média dos últimos 6 frames para ep_probs.
+# Constantes de protocolo
+# K_AGG=6: agregador causal — média dos últimos 6 frames para ep_probs.
 # Fonte: run_v29 linha 189, "Seção 5.1: agregador causal k=6".
 K_AGG = 6
 
@@ -46,14 +38,14 @@ K_AGG = 6
 class StreamEval:
     """Resultado de uma passagem de inferência streaming."""
     frame_probs:       np.ndarray   # (N_episodes, T)  probabilidades frame-a-frame
-    episode_probs:     np.ndarray   # (N_episodes,)    mean(last K_AGG frames) [FIX-2]
+    episode_probs:     np.ndarray   # (N_episodes,)    mean(last K_AGG frames)
     skip_mask:         np.ndarray   # (N_episodes, T)  True = suprimido pelo MHEG
     lat_ms:            float        # latência bruta por frame (ms)
     skip_pct:          float        # % de frames suprimidos
     cost_ms_per_frame: float        # custo efetivo = lat × (1 − skip%)
 
 
-# ── Funções de protocolo causal ───────────────────────────────────────────────
+# Funções de protocolo causal
 
 def binary_entropy(p: float) -> float:
     """Entropia binária H(p) em bits."""
@@ -61,14 +53,14 @@ def binary_entropy(p: float) -> float:
     return -p * math.log2(p) - (1 - p) * math.log2(1 - p)
 
 
-# [FIX-1] make_prefix_window — idêntico ao run_v29 linha 571.
+# make_prefix_window  (mesma definicao do run_v29)
 def make_prefix_window(x_seq: np.ndarray, t: int, window: int = 96) -> np.ndarray:
     """
     Janela causal até t, com pad à esquerda pelo primeiro frame.
 
     No instante t, alimenta sempre `window` frames:
-      · t+1 < window → pad de (window−t−1) cópias do frame 0, seguido de x_0..x_t
-      · t+1 ≥ window → últimos `window` frames até t (sem pad)
+      · t+1 < window -> pad de (window−t−1) cópias do frame 0, seguido de x_0..x_t
+      · t+1 ≥ window -> últimos `window` frames até t (sem pad)
 
     Garante que o modelo nunca veja frames futuros — simula streaming
     real no dispositivo embarcado onde no instante t só existem x_0..x_t.
@@ -85,7 +77,7 @@ def make_prefix_window(x_seq: np.ndarray, t: int, window: int = 96) -> np.ndarra
     return x_slice.astype(np.float32, copy=False)
 
 
-# [FIX-2] episode_probs_from_frames — idêntico ao run_v29 linha 584.
+# episode_probs_from_frames  (mesma definicao do run_v29)
 def episode_probs_from_frames(frame_probs: np.ndarray,
                                k: int = K_AGG) -> np.ndarray:
     """
@@ -98,7 +90,7 @@ def episode_probs_from_frames(frame_probs: np.ndarray,
     return np.mean(frame_probs[:, -k:], axis=1)
 
 
-# ── Helpers internos ──────────────────────────────────────────────────────────
+# Helpers internos
 
 def _warmup(model: nn.Module, x_ref: np.ndarray,
             device: torch.device, steps: int = 100) -> None:
@@ -112,7 +104,7 @@ def _warmup(model: nn.Module, x_ref: np.ndarray,
         torch.cuda.synchronize()
 
 
-# ── Funções de inferência ─────────────────────────────────────────────────────
+# Funções de inferência
 
 @torch.no_grad()
 def infer_stream_fixed(
@@ -125,8 +117,8 @@ def infer_stream_fixed(
     """
     Inferência streaming causal sem gating (política fixa).
 
-    [FIX-1] Loop frame-a-frame com make_prefix_window:
-      · Cada passo t → make_prefix_window(X[i], t, window) → (1, window, D)
+    Loop frame-a-frame com make_prefix_window:
+      · Cada passo t -> make_prefix_window(X[i], t, window) -> (1, window, D)
       · Saída: sigmoid(out[0, -1]) — último token da janela causal
       · Latência medida por passo (ms/frame), batch=1, warmup=100
 
@@ -145,7 +137,7 @@ def infer_stream_fixed(
 
     for ep in range(N):
         for t in range(T):
-            # [FIX-1] Janela causal: modelo vê apenas frames 0..t com pad
+            # Janela causal: modelo vê apenas frames 0..t com pad
             x_slice = make_prefix_window(X[ep], t, window)
             xt = torch.tensor(x_slice, dtype=torch.float32,
                                device=device).unsqueeze(0)   # (1, window, D)
@@ -157,7 +149,7 @@ def infer_stream_fixed(
                 torch.cuda.synchronize()
             lat_times.append(time.perf_counter() - t0)
             # Último frame da janela causal = predição do instante t
-            # Indexação idêntica ao run_v29 linha 1044: fr_log[0, -1, 0]
+            # Indexação (mesma definicao do run_v29): fr_log[0, -1, 0]
             all_probs[ep, t] = float(torch.sigmoid(fr_log[0, -1, 0]).item())
 
     lat_ms    = float(np.mean(lat_times)) * 1000   # ms/frame
@@ -165,7 +157,7 @@ def infer_stream_fixed(
 
     return StreamEval(
         frame_probs=all_probs,
-        episode_probs=episode_probs_from_frames(all_probs, K_AGG),  # [FIX-2]
+        episode_probs=episode_probs_from_frames(all_probs, K_AGG),  #
         skip_mask=skip_mask,
         lat_ms=lat_ms,
         skip_pct=0.0,
@@ -191,7 +183,7 @@ def infer_stream_hybrid(
       · Gatilho cinemático: max|Δx_kin| ≥ tau_delta
       · Gatilho entrópico:  H(p_{t-1}) ≥ tau_h
 
-    [FIX-1] Quando ativado, alimenta make_prefix_window(X[i], t, window) —
+    Quando ativado, alimenta make_prefix_window(X[i], t, window) —
     não o frame t isolado. Preserva o contexto temporal acumulado.
     Frame 0 sempre atualizado (inicialização obrigatória).
 
@@ -213,7 +205,7 @@ def infer_stream_hybrid(
 
         for t in range(T):
 
-            # ── Frame 0: inicialização obrigatória ────────────────────────────
+            # Frame 0: inicialização obrigatória
             if t == 0 or last_p is None:
                 x_slice = make_prefix_window(X[ep], t, window)
                 xt = torch.tensor(x_slice, dtype=torch.float32,
@@ -229,13 +221,13 @@ def infer_stream_hybrid(
                 all_probs[ep, t] = last_p
                 continue
 
-            # ── Sinais de gating ───────────────────────────────────────────────
+            # Sinais de gating
             dk = float(np.abs(
                 X[ep, t, kin_indices] - X[ep, t - 1, kin_indices]
             ).max())
             H  = binary_entropy(last_p)
 
-            # ── Decisão OR ────────────────────────────────────────────────────
+            # Decisão OR
             activate = (dk >= tau_delta) or (H >= tau_h)
 
             if not activate:
@@ -244,7 +236,7 @@ def infer_stream_hybrid(
                 skip_mask[ep, t] = True
                 n_skipped += 1
             else:
-                # UPDATE: [FIX-1] janela causal completa (não frame isolado)
+                # UPDATE: janela causal completa (não frame isolado)
                 x_slice = make_prefix_window(X[ep], t, window)
                 xt = torch.tensor(x_slice, dtype=torch.float32,
                                    device=device).unsqueeze(0)
@@ -264,7 +256,7 @@ def infer_stream_hybrid(
 
     return StreamEval(
         frame_probs=all_probs,
-        episode_probs=episode_probs_from_frames(all_probs, K_AGG),  # [FIX-2]
+        episode_probs=episode_probs_from_frames(all_probs, K_AGG),  #
         skip_mask=skip_mask,
         lat_ms=lat_ms,
         skip_pct=skip_pct,
@@ -278,7 +270,7 @@ def _measure_lat_fixed(
 ) -> float:
     """
     Mede latência bruta por frame em modo batch=1.
-    [FIX-1] Usa make_prefix_window para latência real de deployment.
+    Usa make_prefix_window para latência real de deployment.
     """
     model.eval()
     x_ref = make_prefix_window(
@@ -300,16 +292,16 @@ def _measure_lat_fixed(
     return float(np.mean(times)) * 1000.0
 
 
-# ── InferenceManager ──────────────────────────────────────────────────────────
+# InferenceManager
 
 class InferenceManager:
     """
     Gerencia a inferência de todas as (seed, config) do fatorial 2×2.
 
     Garante:
-      · [FIX-1] Inferência causal via make_prefix_window
-      · [FIX-2] episode_probs via mean(last K_AGG=6 frames)
-      · [FIX-3] VAL frame_probs salvas para select_thr_ep em tera_eval
+      · Inferência causal via make_prefix_window
+      · episode_probs via mean(last K_AGG=6 frames)
+      · VAL frame_probs salvas para select_thr_ep em tera_eval
       · Baseline Hybrid nativa (sem patch)
       · Mesmos tau_delta/tau_H para Baseline e AF-TKD Hybrid por seed
       · Cache de frame_probs para evitar re-inferência
@@ -389,8 +381,8 @@ class InferenceManager:
           1. Carrega baseline e student
           2. Carrega X_te (TEST) e X_va (VAL)
           3. Carrega calibração de gating (tau_delta, tau_H) — apenas gating
-          4. [FIX-3] Roda infer_stream_fixed no VAL, salva VAL frame_probs
-             → tera_eval usa esses arquivos em select_thr_ep
+          4. Roda infer_stream_fixed no VAL, salva VAL frame_probs
+             -> tera_eval usa esses arquivos em select_thr_ep
           5. Executa 4 configs do fatorial 2×2 no TEST
           6. Salva frame_probs, episode_probs, skip_mask por config
         """
@@ -408,12 +400,12 @@ class InferenceManager:
             tau_h     = float(cal.get("tau_h",     0.95))
             print(f"    Gating params: tau_δ={tau_delta:.4f}, tau_H={tau_h:.2f}")
 
-            # ── [FIX-3] VAL inference para thr_ep calibration ─────────────────
+            # VAL inference para thr_ep calibration
             metrics_dir = self.exp_dir / "metrics"
             metrics_dir.mkdir(parents=True, exist_ok=True)
 
             if not self._val_probs_cached(seed):
-                print(f"    [FIX-3] Inferência VAL (thr_ep calibration)...")
+                print(f"    Inferência VAL (thr_ep calibration)...")
                 X_va, _, y_ep_va, _ = self._load_data(seed, "va")
 
                 val_base = infer_stream_fixed(
@@ -427,17 +419,17 @@ class InferenceManager:
                         val_stud.frame_probs)
 
                 np.save(metrics_dir / f"y_ep_val_seed{seed}.npy", y_ep_va)
-                print(f"    [FIX-3] VAL probs salvas (seed={seed})")
+                print(f"    VAL probs salvas (seed={seed})")
             else:
-                print(f"    [FIX-3] VAL probs — cache OK (seed={seed})")
+                print(f"    VAL probs — cache OK (seed={seed})")
 
-            # ── TEST inference por config ──────────────────────────────────────
+            # TEST inference por config
             for config_id in configs:
                 if self._is_cached(seed, config_id):
                     print(f"    [cache] {config_id} — pulando")
                     continue
 
-                print(f"    → {config_id}")
+                print(f"    -> {config_id}")
                 cfg_spec   = self.eval_cfg.get("configs", {}).get(config_id, {})
                 model_role = cfg_spec.get("model", "baseline")
                 use_gating = bool(cfg_spec.get("gating", False))
@@ -459,7 +451,7 @@ class InferenceManager:
                 np.save(self._cache_path(seed, config_id, "frame_probs"),
                         result.frame_probs)
                 np.save(self._cache_path(seed, config_id, "episode_probs"),
-                        result.episode_probs)   # [FIX-2]
+                        result.episode_probs)   #
                 np.save(self._cache_path(seed, config_id, "skip_mask"),
                         result.skip_mask)
 
@@ -471,8 +463,8 @@ class InferenceManager:
                 print(f"      FR_skip={result.skip_pct:.1f}%  "
                       f"cost={result.cost_ms_per_frame:.3f}ms/q")
 
-            # ── Latência de referência por role ───────────────────────────────
-            # [FIX-LAT] Medida separada para baseline e student.
+            # Latência de referência por role
+            # Medida separada para baseline e student.
             # tera_eval usa lat_ms_baseline / lat_ms_student conforme o config.
             # O arquivo é sobrescrito a cada seed para manter a última medição.
             lat_baseline = _measure_lat_fixed(
@@ -485,7 +477,7 @@ class InferenceManager:
                 # Mantido para retrocompatibilidade com versões anteriores:
                 "lat_ms_per_frame": round(lat_student, 4),
             }
-            # [FIX-STD] Salva referência indexada por seed para que tera_eval
+            # Salva referência indexada por seed para que tera_eval
             # leia o valor correto por seed (elimina std=0.000 nas macros).
             lat_path_seed = metrics_dir / f"latency_reference_seed{seed}.json"
             lat_path_seed.write_text(json.dumps(lat_ref, indent=2))

@@ -1,6 +1,5 @@
 """
 patch_baseline_hibrida.py
-══════════════════════════════════════════════════════════════════════
 Aplica DOIS patches no run_v29_ablacao_ttdef_ajuste_gatting.py:
 
 PATCH 1 — evaluate_for_m (linha ~2239):
@@ -23,7 +22,6 @@ PATCH 2 — export_latex_macros (linha ~1907):
     \resBaseHibrLat,  \stdBaseHibrLat
     \resBaseHibrCost, \stdBaseHibrCost
     \resBaseHibrSkip, \stdBaseHibrSkip
-══════════════════════════════════════════════════════════════════════
 """
 
 from pathlib import Path
@@ -41,10 +39,8 @@ print(f"Backup: {backup}")
 
 content = TARGET.read_text(encoding="utf-8")
 
-# ══════════════════════════════════════════════════════════════════════
 # PATCH 1 — adiciona avaliação Baseline Híbrida em evaluate_for_m
 # Inserir logo após o bloco AF-KD Híbrida (linha ~2239)
-# ══════════════════════════════════════════════════════════════════════
 
 OLD_P1 = """\
     if hybrid_params is not None:
@@ -66,7 +62,7 @@ NEW_P1 = """\
     if hybrid_params is not None:
         tau_d, tau_h = hybrid_params
 
-        # ── AF-KD Híbrida (existente) ──────────────────────────────
+        # AF-KD Híbrida (existente)
         te_h = infer_stream_hybrid(student, X_te, device,
                                     tau_delta=tau_d, tau_h=tau_h)
         rows.append({
@@ -79,7 +75,7 @@ NEW_P1 = """\
                              deriv_delta=deriv_kd_delta, deriv_prob_floor=deriv_kd_prob, deriv_smooth_w=deriv_kd_smooth),
         })
 
-        # ── PATCH: Baseline Híbrida ────────────────────────────────
+        # PATCH: Baseline Híbrida
         # Aplica os mesmos parâmetros de gating (tau_d, tau_h)
         # calibrados para o AF-KD sobre o baseline, usando thr_base
         # e theta_base para classificação e TTD. Isso gera o ponto
@@ -99,21 +95,18 @@ NEW_P1 = """\
               f"FR={rows[-1].get('FailRate', float('nan')):.4f} "
               f"Skip={rows[-1].get('SkipPct', float('nan')):.1f}% "
               f"Cost={rows[-1].get('Cost_ms_per_frame', float('nan')):.4f} ms/f")
-        # ─────────────────────────────────────────────────────────────
 
     elif run_hybrid:"""
 
 if OLD_P1 not in content:
-    print("❌ PATCH 1: trecho original NÃO encontrado.")
+    print("erro PATCH 1: trecho original NÃO encontrado.")
     print("   Verifique se o arquivo é a versão correta do run_v29.")
     raise SystemExit(1)
 
 content = content.replace(OLD_P1, NEW_P1, 1)
-print("✅ PATCH 1 aplicado: avaliação Baseline Híbrida adicionada em evaluate_for_m")
+print("ok PATCH 1 aplicado: avaliação Baseline Híbrida adicionada em evaluate_for_m")
 
-# ══════════════════════════════════════════════════════════════════════
 # PATCH 2 — adiciona BaseHibr ao mapping de export_latex_macros
-# ══════════════════════════════════════════════════════════════════════
 
 OLD_P2 = """\
     mapping = [
@@ -127,25 +120,23 @@ NEW_P2 = """\
         ("BaseFixo", "LSTM-Baseline", "Fixa"),
         ("AlvoFixo", "LSTM-AF-KD",    "Fixa"),
         ("AlvoHibr", "LSTM-AF-KD",    None),   # None = política híbrida
-        # PATCH: Baseline com política híbrida → ponto "Baseline Híbrida" no trade-off
+        # PATCH: Baseline com política híbrida -> ponto "Baseline Híbrida" no trade-off
         ("BaseHibr", "LSTM-Baseline", None),
     ]"""
 
 if OLD_P2 not in content:
-    print("❌ PATCH 2: trecho original NÃO encontrado.")
+    print("erro PATCH 2: trecho original NÃO encontrado.")
     print("   Verifique se o arquivo é a versão correta do run_v29.")
     # Reverter
     TARGET.write_text(backup.read_text(encoding="utf-8"), encoding="utf-8")
     raise SystemExit(1)
 
 content = content.replace(OLD_P2, NEW_P2, 1)
-print("✅ PATCH 2 aplicado: BaseHibr adicionado ao mapping de export_latex_macros")
+print("ok PATCH 2 aplicado: BaseHibr adicionado ao mapping de export_latex_macros")
 
-# ══════════════════════════════════════════════════════════════════════
 # SALVAR
-# ══════════════════════════════════════════════════════════════════════
 TARGET.write_text(content, encoding="utf-8")
-print(f"\n✅ Arquivo salvo: {TARGET}")
+print(f"\nok Arquivo salvo: {TARGET}")
 print()
 print("Macros que serão geradas automaticamente após a próxima execução:")
 macros = [

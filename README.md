@@ -23,6 +23,18 @@ experimentos da revisão (round 1)**. Consolidado em 2026-08-27.
 (SHA-256/16 = `65bbec4a23050639`, idêntico ao da campanha publicada) e o wrapper
 `tera_pipeline/dataset/tera_gen.py`.
 
+### Nota sobre a preparação do código para publicação
+
+Antes da publicação deste repositório, comentários, docstrings e mensagens de
+console dos scripts passaram por uma revisão de estilo (remoção de molduras
+decorativas e padronização de avisos). A revisão foi verificada
+automaticamente: a árvore sintática de cada arquivo é idêntica à da versão
+que executou as campanhas, exceto por literais de string de saída, e todos os
+módulos compilam e importam normalmente. `synthetic_driver_risk_v7.py` e
+`configs/experiment_config.yaml` não foram tocados — seus hashes
+(`65bbec4a23050639` e `d5327a24d1d2f7f9`) continuam idênticos aos registrados
+nos manifests das campanhas.
+
 ### Lacunas de rastreabilidade conhecidas (registradas, não resolvidas)
 
 1. **O script que computou os números da campanha de 9 cenários** (tabela de

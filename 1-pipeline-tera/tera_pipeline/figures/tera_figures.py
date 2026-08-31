@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 tera_pipeline/figures/tera_figures.py
-═══════════════════════════════════════════════════════════════════════════════
 Geração automática de todas as figuras do artigo.
 
 Figuras geradas:
@@ -18,7 +17,6 @@ FONTE:
 
 REGRA: Figuras de trade-off usam SEMPRE os resultados de 4 seeds.
        Figuras ilustrativas (trace, entropy, heatmap) usam seed_viz.
-═══════════════════════════════════════════════════════════════════════════════
 """
 
 from pathlib import Path
@@ -28,7 +26,7 @@ import numpy as np
 import pandas as pd
 
 
-# ── Cores canônicas (alinhadas com o artigo) ──────────────────────────────────
+# Cores canônicas (alinhadas com o artigo)
 COLORS = {
     "baseline_fixed":   "#555555",
     "baseline_hybrid":  "#E07B39",
@@ -72,13 +70,13 @@ class FigureGenerator:
         }
         for name in gen:
             if name in fns:
-                print(f"    → {name}")
+                print(f"    -> {name}")
                 try:
                     fns[name]()
                 except Exception as e:
-                    print(f"      ⚠️  Erro em {name}: {e}")
+                    print(f"      Erro em {name}: {e}")
 
-    # ── Carregamento de dados ─────────────────────────────────────────────────
+    # Carregamento de dados
 
     def _load_frame_logs(self) -> Optional[pd.DataFrame]:
         p = self.exp_dir / "logs" / "episode_frame_logs.csv"
@@ -92,7 +90,7 @@ class FigureGenerator:
         p = self.exp_dir / "metrics" / "results_all_seeds.csv"
         return pd.read_csv(p) if p.exists() else None
 
-    # ── fig_temporal_trace ────────────────────────────────────────────────────
+    # fig_temporal_trace
 
     def temporal_trace(self) -> None:
         """
@@ -166,9 +164,9 @@ class FigureGenerator:
         plt.savefig(self._out("fig_temporal_trace"), dpi=self.dpi,
                     bbox_inches="tight")
         plt.close()
-        print(f"      ✓ fig_temporal_trace.{self.fmt}")
+        print(f"      fig_temporal_trace.{self.fmt}")
 
-    # ── fig_entropy_dist ──────────────────────────────────────────────────────
+    # fig_entropy_dist
 
     def entropy_dist(self) -> None:
         """
@@ -235,9 +233,9 @@ class FigureGenerator:
         plt.savefig(self._out("fig_entropy_dist"), dpi=self.dpi,
                     bbox_inches="tight")
         plt.close()
-        print(f"      ✓ fig_entropy_dist.{self.fmt}")
+        print(f"      fig_entropy_dist.{self.fmt}")
 
-    # ── fig_gating_heatmap ────────────────────────────────────────────────────
+    # fig_gating_heatmap
 
     def gating_heatmap(self) -> None:
         """
@@ -306,9 +304,9 @@ class FigureGenerator:
         plt.savefig(self._out("fig_gating_heatmap"), dpi=self.dpi,
                     bbox_inches="tight")
         plt.close()
-        print(f"      ✓ fig_gating_heatmap.{self.fmt}")
+        print(f"      fig_gating_heatmap.{self.fmt}")
 
-    # ── fig_tradeoff ──────────────────────────────────────────────────────────
+    # fig_tradeoff
 
     def tradeoff(self) -> None:
         """
@@ -365,9 +363,9 @@ class FigureGenerator:
         plt.savefig(self._out("fig_tradeoff"), dpi=self.dpi,
                     bbox_inches="tight")
         plt.close()
-        print(f"      ✓ fig_tradeoff.{self.fmt}")
+        print(f"      fig_tradeoff.{self.fmt}")
 
-    # ── fig_multiseed ─────────────────────────────────────────────────────────
+    # fig_multiseed
 
     def multiseed(self) -> None:
         """
@@ -423,9 +421,9 @@ class FigureGenerator:
         plt.savefig(self._out("fig_multiseed"), dpi=self.dpi,
                     bbox_inches="tight")
         plt.close()
-        print(f"      ✓ fig_multiseed.{self.fmt}")
+        print(f"      fig_multiseed.{self.fmt}")
 
-    # ── fig_prob_dist ─────────────────────────────────────────────────────────
+    # fig_prob_dist
 
     def prob_dist(self) -> None:
         """
@@ -471,4 +469,4 @@ class FigureGenerator:
         plt.savefig(self._out("fig_prob_dist"), dpi=self.dpi,
                     bbox_inches="tight")
         plt.close()
-        print(f"      ✓ fig_prob_dist.{self.fmt}")
+        print(f"      fig_prob_dist.{self.fmt}")
