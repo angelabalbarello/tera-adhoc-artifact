@@ -1888,6 +1888,9 @@ organization, not the gating rule, is what converts suppression into safe
 suppression.
 
 \begin{table*}[!tbp]
+% Tabela nova desta revisao: o float sai do escopo do grupo de cor da
+% secao, entao a cor e declarada dentro do proprio float.
+\color{\revcolor}
 \centering
 \caption{Confidence-threshold and smoothed-entropy baselines under the replay
 protocol (mean $\pm$ sd, seeds 42--45). Safe point: maximum suppression
@@ -2077,8 +2080,9 @@ DADA~\cite{fang2022dada} remains necessary for external validity. Second, \MHEG
 thresholds are calibrated on synthetic data and may need re-calibration under
 real-world shift from driver variability, illumination, and sensor noise.
 {\color{\revcolor}Third, the factorial analysis now uses twelve seeds (42--53),
-expanded in this revision from the original four under an a priori protocol
-(seeds fixed before any $p$-value; all reported); with $n=12$ the exact paired
+expanded from the original four under a prespecified protocol: the eight
+additional seeds were fixed before inspecting their outcomes, and all twelve
+are reported; with $n=12$ the exact paired
 Wilcoxon test reaches conventional significance on F1, ECE, and
 $\mathrm{TTD}_{\mathrm{ef}}$ (Section~\ref{sec:mov3_consequencia}). The
 remaining statistical caveat is narrower: FR in the fixed contrast is at a
