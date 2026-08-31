@@ -177,37 +177,29 @@
   addressline={Candeias Campus}, city={Vit\'oria da Conquista},
   postcode={45083-900}, state={Bahia}, country={Brazil}}
 \cortext[1]{Corresponding author.}
-%% =====================================================================
-%% [REVISAO R1 -- ALTERACAO INTEGRAL / R2.1] Abstract totalmente
-%% reescrito e encurtado (~200 palavras). A classe cas-dc nao preserva
-%% comandos de cor dentro do ambiente abstract, por isso este bloco NAO
-%% aparece em vermelho no PDF; considerar TODO o abstract como alterado.
-%% =====================================================================
 \begin{abstract}
 Vehicular edge nodes run monitoring models continuously on hardware that
-cannot compute every frame at full precision. Selective computation---skipping
-or reusing inference steps---keeps such systems within energy and latency
-budgets, but it is safe only if the model's uncertainty rises near critical
-transitions. In continuous driving streams this is not guaranteed: a model
-trained only for classification can remain confident up to a critical
-transition, so a confidence-driven scheduler may suppress exactly the frames on
-which detection depends. We argue that what renders uncertainty usable for
-scheduling is not calibration but its \emph{temporal organization}---whether
-the signal separates stable intervals from the moments around risk onset. We
-study this through the TERA ecosystem: \mbox{TERA-Gen} generates episodes with
-deterministic, frame-precise onsets; \mbox{AF-TOI} induces temporal organization
-offline by aligning a compact causal model to an onset-oriented reference; and
-\mbox{MHEG} exploits the resulting entropy stratification at runtime. In a
-$2\times2$ factorial design over twelve seeds, adding the scheduler to an
-unorganized model leaves the miss rate unchanged yet worsens the effective
-detection delay ($\mathrm{TTD}_{\mathrm{ef}}$) by 13.9\% ($p=0.001$, exact
-paired Wilcoxon), while on \mbox{AF-TOI}-organized trajectories the same
-scheduler achieves \CostReduction\% cost reduction
-($\mathrm{TTD}_{\mathrm{ef}}$ 0.099\,s vs.\ 0.570\,s). A post-hoc calibration
-control shows that probabilistic calibration and temporally conditioned
-reliability vary independently. The pipeline emits a discrete operational-risk
-state $\ell_t$ at $O(1)$ cost, a candidate input for vehicular edge
-coordination.
+cannot compute every frame at full precision. Selective computation, skipping
+or reusing inference steps, keeps these systems within budget, but is safe
+only if uncertainty rises near critical transitions. In
+continuous driving streams this is not guaranteed: a classification-trained
+model can stay confident up to a transition, so a confidence-driven scheduler
+suppresses the very frames detection depends on. We argue that what makes
+uncertainty usable for scheduling is its \emph{temporal organization} rather
+than calibration. We study this through the TERA ecosystem: \mbox{TERA-Gen}
+generates episodes with deterministic, frame-precise onsets; \mbox{AF-TOI}
+aligns a compact causal model to an onset-oriented reference, inducing
+temporal organization offline; and \mbox{MHEG} exploits the resulting entropy
+stratification at runtime. In a controlled $2\times2$ factorial over twelve
+seeds, scheduling unorganized trajectories leaves the miss rate unchanged yet
+worsens the effective detection delay ($\mathrm{TTD}_{\mathrm{ef}}$) by 13.9\%
+($p=0.001$), whereas \mbox{AF-TOI}+MHEG reduces per-frame inference cost by
+\CostReduction\% relative to Baseline Fixed (0.340 vs.\ 0.677\,ms/frame) with
+$\mathrm{TTD}_{\mathrm{ef}}$ of 0.099\,s versus 0.570\,s under Baseline+MHEG.
+A post-hoc calibration control shows that probabilistic calibration and
+temporally conditioned reliability vary independently. The pipeline emits a
+discrete operational-risk state $\ell_t$ at $O(1)$ cost, a candidate input for
+vehicular edge coordination.
 \end{abstract}
 \begin{keywords}
 edge intelligence \sep
@@ -327,10 +319,11 @@ The experiments bear the hypothesis out, and the most telling result is the
 negative one. On unorganized trajectories, adding the scheduler leaves the miss
 rate untouched but worsens $\mathrm{TTD}_{\mathrm{ef}}$ by
 {\color{\revcolor}13.9\%}: the scheduler
-is active, yet without the enabling temporal property it allocates blindly. Give
-the same scheduler \mbox{AF-TOI}-organized trajectories and it cuts effective cost by
-{\color{\revcolor}\CostReduction\%}, with $\mathrm{TTD}_{\mathrm{ef}}$ of
-{\color{\revcolor}0.099\,s against 0.570\,s}.
+is active, yet without the enabling temporal property it allocates blindly.
+{\color{\revcolor}Give the same scheduler \mbox{AF-TOI}-organized trajectories
+and per-frame inference cost falls by \CostReduction\% relative to Baseline
+Fixed (0.340 vs.\ 0.677\,ms/frame), while $\mathrm{TTD}_{\mathrm{ef}}$ is
+0.099\,s against 0.570\,s under Baseline+MHEG}.
 A post-hoc calibration control then rules out the obvious alternative explanation:
 rescaling probabilities improves calibration but does not reorganize entropy in
 time, so the two properties are empirically distinct. \mbox{MHEG} thus works both as a
@@ -1383,8 +1376,10 @@ inter-seed variance than Baseline ({\color{\revcolor}$0.366 \pm 0.069$}), reflec
 the alignment process to initialization.
 {\color{\revcolor}In response to the statistical-power concern raised in
 review, the factorial study was expanded from four to twelve seeds (42--53).
-The eight additional seeds were fixed \emph{a priori}, before any $p$-value
-was computed, and all twelve are reported regardless of outcome; the expansion
+The eight additional seeds were fixed before inspecting their outcomes and
+before recomputing any inferential statistics for the expanded twelve-seed
+campaign; the sample size was not adjusted as a function of the
+additional-seed results, and all twelve are reported regardless of outcome; the expansion
 was executed with the same frozen pipeline (identical configuration and
 generator hashes), and the four original seeds were verified to reproduce the
 initially reported campaign exactly before integration. With $n=12$ the exact
@@ -1980,8 +1975,10 @@ described in the Data Availability statement.
 \label{sec:discussao}
 %%============================================================
 \paragraph{Temporal organization as the enabling condition for edge resource allocation}
-The most informative result is the negative control, rather than the full configuration. Baseline+MHEG holds the miss rate but buys no efficiency in return,
-which locates \AFTOI's primary effect precisely: it is not that \AFTOI raises
+The most informative result is the negative control, rather than the full
+configuration. {\color{\revcolor}Baseline+MHEG buys substantial computational
+savings, but not a safety-qualified efficiency gain: the miss rate is not
+improved and the effective detection delay worsens.} This locates \AFTOI's primary effect precisely: it is not that \AFTOI raises
 classification scores, but that it creates the conditions under which selective
 computation is safe at all. Without differentiated dynamics, efficiency and
 coverage do not merely fail to improve together -- they compete, because the
@@ -2223,10 +2220,12 @@ Within the controlled setting studied here, the evidence supports that reading, 
 the negative control is what makes it credible: with the scheduler applied to
 unorganized trajectories, $\mathrm{TTD}_{\mathrm{ef}}$ worsened by
 {\color{\revcolor}13.9\% (twelve seeds, $p=0.001$)} and
-coverage did not improve, so activating a scheduler is not, by itself, enough. Given
-\mbox{AF-TOI}-organized trajectories, the same \MHEG scheduler reached {\color{\revcolor}\CostReduction\%}
-effective cost reduction with $\mathrm{TTD}_{\mathrm{ef}}$ of
-{\color{\revcolor}0.099\,s against 0.570\,s}. The post-hoc calibration control ruled out the competing explanation:
+coverage did not improve, so activating a scheduler is not, by itself, enough.
+{\color{\revcolor}Given \mbox{AF-TOI}-organized trajectories, the same \MHEG
+scheduler reduced per-frame inference cost by \CostReduction\% relative to
+Baseline Fixed (0.340 vs.\ 0.677\,ms/frame), with
+$\mathrm{TTD}_{\mathrm{ef}}$ of 0.099\,s against 0.570\,s under
+Baseline+MHEG}. The post-hoc calibration control ruled out the competing explanation:
 probabilistic rescaling improved ECE without reorganizing entropy in time, so
 marginal calibration and temporally conditioned reliability are separate properties
 with separate origins.
