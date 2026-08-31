@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-R2.6 — Regenera as cinco figuras densas do artigo com fontes maiores (EN).
-Mesmos dados canonicos (seed 42 reproduzida bit a bit pela campanha nova):
-  fig 4  4-fig_entropy_dist_en.pdf   <- episode_frame_logs.csv (exp_seed12_round1)
-  fig 5  5-fig_temporal_trace_en.pdf <- idem
-  fig 6  6-fig_gating_heatmap_en.pdf <- idem
-  fig 8  8-fig_ttdef_dist.pdf        <- df_episodios_cdf.csv (campanha 4 seeds publicada)
-  fig 11 11-fig_prob_dist_en.pdf     <- borderline_frame_logs.csv (replay, A/L recipes)
-Apenas replot (composicao identica, rotulos EN, fontes >= 11pt); nenhuma
-metrica recalculada alem das ja exibidas nas figuras originais.
+"""Regenera as figuras 4, 5, 6, 8, 9 e 11 do artigo (R2.6, revisao round 1).
+
+Fontes de dados:
+  figs 4-6: episode_frame_logs.csv do protocolo replay (seed 42; H_t em nats)
+  figs 8-9: df_episodios_12seeds.csv (TTDef por episodio, 12 seeds, validado
+            contra results_all_seeds.csv)
+  fig 11:   borderline_frame_logs.csv do TERA (Normal/Critico, main test set)
+            + borderline_episode_level.csv da analise gpu_v23 (Attention/Alert),
+            as mesmas fontes da Tabela 13
+
+Uso: python regen_dense_figs_en.py --outdir <pasta image/ do artigo>
 """
 import argparse
 import numpy as np
@@ -24,11 +25,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
-# Figs 4/5/6 usam os logs de frames do protocolo replay (mesma fonte das
-# figuras publicadas — ECE 0.129/0.044 reproduzidos exatamente; H_t ja em nats)
 LOGS = ROOT / "5-robustness-replay-runv29" / "Inferencia"
-EPCSV = ROOT / "2-campaign-exp_20260519_055950" / "df_episodios_cdf.csv"
-BLCSV = ROOT / "5-robustness-replay-runv29" / "Inferencia" / "borderline_frame_logs.csv"
 LN2 = np.log(2.0)
 THETA = 0.1
 
@@ -124,23 +121,19 @@ def _detect(ep):
 
 def fig_temporal_trace(df, out):
     dv = df[(df.seed == 42) & (df.is_critical == 1)]
-    # escolhe episodios com t0 mais proximos dos da figura publicada
     ep_ids = {}
     base = dv[dv.config == "afkd_hybrid"]
-    # abrupto: t0 proximo ao da figura publicada (~2.9 s)
+    # abrupto: t0 proximo ao da figura da versao submetida (~2.9 s)
     cand = base[base.regime == "abrupt"].groupby("episode_id")["t0_time_s"].first()
     ep_ids["abrupt"] = (cand - 2.92).abs().idxmin()
-    # progressivo: episodio que ilustra a estratificacao (H inicial baixo,
-    # subindo ate perto de ln 2 apos o onset), com t0 em posicao central
+    # progressivo: maior contraste de entropia pre/pos onset, com t0 central
     best, best_score = None, None
     for ep_id, g in base[base.regime == "progressive"].groupby("episode_id"):
         g = g.sort_values("t")
         t0 = float(g.t0_time_s.iloc[0])
         if not (4.0 <= t0 <= 7.0):
             continue
-        h_pre = float(g[g.time_s < t0 - 1.0].H_t.mean())
-        h_post = float(g[g.time_s >= t0].H_t.mean())
-        score = h_post - h_pre  # maior estratificacao pre->pos onset
+        score = float(g[g.time_s >= t0].H_t.mean()) - float(g[g.time_s < t0 - 1.0].H_t.mean())
         if best_score is None or score > best_score:
             best, best_score = ep_id, score
     ep_ids["progressive"] = best
@@ -280,12 +273,7 @@ CFG4 = [("baseline_fixed", "Baseline Fixed", "#4C72B0", "-"),
 
 
 def fig_ttdef_dist(out):
-    """
-    Histogramas de TTDef POR EPISODIO, 12 seeds (n=1440/config).
-    Fonte: df_episodios_12seeds.csv, reconstruido com a regra do
-    tera_eval congelado e validado contra results_all_seeds.csv
-    (FailRate e TTD reproduzidos em 4 casas em todas as 48 combinacoes).
-    """
+    """Histogramas de TTDef por episodio (12 seeds, n=1440 por configuracao)."""
     ep = pd.read_csv(EP12)
     fig, axes = plt.subplots(1, 4, figsize=(16.5, 4.6))
     bins = np.linspace(0, 2.5, 21)
@@ -317,7 +305,7 @@ def fig_ttdef_dist(out):
 
 
 def fig_ttdef_cdf(out):
-    """CDF de TTDef por episodio, 12 seeds — mesma fonte da fig 8."""
+    """CDF de TTDef por episodio, mesma fonte da figura 8."""
     ep = pd.read_csv(EP12)
     fig, ax = plt.subplots(figsize=(8.6, 6.4))
     for cfg, label, color, ls in CFG4:
@@ -350,18 +338,11 @@ def fig_ttdef_cdf(out):
 
 
 def fig_prob_dist(out):
-    """
-    Composto ALINHADO COM A TABELA 13 (ajuste da revisao round 1):
-      Normal/Critico  <- borderline_frame_logs.csv do TERA Pipeline (main
-                         test set, seed 42; AF-TOI Normal 0.006+-0.001/0.0%,
-                         Critico 0.271+-0.178/70.8% = exatamente a Tabela 13;
-                         Baseline Normal 0.090, Critico 0.578)
-      Attention/Alert <- borderline_episode_level.csv (analise gpu_v23, so
-                         AF-TOI; Atencao 0.048+-0.195 (5.8%>theta), Alerta
-                         0.380+-0.415 (48.8%>theta) = Tabela 13)
-    Obs.: a figura PUBLICADA usava os logs do replay para Normal/Critico
-    (AF-TOI Critico ~0.53), divergindo da Tabela 13; esta versao corrige a
-    inconsistencia usando as mesmas fontes da tabela.
+    """Violinos de p_max por nivel de risco, com as mesmas fontes da Tabela 13.
+
+    Normal e Critico vem dos borderline_frame_logs do TERA (main test set,
+    seed 42); Attention e Alert vem do borderline_episode_level.csv da analise
+    gpu_v23. As estatisticas exibidas coincidem com as da tabela.
     """
     tera = pd.read_csv(ROOT / "1-pipeline-tera" / "results" / "exp_seed12_round1"
                        / "logs" / "borderline_frame_logs.csv")

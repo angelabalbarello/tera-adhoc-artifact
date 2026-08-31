@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Consolidacao das 12 seeds (TERA Pipeline, exp_seed12_round1) + estatistica.
+"""Consolida as 12 seeds e compara a estatistica com a campanha de 4 seeds.
 
-PROTOCOLO: reporta TODAS as 12 seeds, individualmente e agregadas, qualquer
-que seja o desfecho. NAO altera nenhum arquivo do artigo ou rebuttal — gera
-apenas relatorios para decisao humana (comparacao n=4 vs n=12).
-
-Saidas (nesta pasta):
-  expanded_summary.csv           media +- sd por configuracao (n=12)
-  expanded_per_seed.csv          as 12 observacoes individuais por configuracao
-  expanded_paper_table2_rows.tex linhas candidatas (formato da Table 8) — NAO
-                                 aplicadas automaticamente
-  expanded_stats_report.txt      Wilcoxon pareado exato (n=12) + Cliff's delta,
-                                 lado a lado com os valores n=4 publicados
+Gera, nesta pasta: expanded_summary.csv (media +- sd por configuracao),
+expanded_per_seed.csv (observacoes individuais), expanded_paper_table2_rows.tex
+(linhas no formato da Table 8, para conferencia cruzada com as geradas pelo
+tera_latex do pipeline) e expanded_stats_report.txt (Wilcoxon pareado exato e
+Cliff's delta, n=4 vs n=12). Todas as seeds entram no relatorio,
+independentemente do desfecho; o artigo nao e alterado por este script.
 """
 import csv
 import math
@@ -56,6 +50,7 @@ def cliffs(a, b):
 
 
 def wilcoxon_exact(a, b):
+    # implementacao propria usada apenas quando o scipy nao esta disponivel
     d = [x - y for x, y in zip(a, b) if x != y]
     n = len(d)
     if n == 0:
@@ -91,17 +86,14 @@ def wilcoxon(a, b):
 
 def main():
     if not NEW_CSV.exists():
-        raise SystemExit(f"ERRO: {NEW_CSV} nao existe. Rode a campanha primeiro "
-                         "e valide com check_reproduction_42_45.py.")
+        raise SystemExit(f"{NEW_CSV} nao existe; rode a campanha e a validacao antes")
     new = load(NEW_CSV)
     ref = load(REF_CSV)
     seeds12 = sorted({s for c in new for s in new[c]})
-    print(f"Seeds na nova campanha: {seeds12}")
+    print(f"seeds na campanha nova: {seeds12}")
     if len(seeds12) != 12:
-        print(f"AVISO: esperadas 12 seeds, encontradas {len(seeds12)}. "
-              "Reportando o que existe (protocolo: nada e descartado).")
+        print(f"aviso: esperadas 12 seeds, encontradas {len(seeds12)}")
 
-    # ---- per-seed dump -------------------------------------------------
     with open(HERE / "expanded_per_seed.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["config_id", "Seed"] + METRICS)
@@ -109,7 +101,6 @@ def main():
             for s in sorted(new.get(c, {})):
                 w.writerow([c, s] + [new[c][s][m] for m in METRICS])
 
-    # ---- summary n=12 --------------------------------------------------
     with open(HERE / "expanded_summary.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["config_id", "n_seeds"] +
@@ -121,8 +112,7 @@ def main():
                 line += [f"{st.mean(v):.4f}", f"{st.stdev(v):.4f}" if len(v) > 1 else "0"]
             w.writerow(line)
 
-    # ---- candidate LaTeX rows (NOT applied) ----------------------------
-    def cell(c, m, bold):
+    def cell(c, m, bold=False):
         v = vals(new, c, m)
         t = f"{st.mean(v):.3f}\\pm{st.stdev(v):.3f}"
         return f"$\\mathbf{{{t}}}$" if bold else f"${t}$"
@@ -132,16 +122,16 @@ def main():
              ("aftkd_fixed", "LSTM-AF-TOI", "No", False),
              ("aftkd_hybrid", "LSTM-AF-TOI", "\\textbf{Yes}", True)]
     with open(HERE / "expanded_paper_table2_rows.tex", "w", encoding="utf-8") as f:
-        f.write("% CANDIDATO n=12 — NAO integrado automaticamente ao artigo.\n")
+        f.write("% conferencia cruzada das linhas da Table 8 (n=12); a versao\n"
+                "% aplicada no artigo vem do tera_latex do pipeline\n")
         for c, name, mheg, bold in order:
             cells = [cell(c, m, bold) for m in METRICS]
             if c == "baseline_hybrid":
-                cells[4] = "{---}"  # TTD_b omitido na linha hybrid nao-destacada, como na Table 8
+                cells[4] = "{---}"
             f.write(f"{name} & {mheg} & " + " & ".join(cells) + " \\\\\n")
 
-    # ---- stats report: n=4 (publicado) vs n=12 -------------------------
-    lines = ["Comparacao estatistica — campanha publicada (n=4) vs expandida (n=12)",
-             "Wilcoxon signed-rank pareado por seed, bicaudal, exato; Cliff's delta.",
+    lines = ["Estatistica pareada por seed: campanha publicada (n=4) vs expandida (n=12)",
+             "Wilcoxon signed-rank bicaudal exato; Cliff's delta.",
              "=" * 76]
     for c1, c2 in PAIRS:
         lines.append(f"\n{c1}  vs  {c2}")
@@ -155,15 +145,9 @@ def main():
             sig = " *" if p12 < 0.05 else ""
             lines.append(f"  {m:18s} {p4:8.4f} {d4:+10.3f} {p12:8.4f}{sig} {d12:+10.3f}")
     lines.append("\n* p < 0.05 na campanha n=12.")
-    lines.append("Medias por configuracao: expanded_summary.csv; observacoes "
-                 "individuais: expanded_per_seed.csv.")
-    lines.append("PROTOCOLO: resultado reportado integralmente, favoravel ou nao. "
-                 "Nenhum arquivo do artigo foi alterado por este script.")
     report = "\n".join(lines)
     (HERE / "expanded_stats_report.txt").write_text(report, encoding="utf-8")
     print(report)
-    print("\nGerados: expanded_summary.csv, expanded_per_seed.csv, "
-          "expanded_paper_table2_rows.tex, expanded_stats_report.txt")
 
 
 if __name__ == "__main__":

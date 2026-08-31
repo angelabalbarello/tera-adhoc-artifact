@@ -45,7 +45,9 @@ experimentos da revisão (round 1)**. Consolidado em 2026-08-27.
 | `6-revision-round1/seed-expansion-tera/run_seed_expansion_tera.py` | **novo — launcher correto** | expansão 4→12 seeds no TERA Pipeline congelado, com verificação de hashes antes de executar |
 | `6-revision-round1/seed-expansion-tera/check_reproduction_42_45.py` | **novo** | validação crítica: seeds 42–45 regeneradas devem reproduzir a campanha publicada antes de qualquer integração |
 | `6-revision-round1/seed-expansion-tera/stats_12seeds.py` | **novo** | agrega as 12 seeds, Wilcoxon exato + Cliff's δ, comparação n=4 × n=12, observações individuais — **não altera o artigo** |
-| `7-article-latex/revisao-round1/artigo.tex`, `rebuttal.tex` | **em modificação** | manuscrito revisado e resposta aos revisores (alterações em vermelho) |
+| `6-revision-round1/seed-expansion-tera/regen_figs_12seeds_en.py`, `regen_dense_figs_en.py` | **novos** | regeneram as figuras do artigo (multiseed/trade-off em 12 seeds; figuras densas com fontes maiores, R2.6) |
+| `6-revision-round1/seed-expansion-tera/df_episodios_12seeds.csv` | **novo** | TTDef por episódio das 12 seeds (validado contra o CSV canônico), fonte das Figs. 8–9 |
+| `7-article-latex/revisao-round1/artigo.tex`, `rebuttal.tex` | **revisão integrada** (31/08) | n=12 aplicado às Tabelas 8–10/12 e Figuras 7–10, mudanças em vermelho com referência de página no rebuttal; pendem itens da autora (nome do editor, decisão R3.11, Data statement, Highlights) |
 
 ### Protocolo congelado da expansão de seeds
 

@@ -174,16 +174,16 @@ nenhuma seed nova inverteu o sentido do efeito (o AF-TOI supera a Baseline em F1
 | `6-revision-round1/seed-expansion-tera/expanded_stats_report.txt` | Wilcoxon/Cliff n=4 × n=12 |
 | `6-revision-round1/seed-expansion-tera/expanded_summary.csv` | médias ± dp por configuração (n=12) |
 | `6-revision-round1/seed-expansion-tera/expanded_per_seed.csv` | as 12 observações individuais por configuração |
-| `6-revision-round1/seed-expansion-tera/expanded_paper_table2_rows.tex` | linhas candidatas à Table 8 (**não aplicadas**) |
+| `6-revision-round1/seed-expansion-tera/expanded_paper_table2_rows.tex` | conferência cruzada das linhas da Table 8 (a versão aplicada vem do `tera_latex` do pipeline) |
 | `6-revision-round1/seed-expansion-tera/campaign_log.txt` | log completo da execução |
 
-## 7. O que fica para decisão humana (orientador)
+## 7. Decisões tomadas (atualização de 31/08)
 
-1. **Integrar n=12 ao artigo?** Se sim: Table 8 (linhas candidatas prontas), Tabela 9
-   (novos p/δ), §4.4 "Statistical analysis" e resposta R2.5/R3.6 no rebuttal — com a
-   nota sobre a coluna ms/f. Se não: manter n=4 e assumir a limitação (opção
-   igualmente defensável).
-2. **Onset sweep (R3.4):** experimento separado, só se o orientador julgar que a
-   resposta atual a R3.4 é insuficiente.
-3. Baselines confidence/smoothed-entropy (R3.5) já prontos em
+1. **Integração n=12 executada** por decisão da autora: Tabelas 8–10 e 12,
+   Figuras 7–10, §4.4, limitação 3 e as respostas R2.5/R3.6 do rebuttal foram
+   atualizadas, com todas as mudanças em vermelho e a nota sobre a coluna ms/f
+   na legenda da Table 8.
+2. **Onset sweep (R3.4):** respondido textualmente (decisão da autora); só será
+   executado se o orientador julgar a resposta insuficiente.
+3. Baselines confidence/smoothed-entropy (R3.5) prontos em
    `6-revision-round1/baselines_novos/` — independentes desta campanha.

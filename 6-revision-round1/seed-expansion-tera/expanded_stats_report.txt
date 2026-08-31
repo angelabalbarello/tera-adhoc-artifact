@@ -1,5 +1,5 @@
-Comparacao estatistica — campanha publicada (n=4) vs expandida (n=12)
-Wilcoxon signed-rank pareado por seed, bicaudal, exato; Cliff's delta.
+Estatistica pareada por seed: campanha publicada (n=4) vs expandida (n=12)
+Wilcoxon signed-rank bicaudal exato; Cliff's delta.
 ============================================================================
 
 baseline_fixed  vs  aftkd_fixed
@@ -35,5 +35,3 @@ baseline_fixed  vs  baseline_hybrid
   Cost_ms_per_frame    0.1250     +1.000   0.0005 *     +0.806
 
 * p < 0.05 na campanha n=12.
-Medias por configuracao: expanded_summary.csv; observacoes individuais: expanded_per_seed.csv.
-PROTOCOLO: resultado reportado integralmente, favoravel ou nao. Nenhum arquivo do artigo foi alterado por este script.

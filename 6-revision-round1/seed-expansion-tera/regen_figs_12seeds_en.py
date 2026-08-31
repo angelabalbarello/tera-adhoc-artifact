@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Regenera fig_multiseed (EN) e fig_tradeoff (EN) para a campanha de 12 seeds
-(exp_seed12_round1), com fontes maiores (atende R2.6 nestas figuras).
-Fonte de dados: results_all_seeds.csv canonico da campanha (nenhum
-pos-processamento manual; apenas plot).
-Saida: --outdir (image/ do artigo revisado).
+"""Regenera as figuras multiseed e trade-off do artigo para as 12 seeds.
+
+Le o results_all_seeds.csv da campanha exp_seed12_round1 e apenas plota
+(nenhuma metrica e recalculada). Uso:
+    python regen_figs_12seeds_en.py --outdir <pasta image/ do artigo>
 """
 import argparse
 import numpy as np
