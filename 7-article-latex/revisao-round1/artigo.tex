@@ -329,7 +329,7 @@ rate untouched but worsens $\mathrm{TTD}_{\mathrm{ef}}$ by
 {\color{\revcolor}13.9\%}: the scheduler
 is active, yet without the enabling temporal property it allocates blindly. Give
 the same scheduler \mbox{AF-TOI}-organized trajectories and it cuts effective cost by
-\CostReduction\%, with $\mathrm{TTD}_{\mathrm{ef}}$ of
+{\color{\revcolor}\CostReduction\%}, with $\mathrm{TTD}_{\mathrm{ef}}$ of
 {\color{\revcolor}0.099\,s against 0.570\,s}.
 A post-hoc calibration control then rules out the obvious alternative explanation:
 rescaling probabilities improves calibration but does not reorganize entropy in
@@ -1349,17 +1349,17 @@ ECE: auxiliary indicator.
 \end{table*}
 \paragraph{The negative control as unsafe adaptive computation}
 Applying \MHEG to unorganized trajectories has non-neutral effects on allocation
-quality. Baseline+MHEG holds $\text{FR} = \resBaseHibrFail \pm \stdBaseHibrFail$
+quality. Baseline+MHEG holds $\text{FR} = {\color{\revcolor}\resBaseHibrFail \pm \stdBaseHibrFail}$
 at the fixed-baseline level, so it does not reduce misses, and it still degrades
-$\mathrm{TTD}_{\mathrm{ef}}$ by {\color{\revcolor}13.9\%}, from $\resBaseFixoTTDef$\,s to
-$\resBaseHibrTTDef$\,s. The scheduler allocates without temporal discrimination,
+$\mathrm{TTD}_{\mathrm{ef}}$ by {\color{\revcolor}13.9\%, from $\resBaseFixoTTDef$\,s to
+$\resBaseHibrTTDef$\,s}. The scheduler allocates without temporal discrimination,
 suppressing emerging-risk timesteps as often as redundant ones. This is the
 unsafe regime: apparent per-frame cost drops with no coverage guarantee while
 the effective delay worsens. The result points to the absence of the enabling
 property, not a scheduler design flaw.
 \paragraph{The complete ecosystem and trustworthy selective computation}
 Under \AFTOI organization, \MHEG operates on differentiated trajectories. The
-miss rate is preserved at $\resAlvoHibrFail \pm \stdAlvoHibrFail$, with
+miss rate is preserved at ${\color{\revcolor}\resAlvoHibrFail \pm \stdAlvoHibrFail}$, with
 $\mathrm{TTD}_{\mathrm{ef}}$ rising only {\color{\revcolor}0.016}\,s relative to \AFTOI fixed. The
 latency impact of scheduling is about {\color{\revcolor}4.3}$\times$ smaller in the complete
 ecosystem than in the negative control {\color{\revcolor}(0.016\,s vs.\ 0.070\,s)}, and absolute
@@ -1549,7 +1549,8 @@ so the complete-ecosystem advantage does not depend on the specific
 $T_{\mathrm{ep}}$.
 \begin{table*}[!tbp]
 \centering
-\caption{$\mathrm{TTD}_{\mathrm{ef}}$ sensitivity as a function of miss penalty.}
+\caption{$\mathrm{TTD}_{\mathrm{ef}}$ sensitivity as a function of miss
+penalty{\color{\revcolor}; values recomputed for the twelve-seed campaign}.}
 \label{tab:tep_sensitivity}
 \footnotesize
 \setlength{\tabcolsep}{12pt}
@@ -1560,12 +1561,12 @@ $T_{\mathrm{ep}}$.
 \textbf{Configuration} & \textbf{Penalty 5.0\,s}
   & \textbf{Penalty 10.0\,s} & \textbf{Penalty 15.0\,s} \\
 \midrule
-Baseline Fixed       & \resSensBaseA & \resSensBaseB & \resSensBaseC \\
+Baseline Fixed       & {\color{\revcolor}\resSensBaseA} & {\color{\revcolor}\resSensBaseB} & {\color{\revcolor}\resSensBaseC} \\
 \rowcolor{gray!8}
-Baseline+MHEG        & \resSensHibrA & \resSensHibrB & \resSensHibrC \\
-\mbox{AF-TOI} Fixed         & \resSensAlvoA & \resSensAlvoB & \resSensAlvoC \\
+Baseline+MHEG        & {\color{\revcolor}\resSensHibrA} & {\color{\revcolor}\resSensHibrB} & {\color{\revcolor}\resSensHibrC} \\
+\mbox{AF-TOI} Fixed         & {\color{\revcolor}\resSensAlvoA} & {\color{\revcolor}\resSensAlvoB} & {\color{\revcolor}\resSensAlvoC} \\
 \rowcolor{gray!8}
-\mbox{AF-TOI}+MHEG          & \resSensComplA & \resSensComplB & \resSensComplC \\
+\mbox{AF-TOI}+MHEG          & {\color{\revcolor}\resSensComplA} & {\color{\revcolor}\resSensComplB} & {\color{\revcolor}\resSensComplC} \\
 \bottomrule
 \multicolumn{4}{p{0.96\textwidth}}{\scriptsize Computed analytically
 from $\mathrm{TTD}_{\mathrm{ef}} = \text{TTD}_b + \text{FR} \times T_{\text{ep}}$.}
@@ -1615,7 +1616,10 @@ independently generated borderline recipes.}
 \caption{$\bar{p}_{\max}$ distributions by severity level in borderline
 episodes for seed~42. Baseline Fixed contains Normal and Critical levels;
 \mbox{AF-TOI} Fixed includes Normal, Attention, Alert, and Critical levels with
-activation fractions reported in the plot.}
+activation fractions reported in the plot.
+{\color{\revcolor}Revised in this version so that the Normal and Critical
+distributions are drawn from the same main-test-set data as
+Table~\ref{tab:borderline}, ensuring figure--table consistency.}}
 \label{fig:prob_dist}
 \end{figure*}
 The results give preliminary evidence that the induction extends beyond the
@@ -1721,11 +1725,12 @@ comparing Baseline, post-hoc calibration variants, and \mbox{AF-TOI}.}
 Baseline with and without MHEG. MHEG thresholds are re-calibrated
 per seed for each variant. ECE~(cal): post-calibration ECE;
 $\Delta$ECE: improvement vs.\ uncalibrated Baseline ($\approx 0.035$).
-Reference: Baseline Fixed FR~$= \resBaseFixoFail \pm \stdBaseFixoFail$,
-TTD$_{\mathrm{ef}}$~$= \resBaseFixoTTDef \pm \stdBaseFixoTTDef$\,s;
-\mbox{AF-TOI}+MHEG FR~$= \resAlvoHibrFail \pm \stdAlvoHibrFail$,
-TTD$_{\mathrm{ef}}$~$= \resAlvoHibrTTDef \pm \stdAlvoHibrTTDef$\,s,
-\SkipRate\% computation suppression.}
+Reference{\color{\revcolor} (twelve-seed campaign)}: Baseline Fixed
+FR~$= {\color{\revcolor}\resBaseFixoFail \pm \stdBaseFixoFail}$,
+TTD$_{\mathrm{ef}}$~$= {\color{\revcolor}\resBaseFixoTTDef \pm \stdBaseFixoTTDef}$\,s;
+\mbox{AF-TOI}+MHEG FR~$= {\color{\revcolor}\resAlvoHibrFail \pm \stdAlvoHibrFail}$,
+TTD$_{\mathrm{ef}}$~$= {\color{\revcolor}\resAlvoHibrTTDef \pm \stdAlvoHibrTTDef}$\,s,
+{\color{\revcolor}\SkipRate\%} computation suppression.}
 \label{tab:calibracao_posthoc}
 \footnotesize
 \setlength{\tabcolsep}{4.5pt}
@@ -1928,8 +1933,8 @@ point because smoothing a frozen buffer does not alter the deadlock.}
 \label{sec:deployment}
 At runtime, the active infrastructure is limited to the causal LSTM target, the
 \MHEG scheduler, constant thresholds, and the recurrent buffer
-(Table~\ref{tab:deployment}). \mbox{AF-TOI}+MHEG reaches \SkipRate\% computation
-suppression (\%Sup) and \CostReduction\% effective cost reduction (ms/f,
+(Table~\ref{tab:deployment}). \mbox{AF-TOI}+MHEG reaches {\color{\revcolor}\SkipRate\%} computation
+suppression (\%Sup) and {\color{\revcolor}\CostReduction\%} effective cost reduction (ms/f,
 per-frame latency relative to Baseline Fixed), two metrics that jointly
 characterize the operational economy. Estimates for dedicated embedded platforms
 come from scaling projections; physical chip validation is required before
@@ -1953,9 +1958,9 @@ FP32 / INT8 & \multicolumn{3}{c}{$\approx 228$\,KB / $\approx 57$\,KB} \\
 Recurrent buffer & \multicolumn{3}{c}{$1024$\,bytes} \\
 FLOPs/timestep & \multicolumn{3}{c}{$\approx 28$\,KFLOPs} \\
 \midrule
-Latency (ms/f) & $\resBaseFixoCost$ & $\resAlvoFixoCost$
-  & $\mathbf{\resAlvoHibrCost}$ \\
-Computation suppression & $0\%$ & $0\%$ & $\SkipRate$\% \\
+Latency (ms/f) & ${\color{\revcolor}\resBaseFixoCost}$ & ${\color{\revcolor}\resAlvoFixoCost}$
+  & ${\color{\revcolor}\mathbf{\resAlvoHibrCost}}$ \\
+Computation suppression & $0\%$ & $0\%$ & ${\color{\revcolor}\SkipRate}$\% \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -2166,7 +2171,7 @@ work.
 \label{sec:vecmec_implications}
 \paragraph{Resource allocation at the embedded tier}
 The most immediate implication is within the on-board unit. Under \mbox{AF-TOI}+MHEG,
-\SkipRate\% of frames are suppressed without violating $\mathrm{FR} \le 0.05$,
+{\color{\revcolor}\SkipRate\%} of frames are suppressed without violating $\mathrm{FR} \le 0.05$,
 freeing cycles that could support other on-board functions. Whether such sharing
 is feasible depends on the hardware platform and RTOS scheduler, which this work
 does not evaluate.
@@ -2219,7 +2224,7 @@ the negative control is what makes it credible: with the scheduler applied to
 unorganized trajectories, $\mathrm{TTD}_{\mathrm{ef}}$ worsened by
 {\color{\revcolor}13.9\% (twelve seeds, $p=0.001$)} and
 coverage did not improve, so activating a scheduler is not, by itself, enough. Given
-\mbox{AF-TOI}-organized trajectories, the same \MHEG scheduler reached \CostReduction\%
+\mbox{AF-TOI}-organized trajectories, the same \MHEG scheduler reached {\color{\revcolor}\CostReduction\%}
 effective cost reduction with $\mathrm{TTD}_{\mathrm{ef}}$ of
 {\color{\revcolor}0.099\,s against 0.570\,s}. The post-hoc calibration control ruled out the competing explanation:
 probabilistic rescaling improved ECE without reorganizing entropy in time, so
@@ -2272,7 +2277,7 @@ reviewers upon request.
 \section*{Funding}
 This research received no specific funding from public or private agencies.
 \section*{Acknowledgments}
-The authors thank the Universidade de Bras\'ilia computing infrastructure
+The authors thank the University of Bras\'ilia computing infrastructure
 for support of the experimental evaluations.
 \begin{sloppypar}
 % [REVISAO R1] Titulo e frase-modelo exigidos pelo Guide for Authors da
