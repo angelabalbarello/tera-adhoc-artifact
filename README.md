@@ -35,12 +35,13 @@ módulos compilam e importam normalmente. `synthetic_driver_risk_v7.py` e
 (`65bbec4a23050639` e `d5327a24d1d2f7f9`) continuam idênticos aos registrados
 nos manifests das campanhas.
 
-### Lacunas de rastreabilidade conhecidas (registradas, não resolvidas)
+### Notas de rastreabilidade
 
-1. **O script que computou os números da campanha de 9 cenários** (tabela de
-   robustez com FS@onset e orçamento pareado) **não foi localizado em disco** —
-   apenas o `robustness_section.tex` final com os valores. As trajetórias-fonte
-   (frame_probs por seed) estão em `5-robustness-replay-runv29/Inferencia/`.
+1. A campanha de 9 cenários da subseção de robustez (FS@onset e orçamento
+   pareado) está em `8-stress-campaign/`, com scripts, resultados e testes.
+   A re-execução completa reproduz os 16 CSVs byte a byte (validado em
+   31/08/2026); os episódios são gerados deterministicamente pelos próprios
+   scripts, sem dependência de dados externos.
 2. A cópia "viva" do `tera_pipeline` em `FGCS/Arquitetura/` **divergiu após a
    campanha publicada** (`tera_utils.py` modificado em 25/06, `tera_figures.py`
    em 02/06). Este repositório contém a **cópia congelada** (estado ≤ 19/05,
