@@ -1642,6 +1642,12 @@ yielding Table~\ref{tab:calibracao_posthoc}.
 Probabilistic alignment improves in all variants. Uncalibrated Baseline ECE is
 $\approx 0.035$; after isotonic calibration it drops to $\CalibICFixedECE$
 (reduction $\CalibICFixedECEDELTA$). The techniques work as intended.
+{\color{\revcolor}A note on scale: ECE values in this paper are
+protocol-specific -- the factorial evaluation of
+Table~\ref{tab:resultados_principais}, the frame-level reliability diagram of
+Figure~\ref{fig:entropy_dist}, and the calibration study of this subsection
+each compute ECE over a different probability stream, partition, and binning
+-- so magnitudes are comparable within, but not across, these analyses.}
 Their operational profiles under \MHEG differ sharply. Temperature scaling
 degrades $\mathrm{TTD}_{\mathrm{ef}}$ from $\CalibTSFixedTTDef$\,s to
 $\CalibTSHybrTTDef$\,s, reproducing the unsafe regime of the negative control.

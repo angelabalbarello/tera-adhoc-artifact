@@ -309,16 +309,22 @@ def fig_ttdef_dist(out):
 
 def fig_prob_dist(out):
     """
-    Composto (mesmas fontes da figura publicada, verificadas numericamente):
-      Normal/Critico  <- replay borderline_frame_logs.csv (p_max por episodio;
-                         Baseline Critico 0.926+-0.007, AF-TOI 0.527+-0.065)
+    Composto ALINHADO COM A TABELA 13 (ajuste da revisao round 1):
+      Normal/Critico  <- borderline_frame_logs.csv do TERA Pipeline (main
+                         test set, seed 42; AF-TOI Normal 0.006+-0.001/0.0%,
+                         Critico 0.271+-0.178/70.8% = exatamente a Tabela 13;
+                         Baseline Normal 0.090, Critico 0.578)
       Attention/Alert <- borderline_episode_level.csv (analise gpu_v23, so
                          AF-TOI; Atencao 0.048+-0.195 (5.8%>theta), Alerta
-                         0.380+-0.416 (48.8%>theta) -- valores do texto)
+                         0.380+-0.415 (48.8%>theta) = Tabela 13)
+    Obs.: a figura PUBLICADA usava os logs do replay para Normal/Critico
+    (AF-TOI Critico ~0.53), divergindo da Tabela 13; esta versao corrige a
+    inconsistencia usando as mesmas fontes da tabela.
     """
-    bl = pd.read_csv(BLCSV)
-    bl = bl[bl.seed == 42]
-    pmax = (bl.groupby(["config", "risk_level", "episode_id"])["p_t"]
+    tera = pd.read_csv(ROOT / "1-pipeline-tera" / "results" / "exp_seed12_round1"
+                       / "logs" / "borderline_frame_logs.csv")
+    tera = tera[tera.seed == 42]
+    pmax = (tera.groupby(["config", "risk_level", "episode_id"])["p_t"]
             .max().reset_index(name="p_max"))
     epv = pd.read_csv(ROOT / "5-robustness-replay-runv29" / "borderline-analysis"
                       / "borderline_episode_level.csv")
@@ -327,11 +333,11 @@ def fig_prob_dist(out):
               ("Alerta", "Alert", "#E07B39"), ("Crítico", "Critical", "#8172B3")]
     fig, axes = plt.subplots(1, 2, figsize=(14, 5.8), sharey=True)
     for ax, (cfg, title) in zip(axes, [("baseline_fixed", "(a) Baseline Fixed"),
-                                       ("afkd_fixed", "(b) AF-TOI Fixed")]):
+                                       ("aftkd_fixed", "(b) AF-TOI Fixed")]):
         sub = pmax[pmax.config == cfg]
         for i, (pt_lv, en_lv, color) in enumerate(levels):
             if pt_lv in ("Atenção", "Alerta"):
-                if cfg != "afkd_fixed":
+                if cfg != "aftkd_fixed":
                     ax.text(i, 0.5, "N/A\n(not evaluated)", ha="center",
                             va="center", fontsize=11, color="gray",
                             style="italic")
@@ -351,8 +357,8 @@ def fig_prob_dist(out):
                 b.set_edgecolor(color); b.set_lw(1.4)
             ax.hlines(np.median(vals), i - 0.22, i + 0.22, color="k", lw=1.8)
             ax.plot([i], [vals.mean()], marker="D", color="k", ms=6)
-            pct = 100.0 * float((vals > THETA).mean())
-            ax.text(i, -0.085, f"{pct:.1f}% > $\\theta$", ha="center",
+            pct = 100.0 * float((vals >= THETA).mean())  # mesmo criterio da Tabela 13
+            ax.text(i, -0.085, f"{pct:.1f}% $\\geq \\theta$", ha="center",
                     fontsize=10, color=color)
         ax.axhline(THETA, color="red", ls="--", lw=1.6)
         ax.text(-0.42, THETA + 0.015, r"$\theta = 0.1$", color="red", fontsize=11)

@@ -159,6 +159,14 @@
 
 % ── Borderline analysis macros (Movement 6; seed 42, unchanged by the
 %    12-seed expansion — seed 42 reproduced bit-exactly) ─────────────
+% ATENÇÃO AOS NOMES (auditoria 31/08/2026): apesar dos sufixos "At"/"Al",
+% estas macros contêm os valores dos grupos NORMAL (n=37) e CRÍTICO (n=120)
+% dos borderline_frame_logs do TERA Pipeline (config aftkd_fixed, seed 42) —
+% gera_borderline_macros.py foi executado com os rótulos trocados.
+% Verificação: Normal p̄max=0.006±0.001 (0.0%≥θ); Crítico 0.271±0.178
+% (70.8%≥θ). A Tabela 13 do artigo NÃO usa estas macros (valores diretos,
+% corretos); mantidas apenas por compatibilidade. Não usar em texto novo
+% sem renomear.
 \newcommand{\BLnAt}{37}
 \newcommand{\BLnAl}{120}
 \newcommand{\BLmxAt}{0{,}006}
