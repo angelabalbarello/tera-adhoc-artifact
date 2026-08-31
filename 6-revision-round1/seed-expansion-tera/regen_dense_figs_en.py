@@ -308,10 +308,21 @@ def fig_ttdef_dist(out):
 
 
 def fig_prob_dist(out):
+    """
+    Composto (mesmas fontes da figura publicada, verificadas numericamente):
+      Normal/Critico  <- replay borderline_frame_logs.csv (p_max por episodio;
+                         Baseline Critico 0.926+-0.007, AF-TOI 0.527+-0.065)
+      Attention/Alert <- borderline_episode_level.csv (analise gpu_v23, so
+                         AF-TOI; Atencao 0.048+-0.195 (5.8%>theta), Alerta
+                         0.380+-0.416 (48.8%>theta) -- valores do texto)
+    """
     bl = pd.read_csv(BLCSV)
     bl = bl[bl.seed == 42]
     pmax = (bl.groupby(["config", "risk_level", "episode_id"])["p_t"]
             .max().reset_index(name="p_max"))
+    epv = pd.read_csv(ROOT / "5-robustness-replay-runv29" / "borderline-analysis"
+                      / "borderline_episode_level.csv")
+    epv = epv[epv.seed == 42]
     levels = [("Normal", "Normal", "#4C72B0"), ("Atenção", "Attention", "#55A868"),
               ("Alerta", "Alert", "#E07B39"), ("Crítico", "Critical", "#8172B3")]
     fig, axes = plt.subplots(1, 2, figsize=(14, 5.8), sharey=True)
@@ -319,7 +330,16 @@ def fig_prob_dist(out):
                                        ("afkd_fixed", "(b) AF-TOI Fixed")]):
         sub = pmax[pmax.config == cfg]
         for i, (pt_lv, en_lv, color) in enumerate(levels):
-            vals = sub[sub.risk_level == pt_lv]["p_max"].values
+            if pt_lv in ("Atenção", "Alerta"):
+                if cfg != "afkd_fixed":
+                    ax.text(i, 0.5, "N/A\n(not evaluated)", ha="center",
+                            va="center", fontsize=11, color="gray",
+                            style="italic")
+                    continue
+                cat = "Atencao" if pt_lv == "Atenção" else "Alerta"
+                vals = epv[epv.categoria == cat]["max_prob"].values
+            else:
+                vals = sub[sub.risk_level == pt_lv]["p_max"].values
             if len(vals) < 3:
                 ax.text(i, 0.5, "N/A\n(no data)", ha="center", va="center",
                         fontsize=11, color="gray", style="italic")
@@ -361,12 +381,7 @@ def main():
     fig_temporal_trace(df, out); print("ok 5-fig_temporal_trace_en")
     fig_gating_heatmap(df, out); print("ok 6-fig_gating_heatmap_en")
     fig_ttdef_dist(out);         print("ok 8-fig_ttdef_dist")
-    # fig 11 (prob_dist / violinos borderline) NAO e regenerada: o recorte de
-    # dados da figura publicada (n=37 Attention, p_max 0.048+-0.195) nao foi
-    # localizado em disco (nem o replay 240-episodios nem os logs TERA o
-    # reproduzem), e regenerar com outro recorte contradiria os numeros do
-    # texto do artigo. Mantida a figura original (fontes ja legiveis).
-    # fig_prob_dist(out)
+    fig_prob_dist(out);          print("ok 11-fig_prob_dist_en")
 
 
 if __name__ == "__main__":
