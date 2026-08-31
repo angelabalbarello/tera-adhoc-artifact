@@ -1467,38 +1467,41 @@ safety boundary; the shaded area denotes the unsafe scheduling region.}
 Mean $\mathrm{TTD}_{\mathrm{ef}}$ can mask heterogeneous per-episode behavior.
 Figures~\ref{fig:ttdef_hist} and~\ref{fig:ttdef_cdf} show the pattern: \mbox{AF-TOI}
 histograms concentrate near zero, while variants without organization spread
-widely, with 19 episodes stuck at the 10\,s miss penalty, precisely the episodes
+widely, with {\color{\revcolor}47 episodes} stuck at the 10\,s miss penalty, precisely the episodes
 where the scheduler failed to invest at emergence windows.
 \begin{figure*}[!tbp]
 \centering
 \includegraphics[width=0.98\textwidth]{image/8-fig_ttdef_dist.pdf}
 \caption{$\mathrm{TTD}_{\mathrm{ef}}$ frequency distributions per critical
-episode across seeds 42--45 ($n=480$ per configuration{\color{\revcolor};
-original four-seed campaign, see text for the twelve-seed counts}). The 10\,s value
-denotes the miss penalty used in $\mathrm{TTD}_{\mathrm{ef}}$.}
+episode across {\color{\revcolor}seeds 42--53 ($n=1{,}440$ per configuration;
+updated in this revision to the twelve-seed campaign)}. The 10\,s value
+denotes the miss penalty used in $\mathrm{TTD}_{\mathrm{ef}}$.
+{\color{\revcolor}The in-panel mean is the per-episode average (detected delay,
+or 10\,s when missed) and therefore differs slightly from the seed-level
+$\mathrm{TTD}_{\mathrm{ef}}$ of Table~\ref{tab:resultados_principais}, which
+averages the detected delay and adds $\mathrm{FR} \times T_{\mathrm{ep}}$ at
+seed level.}}
 \label{fig:ttdef_hist}
 \end{figure*}
 \begin{figure}
 \centering
 \includegraphics[width=\columnwidth]{image/9-fig_ttdef_cdf.pdf}
 \caption{Cumulative distribution functions of
-$\mathrm{TTD}_{\mathrm{ef}}$ per critical episode across seeds 42--45
-($n=480$ per configuration{\color{\revcolor}; original four-seed campaign}).}
+$\mathrm{TTD}_{\mathrm{ef}}$ per critical episode across {\color{\revcolor}seeds 42--53
+($n=1{,}440$ per configuration; twelve-seed campaign)}.}
 \label{fig:ttdef_cdf}
 \end{figure}
 The high standard deviations of the non-\mbox{AF-TOI} configurations are not stochastic
-noise but the 19 severely penalized episodes where computation was suppressed at
-critical windows. With \AFTOI, the miss population collapses from 19 to 2, so
+noise but the {\color{\revcolor}47} severely penalized episodes where computation was suppressed at
+critical windows. With \AFTOI, the miss population collapses from
+{\color{\revcolor}47 to 2 (out of 1{,}440 critical test episodes)}, so
 the induction restructures the failure distribution rather than merely lowering
-mean latency. Baseline Fixed and Baseline+MHEG share identical miss counts,
+mean latency. Baseline Fixed and Baseline+MHEG share {\color{\revcolor}nearly
+identical miss counts (47 vs.\ 50)},
 confirming no distributional coverage benefit from selective computation without
 organization. Adding \MHEG to already organized trajectories does not shift the
 profile, since the scheduler suppresses genuinely redundant intervals without
-creating new failures. {\color{\revcolor}The figures of this movement show the
-original four-seed campaign; in the expanded twelve-seed campaign the same
-distributional pattern holds, with 47 penalized episodes for Baseline Fixed
-(50 under Baseline+MHEG) against 2 for the organized configurations, out of
-1,440 critical test episodes.}
+creating new failures.
 \subsection{Movement 5. Robustness}
 \label{sec:mov5_robustez}
 Figure~\ref{fig:multiseed} shows performance across {\color{\revcolor}the

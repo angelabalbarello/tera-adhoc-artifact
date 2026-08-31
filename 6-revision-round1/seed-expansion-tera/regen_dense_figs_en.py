@@ -272,15 +272,24 @@ def fig_gating_heatmap(df, out):
     plt.close(fig)
 
 
+EP12 = HERE / "df_episodios_12seeds.csv"
+CFG4 = [("baseline_fixed", "Baseline Fixed", "#4C72B0", "-"),
+        ("baseline_hybrid", "Baseline+MHEG\n(neg. control)", "#55A868", "--"),
+        ("aftkd_fixed", "AF-TOI Fixed", "#C44E52", "-"),
+        ("aftkd_hybrid", "AF-TOI+MHEG", "#8172B3", "--")]
+
+
 def fig_ttdef_dist(out):
-    ep = pd.read_csv(EPCSV)
-    configs = [("baseline_fixed", "Baseline Fixed", "#4C72B0"),
-               ("baseline_hybrid", "Baseline+MHEG\n(neg. control)", "#55A868"),
-               ("aftkd_fixed", "AF-TOI Fixed", "#C44E52"),
-               ("aftkd_hybrid", "AF-TOI+MHEG", "#8172B3")]
+    """
+    Histogramas de TTDef POR EPISODIO, 12 seeds (n=1440/config).
+    Fonte: df_episodios_12seeds.csv, reconstruido com a regra do
+    tera_eval congelado e validado contra results_all_seeds.csv
+    (FailRate e TTD reproduzidos em 4 casas em todas as 48 combinacoes).
+    """
+    ep = pd.read_csv(EP12)
     fig, axes = plt.subplots(1, 4, figsize=(16.5, 4.6))
     bins = np.linspace(0, 2.5, 21)
-    for ax, (cfg, title, color) in zip(axes, configs):
+    for ax, (cfg, title, color, _ls) in zip(axes, CFG4):
         vals = ep[ep.config_id == cfg]["TTDef"].values
         det = vals[vals < 10]
         n_miss = int((vals >= 10).sum())
@@ -288,7 +297,7 @@ def fig_ttdef_dist(out):
         ax.bar([2.35], [n_miss], width=0.14, color=color, alpha=0.88,
                hatch="//", edgecolor="k", lw=0.6)
         ax.annotate(f"{n_miss}\nmisses\n(10 s)", xy=(2.35, n_miss),
-                    xytext=(2.28, n_miss + max(8, n_miss * 0.25)),
+                    xytext=(2.28, n_miss + max(25, n_miss * 0.25)),
                     fontsize=10.5, ha="center")
         ax.text(0.97, 0.94, f"mean={vals.mean():.3f}s\nFR={n_miss/len(vals):.3f}",
                 transform=ax.transAxes, fontsize=11, va="top", ha="right",
@@ -301,9 +310,42 @@ def fig_ttdef_dist(out):
         ax.grid(alpha=0.2, ls="--", axis="y")
     axes[0].set_ylabel("Critical episodes")
     fig.suptitle(r"Distribution of TTD$_{\mathrm{ef}}$ per critical episode "
-                 "(seeds 42–45)", fontsize=14, y=1.03)
+                 "(seeds 42–53, n = 1,440 per configuration)", fontsize=14, y=1.03)
     fig.tight_layout()
     fig.savefig(out / "8-fig_ttdef_dist.pdf", bbox_inches="tight")
+    plt.close(fig)
+
+
+def fig_ttdef_cdf(out):
+    """CDF de TTDef por episodio, 12 seeds — mesma fonte da fig 8."""
+    ep = pd.read_csv(EP12)
+    fig, ax = plt.subplots(figsize=(8.6, 6.4))
+    for cfg, label, color, ls in CFG4:
+        vals = np.sort(ep[ep.config_id == cfg]["TTDef"].values)
+        y = np.arange(1, len(vals) + 1) / len(vals)
+        ax.step(vals, y, where="post", color=color, ls=ls, lw=2.4,
+                label=label.replace("\n", " "))
+    ax.axvline(10.0, color="gray", ls=":", lw=1.8)
+    ax.text(9.85, 0.42, "Miss penalty\n(10 s)", ha="right", fontsize=11.5,
+            color="gray", style="italic")
+    ax.annotate("AF-TOI concentrates\nepisodes near 0 s",
+                xy=(0.45, 0.965), xytext=(2.6, 0.80), fontsize=11.5,
+                color="#C44E52",
+                arrowprops=dict(arrowstyle="->", color="#C44E52"))
+    ax.annotate("Baseline: long tail\ntoward miss penalty",
+                xy=(9.9, 0.968), xytext=(5.6, 0.55), fontsize=11.5,
+                color="#4C72B0",
+                arrowprops=dict(arrowstyle="->", color="#4C72B0"))
+    ax.set_xlabel(r"TTD$_{\mathrm{ef}}$ (s)")
+    ax.set_ylabel("Cumulative fraction")
+    ax.set_title(r"Cumulative distribution of TTD$_{\mathrm{ef}}$ per critical "
+                 "episode (seeds 42–53)", pad=12)
+    ax.set_xlim(-0.15, 10.4)
+    ax.set_ylim(0, 1.02)
+    ax.grid(ls="--", alpha=0.35)
+    ax.legend(loc="lower right", framealpha=0.95)
+    fig.tight_layout()
+    fig.savefig(out / "9-fig_ttdef_cdf.pdf", bbox_inches="tight")
     plt.close(fig)
 
 
@@ -386,7 +428,8 @@ def main():
     fig_entropy_dist(df, out);   print("ok 4-fig_entropy_dist_en")
     fig_temporal_trace(df, out); print("ok 5-fig_temporal_trace_en")
     fig_gating_heatmap(df, out); print("ok 6-fig_gating_heatmap_en")
-    fig_ttdef_dist(out);         print("ok 8-fig_ttdef_dist")
+    fig_ttdef_dist(out);         print("ok 8-fig_ttdef_dist (12 seeds)")
+    fig_ttdef_cdf(out);          print("ok 9-fig_ttdef_cdf (12 seeds)")
     fig_prob_dist(out);          print("ok 11-fig_prob_dist_en")
 
 
