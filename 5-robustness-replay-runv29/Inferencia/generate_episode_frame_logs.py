@@ -161,7 +161,11 @@ def infer_hybrid_with_mask(
             except Exception:
                 dk = 0.0
             p_clip = float(np.clip(last_p, 1e-6, 1 - 1e-6))
-            H_val  = -(p_clip * np.log(p_clip) + (1 - p_clip) * np.log(1 - p_clip))
+            # FIX 2026-09-23 (auditoria): entropia do gate em BITS (log2), como
+            # na Eq. 11 do artigo e no run_v29 que calibrou tau_h=0.95; a versao
+            # anterior usava np.log (nats, max 0.693 < 0.95), de modo que o ramo
+            # entropico nunca disparava e a mascara ficava puramente cinematica.
+            H_val  = -(p_clip * np.log2(p_clip) + (1 - p_clip) * np.log2(1 - p_clip))
             update = (dk >= tau_delta) or (H_val >= tau_h)
 
             if not update:

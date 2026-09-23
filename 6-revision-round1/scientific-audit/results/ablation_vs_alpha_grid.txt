@@ -1,0 +1,12 @@
+TTDef NoTemp=0.250 vs canonical a015=0.043 ratio=5.74x p=0.0161 delta=+0.806
+TTDef NoTemp=0.250 vs worst-alpha mechabl_a030=0.161 ratio=1.56x p=0.9097 delta=+0.389
+TTDef NoTemp=0.250 vs grid mean=0.099 ratio=2.53x p=0.2036 delta=+0.250
+TTDef_hyb NoTemp=0.180 vs canonical a015=0.051 ratio=3.54x p=0.0049 delta=+0.819
+TTDef_hyb NoTemp=0.180 vs worst-alpha mechabl_a005=0.059 ratio=3.03x p=0.0034 delta=+0.778
+TTDef_hyb NoTemp=0.180 vs grid mean=0.037 ratio=4.83x p=0.0010 delta=+0.833
+ECE NoTemp=0.642 vs canonical a015=0.531 ratio=1.21x p=0.0005 delta=+1.000
+ECE NoTemp=0.642 vs worst-alpha mechabl_a050=0.535 ratio=1.20x p=0.0005 delta=+1.000
+ECE NoTemp=0.642 vs grid mean=0.532 ratio=1.21x p=0.0005 delta=+1.000
+SupPct NoTemp=58.985 vs canonical a015=47.525 ratio=1.24x p=0.0210 delta=+0.569
+SupPct NoTemp=58.985 vs worst-alpha mechabl_a005=50.118 ratio=1.18x p=0.0342 delta=+0.431
+SupPct NoTemp=58.985 vs grid mean=49.073 ratio=1.20x p=0.0024 delta=+0.694

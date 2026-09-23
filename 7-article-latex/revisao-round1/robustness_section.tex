@@ -66,7 +66,12 @@ no\_onset\_negative\_control & mixed       & org.  & sanity: FS must be $\approx
 \end{table}
 
 \paragraph{Cost-matched safety.}
-The decisive result is that structure, not compute budget, drives safety.
+The most informative result of this campaign is that, under its stress
+protocol and at matched budget, structure rather than compute budget drives
+near-onset safety; {\color{\revcolor}Section~\ref{sec:temporal_scale}
+qualifies the scope of this reading under temporal-scale shift, where the
+budget-matched advantage concentrates on coverage and timeliness rather than
+on suppression placement.}
 Table~\ref{tab:rob_costmatched} matches every control to the \mbox{MHEG}
 budget within $\pm 2\%$. At \emph{identical} cost, \mbox{MHEG} preserves full
 coverage with zero onset-window suppression, while budget-matched controls
@@ -128,8 +133,8 @@ $56.7\%$ FS@onset for the lagged control under abrupt onsets. The
 false suppression $\approx 0$ for all methods. When the kinematic channel was
 removed (\texttt{kinematic\_signal\_missing}), \mbox{MHEG} retained coverage
 $100\%$ with only $11.5\%$ FS@onset, while the matched controls became unsafe
-($33$--$46\%$ FS@onset), confirming the kinematic trigger as the intended
-fallback for sub-onset windows.
+($33$--$46\%$ FS@onset), a result consistent with the kinematic trigger acting
+as the intended fallback for sub-onset windows.
 
 \paragraph{Entropy-lag sensitivity.}
 Table~\ref{tab:rob_lag} varies the entropic-signal lag. Progressive onsets
@@ -166,7 +171,7 @@ in percent.}
 \end{table}
 
 \paragraph{Ablation of the scheduling channels.}
-A per-channel ablation confirms that both components are necessary.
+A per-channel ablation indicates that both components are necessary.
 Entropy-only scheduling preserves coverage but adds delay
 ($\mathrm{TTD}_{\mathrm{ef}}$ rises relative to the hybrid), while
 kinematic-only scheduling is catastrophic on progressive onsets, collapsing

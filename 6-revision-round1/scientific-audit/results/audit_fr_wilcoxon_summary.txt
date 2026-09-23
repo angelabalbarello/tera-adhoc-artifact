@@ -1,0 +1,7 @@
+zeros=7 pos=5 neg=0 n_eff=5
+wilcox: W=0.0, p=0.062500
+pratt: W=0.0, p=0.062500
+zsplit: W=14.0, p=0.052246
+Baseline seeds FR=0: 7/12 (FR>0: [43, 44, 45, 49, 53])
+AF-TOI seeds FR=0: 11/12
+Cliff delta = +0.3611

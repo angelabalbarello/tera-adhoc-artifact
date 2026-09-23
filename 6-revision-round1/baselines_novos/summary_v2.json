@@ -1,0 +1,82 @@
+{
+ "safe|Baseline|Confidence-threshold gate": {
+  "fr": 0.0,
+  "fr_sd": 0.0,
+  "ttdef": 0.009548611111111112,
+  "ttdef_sd": 0.010270971845659057,
+  "sup": 0.3722622863247863,
+  "sup_sd": 0.7445245726495726
+ },
+ "safe|Baseline|Entropy+kinematic gate (MHEG-style)": {
+  "fr": 0.0020833333333333333,
+  "fr_sd": 0.004166666666666667,
+  "ttdef": 0.24667184582166202,
+  "ttdef_sd": 0.07783553516833396,
+  "sup": 93.61311431623932,
+  "sup_sd": 0.026986190466932503
+ },
+ "safe|Baseline|Smoothed-entropy gate (w=5)": {
+  "fr": 0.010416666666666666,
+  "fr_sd": 0.020833333333333332,
+  "ttdef": 0.11373414855072463,
+  "ttdef_sd": 0.20335551548700814,
+  "sup": 2.1400908119658117,
+  "sup_sd": 3.6351678073472287
+ },
+ "safe|AF-TOI|Confidence-threshold gate": {
+  "fr": 0.0,
+  "fr_sd": 0.0,
+  "ttdef": 0.03927951388888889,
+  "ttdef_sd": 0.037210974398805934,
+  "sup": 0.0,
+  "sup_sd": 0.0
+ },
+ "safe|AF-TOI|Entropy+kinematic gate (MHEG-style)": {
+  "fr": 0.010416666666666666,
+  "fr_sd": 0.007978559231302817,
+  "ttdef": 0.3506716643225087,
+  "ttdef_sd": 0.183063616500512,
+  "sup": 69.33259882478632,
+  "sup_sd": 1.7404064819644318
+ },
+ "safe|AF-TOI|Smoothed-entropy gate (w=5)": {
+  "fr": 0.0,
+  "fr_sd": 0.0,
+  "ttdef": 0.03927951388888889,
+  "ttdef_sd": 0.037210974398805934,
+  "sup": 0.0,
+  "sup_sd": 0.0
+ },
+ "matched|Baseline|Confidence-threshold gate": {
+  "fr": 0.9895833333333334,
+  "fr_sd": 0.004166666666666707,
+  "ttdef": 9.895833333333334,
+  "ttdef_sd": 0.04166666666666785,
+  "sup": 97.08533653846153,
+  "sup_sd": 0.24706196581196893
+ },
+ "matched|Baseline|Smoothed-entropy gate (w=5)": {
+  "fr": 0.9875,
+  "fr_sd": 0.004811252243246928,
+  "ttdef": 9.875,
+  "ttdef_sd": 0.04811252243247018,
+  "sup": 96.69471153846155,
+  "sup_sd": 0.5070977634342849
+ },
+ "matched|AF-TOI|Confidence-threshold gate": {
+  "fr": 0.59375,
+  "fr_sd": 0.12772492868429175,
+  "ttdef": 5.9382440476190474,
+  "ttdef_sd": 1.278139833509682,
+  "sup": 69.70319177350427,
+  "sup_sd": 1.7824263214635887
+ },
+ "matched|AF-TOI|Smoothed-entropy gate (w=5)": {
+  "fr": 0.59375,
+  "fr_sd": 0.12772492868429175,
+  "ttdef": 5.9382440476190474,
+  "ttdef_sd": 1.278139833509682,
+  "sup": 69.67314369658119,
+  "sup_sd": 1.7704204829441526
+ }
+}
