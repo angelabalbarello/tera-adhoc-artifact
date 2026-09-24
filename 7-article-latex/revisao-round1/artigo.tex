@@ -528,14 +528,20 @@ structure was the kind a scheduler could safely allocate on. In the table, the
 across prior work. On the evidence we surveyed, we are not aware of prior work that
 uses temporal entropy dynamics near a deterministic onset as a scheduling signal
 under an explicit miss-coverage constraint, or that treats temporal organization as
-a \emph{necessary} condition along the chain
+a structural precondition along the chain
 \emph{Entropy Stratification $\rightarrow$ Informative Scheduling Signal $\rightarrow$
 Trustworthy Selective Computation}.
 These gaps form a dependency chain. Onset dynamics cannot be characterized
 without deterministic annotation; entropy does not gain discriminative power at
-transitions without onset-aware training; schedulers cannot allocate safely
-without informative entropy. TERA treats temporal organization as the
-structural precondition for this chain: \AFTOI promotes the trajectory
+transitions without onset-aware training; and, {\color{\revcolor}in the
+setting evaluated here, an entropy-driven gate cannot allocate computation
+reliably around the onset when the entropy trajectory itself is not
+informative. This does not imply that every selective-computation mechanism
+requires temporally organized entropy: periodic-refresh and learned-gating
+baselines provide alternative allocation mechanisms, examined in
+Section~\ref{sec:gating_baselines}.} TERA treats temporal organization as the
+structural precondition for entropy-driven selective scheduling under the
+explicit coverage constraint evaluated here: \AFTOI promotes the trajectory
 structure required for entropy stratification, and \MHEG exploits the resulting
 signal to allocate computation selectively and safely at the edge.
 The columns of Table~\ref{tab:panorama} are read as follows.
@@ -656,8 +662,10 @@ where each $x_t \in \mathbb{R}^D$ encodes visual, kinematic, contextual, and
 acoustic observations. The output $y_t$ depends only on the history $\{x_1,
 \ldots, x_t\}$, which distinguishes the embedded model from bidirectional
 architectures. The predictive core is a two-layer unidirectional LSTM with
-per-step cost $\mathcal{O}(4(DH{+}H^2))$, compatible with automotive-grade edge
-budgets{\color{\revcolor}, where $H$ denotes the recurrent hidden width,
+recurrent-update cost $\mathcal{O}(4(DH{+}H^2)+8H^2)$ for the two stacked
+layers ({\color{\revcolor}${\approx}57.2$\,K MACs per executed timestep for
+$D{=}31$, $H{=}64$; Section~\ref{sec:complexidade}}), compatible with
+automotive-grade edge budgets{\color{\revcolor}, where $H$ denotes the recurrent hidden width,
 distinct from the entropy $H(\cdot)$ used by the scheduler}.
 {\color{\revcolor}The sensor stream at the input of Figure~\ref{fig:tera_operational}
 is the frame-synchronous concatenation of the four on-board modality groups
@@ -1543,8 +1551,8 @@ count of every seed unchanged. Direct operational means in the fixed contrast
 (\mbox{AF-TOI} Fixed vs.\ Baseline Fixed) match the four-seed campaign's
 pattern (FR 0.001 vs.\ 0.033; $\mathrm{TTD}_{\mathrm{ef}}$ 0.083\,s vs.\
 0.500\,s). The complementary campaigns (post-hoc calibration, teacher
-ablation, stress scenarios, and gating baselines) retain the original four
-seeds (42--45).}
+ablation, stress scenarios, and gating baselines) use the initial four
+seeds (42--45) throughout.}
 Table~\ref{tab:cliff_delta} summarizes.
 \begin{table}[!tbp]
 \centering
@@ -2521,8 +2529,9 @@ configuration. {\color{\revcolor}Baseline+MHEG buys computational
 savings, but not a safety-qualified efficiency gain: the miss rate is not
 improved and the effective detection delay worsens.} This locates \AFTOI's
 primary effect. The mechanism does not work by raising classification scores;
-it creates the conditions under which selective
-computation is safe at all. Without differentiated dynamics, efficiency and
+{\color{\revcolor}it creates the conditions under which the evaluated \MHEG
+policy achieves coverage-preserving selective computation, under the
+controlled synthetic conditions studied here.} Without differentiated dynamics, efficiency and
 coverage do not merely fail to improve together; they compete, because the
 scheduler trims apparent per-frame cost while the effective delay climbs. Once the
 trajectories are organized, that competition relaxes
@@ -2641,9 +2650,9 @@ confirmation on naturalistic datasets such as DMD~\cite{ortega2020dmd} and
 DADA~\cite{fang2022dada} remains necessary for external validity. Second, \MHEG
 thresholds are calibrated on synthetic data and may need re-calibration under
 real-world shift from driver variability, illumination, and sensor noise.
-{\color{\revcolor}Third, the factorial analysis uses twelve seeds (42--53),
-expanded from the original four under a prespecified protocol: the eight
-additional seeds were fixed before inspecting their outcomes, and all twelve
+{\color{\revcolor}Third, the factorial analysis uses twelve seeds (42--53)
+under a prespecified protocol: the eight seeds beyond the initial four
+(42--45) were fixed before inspecting their outcomes, and all twelve
 are reported; with $n=12$ the exact paired
 Wilcoxon test reaches conventional significance on F1, ECE, and
 $\mathrm{TTD}_{\mathrm{ef}}$ (Section~\ref{sec:mov3_consequencia}). The
