@@ -181,7 +181,8 @@
 Vehicular edge nodes run monitoring models continuously on hardware shared
 with other always-on functions. Selective
 computation -- skipping or reusing inference steps -- keeps such systems
-within budget, but is safe only if uncertainty rises near critical
+within budget, but for uncertainty-driven scheduling to preserve detection
+coverage, the uncertainty signal must become informative around critical
 transitions. Continuous driving streams do not guarantee this: a
 classification-trained model can stay confident up to a transition, and a
 confidence-driven scheduler then suppresses the frames detection depends on.
@@ -2241,7 +2242,7 @@ detection endpoints above.
 \color{\revcolor}
 \centering
 \caption{Skip-RNN versus the frozen \mbox{AF-TOI}(+\MHEG) models under a
-single harmonized protocol (published campaign test partitions, seeds 42--45,
+single harmonized protocol (main-campaign test partitions, seeds 42--45,
 $\theta=0.10$, detection from the label onset; mean $\pm$ sd). ``Matched''
 selects, per seed, the Skip-RNN cost weight whose suppression fraction is
 closest to \MHEG's (a post-hoc diagnostic; suppression fractions, not FLOPs,
