@@ -1212,9 +1212,9 @@ Table~\ref{tab:receitas} summarizes the full recipe taxonomy.
 \end{tabular}
 \end{table}
 The dataset consolidates {\color{\revcolor}12,480 episodes across twelve seeds
-(42--53); the four original seeds (42--45) of the factorial study were
-verified to reproduce the initially reported campaign exactly before the
-expansion to twelve. Each seed follows} the
+(42--53); the four initial seeds (42--45) of the factorial study were
+verified to reproduce their four-seed campaign exactly before the
+extension to twelve. Each seed follows} the
 70/15/15\% split. Each sequence has $T=96$ timesteps at $\approx$9.6\,fps,
 $D=31$, and deterministic onset $t_0$ at frame-level precision. That onset makes
 the induced organization verifiable, since it fixes the reference against which
@@ -1448,7 +1448,7 @@ Baseline Fixed & \ding{55} & \ding{55} & {\color{\revcolor}12/12}
 \caption{Global factorial study results under continuous causal streaming
 (mean $\pm$ inter-seed standard deviation{\color{\revcolor}; twelve seeds,
 42--53}). {\color{\revcolor}Twelve-seed campaign executed with the same frozen
-pipeline as the original four-seed study; ms/f is measured wall-clock time
+pipeline as the initial four-seed campaign; ms/f is measured wall-clock time
 and is homogeneous within this campaign.}}
 \label{tab:resultados_principais}
 \scriptsize
@@ -1518,14 +1518,15 @@ The \AFTOI F1-Score ({\color{\revcolor}$0.846 \pm 0.180$, CV $\approx$21\%}) sho
 inter-seed variance than Baseline ({\color{\revcolor}$0.366 \pm 0.069$}), reflecting sensitivity of
 the alignment process to initialization.
 {\color{\revcolor}To give the factorial contrasts adequate statistical power,
-the factorial study was expanded from four to twelve seeds (42--53).
+the factorial study covers twelve seeds (42--53): an initial four-seed
+campaign (42--45) extended by eight further seeds.
 The eight additional seeds were fixed before inspecting their outcomes and
 before recomputing any inferential statistics for the expanded twelve-seed
 campaign; the sample size was not adjusted as a function of the
 additional-seed results, and all twelve are reported regardless of outcome; the expansion
 was executed with the same frozen pipeline (identical configuration and
-generator hashes), and the four original seeds were verified to reproduce the
-initially reported campaign exactly before integration. With $n=12$ the exact
+generator hashes), and the four initial seeds were verified to reproduce
+their four-seed campaign exactly before integration. With $n=12$ the exact
 paired Wilcoxon test resolves conventional significance:
 \mbox{AF-TOI} dominates the Baseline on F1 and ECE ($p=0.0005$) and on
 $\mathrm{TTD}_{\mathrm{ef}}$ ($p=0.021$), with \mbox{AF-TOI} attaining higher
@@ -1539,7 +1540,7 @@ significant: adding \mbox{MHEG} to unorganized trajectories degrades
 $\mathrm{TTD}_{\mathrm{ef}}$ ($p=0.001$) without reducing FR, whereas on
 organized trajectories it reduces cost ($p=0.0005$) while leaving the miss
 count of every seed unchanged. Direct operational means in the fixed contrast
-(\mbox{AF-TOI} Fixed vs.\ Baseline Fixed) preserve the originally reported
+(\mbox{AF-TOI} Fixed vs.\ Baseline Fixed) match the four-seed campaign's
 pattern (FR 0.001 vs.\ 0.033; $\mathrm{TTD}_{\mathrm{ef}}$ 0.083\,s vs.\
 0.500\,s). The complementary campaigns (post-hoc calibration, teacher
 ablation, stress scenarios, and gating baselines) retain the original four
@@ -1600,7 +1601,7 @@ Table~\ref{tab:estratificado} stratifies by operational regime, showing that the
 \includegraphics[width=\columnwidth]{image/7-fig_tradeoff.pdf}
 \caption{Global miss rate versus effective inference cost per frame
 (CI~95\%, {\color{\revcolor}seeds 42--53}). The dashed line marks the $\text{FR}=0.05$
-safety boundary; the shaded area denotes the unsafe scheduling region.}
+safety boundary; the shaded area denotes the unsafe scheduling region. {\color{\revcolor}The dashed line is the \emph{aggregate} FR reference; trustworthiness is assessed per seed (Section~\ref{sec:rel_trust}) -- Baseline+MHEG violates $\mathrm{FR}\le0.05$ in 3 of 12 seeds despite an aggregate mean below 0.05.}}
 \label{fig:tradeoff}
 \end{figure}
 \subsection{Movement 4. Distributional Structure}
@@ -1876,12 +1877,11 @@ probability-scale adjustment does not reproduce, visible in the temporal
 morphology of panel~(b): $H(t)$ is elevated around the onset and suppressed in
 stable phases, a differentiation that tracks onset proximity and is absent
 from every calibrated variant in panel~(a).
-{\color{\revcolor}A scalar summary used in the submitted version, the
-entropy-stratification score $H_{\mathrm{strat}} =
-(H_{\mathrm{post}}-H_{\mathrm{stable}})/H_{\max}$, was removed during
-revision verification: recomputed under a single procedure on the stored
-trajectories, it is sensitive to the probability scale rather than to
-temporal organization (the calibrated variants score $0.63$--$0.82$, above
+{\color{\revcolor}A scalar summary, the entropy-stratification score
+$H_{\mathrm{strat}} = (H_{\mathrm{post}}-H_{\mathrm{stable}})/H_{\max}$, is
+deliberately not retained here: recomputed under a single unified procedure on
+the stored trajectories, it proves sensitive to the probability scale rather
+than to temporal organization (the calibrated variants score $0.63$--$0.82$, above
 both the uncalibrated Baseline, $0.39 \pm 0.06$, and \AFTOI,
 $0.34 \pm 0.03$), so it cannot support -- in either direction -- claims about
 organization. The evidence for this control therefore rests on the trajectory
@@ -1929,9 +1929,8 @@ and \mbox{AF-TOI}.}
 {\color{\revcolor}Probability-scale
 correction does not modify the internal representation or how it responds to
 risk proximity; it rescales declared confidence at the output without inducing
-the temporal differentiation reliable scheduling needs. The per-seed
-stratification-score figure of the submitted version was removed together
-with the score itself, for the reason given above.}
+the temporal differentiation reliable scheduling needs. For the reason given
+above, no per-seed stratification-score figure is reported.}
 \begin{table*}
 \centering
 \caption{Epistemological control via post-hoc calibration applied to
@@ -2288,7 +2287,13 @@ anchors, an interpolation gap ($1.46$--$2.29$\,s), and extrapolation
 extremes ($0.21$ and $4.38$--$5.21$\,s). At the native duration the warp
 reproduces the original trajectories exactly, and the evaluation machinery
 reproduces the original factorial campaign with zero error on the original
-test partitions of seeds 42--45.
+test partitions of seeds 42--45. {\color{\revcolor}The
+$\mathrm{TTD}_{\mathrm{ef}}$ magnitudes below are on this campaign's own
+scale -- frame-level detection from the label onset on warped episodes -- and
+are not comparable to the episode-rule $\mathrm{TTD}_{\mathrm{ef}}$ of
+Table~\ref{tab:resultados_principais}
+(Table~\ref{tab:protocol_map}); the zero-error anchor concerns reproduction
+of the campaign artifacts, not a shared metric scale.}
 
 Figure~\ref{fig:temporal_scale}a--b and Table~\ref{tab:temporal_scale}
 report the frozen operating points. \mbox{AF-TOI} maintains mean FR below
@@ -2525,9 +2530,20 @@ trajectories are organized, that competition relaxes
 into a variable the scheduler can discriminate on, concentrating computation at
 high-instability timesteps and reusing buffers through the stable ones. The premise
 behind SkipRNN~\cite{campos2018skip} and ACT~\cite{graves2016adaptive} (that low
-uncertainty marks content safe to skip) holds in activity recognition and breaks
-in causal edge inference, and the negative control is where that break becomes
-measurable. In summary, the effectiveness of the runtime allocator depends on a property the model must already possess, namely temporal differentiation in its trajectories.
+uncertainty marks content safe to skip) holds in activity recognition; in our
+controlled causal replay it fails for unorganized trajectories, and the
+negative control is where that failure becomes measurable. The Skip-RNN
+comparison of Section~\ref{sec:gating_baselines} adds the complementary
+nuance: a learned gate can still reach the in-distribution detection
+endpoints, at the pre-onset alert occupancy reported there. In summary, the effectiveness of the runtime allocator depends on a property the model must already possess, namely temporal differentiation in its trajectories.
+{\color{\revcolor}Two in-distribution caveats bound this reading: isotonic
+recalibration combined with \MHEG matches or exceeds \mbox{AF-TOI}+MHEG on
+the replay endpoints of Section~\ref{sec:controle_calibracao}, and a
+periodic-refresh confidence gate suffices for the replay endpoints of
+Section~\ref{sec:gating_baselines}. What neither provides is the
+interpretable, onset-anchored signal semantics, nor the behavior under the
+controlled shifts probed in Sections~\ref{sec:robustness_controls}
+and~\ref{sec:temporal_scale}.}
 \paragraph{AF-TOI as enabler of trustworthy selective computation}
 A model with 95\% classification accuracy and an unsafe scheduler is not
 equivalent to one whose scheduler allocates correctly at emergence windows. In

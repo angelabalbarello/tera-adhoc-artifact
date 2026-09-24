@@ -1,0 +1,64 @@
+{
+ "source": "FGCS/Inferencia/run_v29_ablacao_ttdef_ajuste_gatting.py (config A, call at ~L2622)",
+ "coefficients": {
+  "gamma_ep": 0.25,
+  "lambda_late": 2.0,
+  "lambda_pre": 1.5,
+  "lambda_tail": 1.2,
+  "lambda_neg_effective": 6.0,
+  "lambda_neg_composition": "outer 2.00 x inner 3.0",
+  "early_pen_weights": {
+   "track": 0.6,
+   "floor": 1.6,
+   "mono": 1.2,
+   "push": 1.5
+  }
+ },
+ "alignment": {
+  "form": "MSE on tempered probabilities, gated to critical episodes",
+  "T": 2.0,
+  "use_temp_schedule": false,
+  "beta_max": 0.35
+ },
+ "schedules": {
+  "warmup_epochs": 12,
+  "rampup_epochs": 16,
+  "total_epochs": 80,
+  "alpha_floor": 0.5,
+  "delta_start": 0.3,
+  "delta_end": 2.8,
+  "lambda_ramp": [
+   0.2,
+   1.0
+  ],
+  "p_min": [
+   0.5,
+   0.78
+  ]
+ },
+ "windows": {
+  "K_post_onset": 50,
+  "N_pre": 8,
+  "theta_late": 0.1,
+  "early_onset_thr": 0.35,
+  "early_target_hi": 0.9,
+  "push_ramp": [
+   0.45,
+   "min(0.80,p_min+0.10)"
+  ],
+  "mono_min_rise": 0.015,
+  "tail_floor": 0.4,
+  "noncrit_cap": 0.04,
+  "K_AGG": 6
+ },
+ "activation_gates": {
+  "late_pen": "delta(e) > 0.5",
+  "pre_pen": "delta(e) > 1.0 and progressive critical only"
+ },
+ "bce": "class-weighted (pos_weight) for frame and episode heads; hard-loss ramp w(t)=1+lambda_ramp(e)*t/(T-1); 3x abrupt weighting only when use_abrupt_mask=True (config A: False)",
+ "config_A_disables": [
+  "temp schedule (M2)",
+  "abrupt oversampling (M4)",
+  "hidden-state KD (M5)"
+ ]
+}
