@@ -15,7 +15,7 @@ def test_complexity_formula_not_single_layer():
 def test_forbidden():
     for w in ["rules out","bear the hypothesis out","this paper establishes","systematically exceed",
               "nine of the twelve","28\\,KFLOPs","(nats)","breaks in causal edge inference",
-              "submitted version","revision verification","initially reported","originally reported","breaks in causal edge","safe at all","schedulers cannot allocate safely","necessary} condition","original four seeds"]:
+              "submitted version","revision verification","initially reported","originally reported","breaks in causal edge","safe at all","schedulers cannot allocate safely","necessary} condition","original four seeds","but is safe only if uncertainty rises","published campaign test partitions"]:
         assert w not in art, w
 def test_required():
     for w in ["seven of the twelve Baseline seeds","per seed, not merely on average",

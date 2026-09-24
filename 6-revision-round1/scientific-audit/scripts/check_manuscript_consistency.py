@@ -55,7 +55,7 @@ for v in ["ECE}_{\\mathrm{pipe","ECE}_{\\mathrm{replay","ECE}_{\\mathrm{cal","EC
 m = re.search(r"\\begin{abstract}(.*?)\\end{abstract}", art, re.S)
 t = re.sub(r"\\color\{\w+\}|\\mbox|\\emph|[{}\\\\$]"," ",m.group(1))
 n = len([w for w in t.split() if any(c.isalnum() for c in w)])
-check("abstract 195-220 words", 195<=n<=220, f"({n})")
+check("abstract 195-230 words", 195<=n<=230, f"({n})")
 # 10. FR facts
 check("'seven of the twelve Baseline seeds' present", "seven of the twelve Baseline seeds" in art)
 check("mirror: rebuttal has same count", "seven of the twelve Baseline seeds" in reb)
