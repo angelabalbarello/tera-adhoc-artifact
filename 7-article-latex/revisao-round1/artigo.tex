@@ -1994,8 +1994,9 @@ $\Delta$ECE: positive indicates improvement.
 \%Sup: computation suppression rate by MHEG.
 Lower TTD$_{\mathrm{ef}}$ for PS and IC variants reflects threshold
 recalibration to the redistributed probability scale, not temporal
-trajectory reorganization; $H_{\mathrm{strat}}$ remains within the
-Baseline range for all three techniques.}
+trajectory reorganization{\color{\revcolor}\ (see the entropy trajectories of
+Figure~\ref{fig:calibracao_entropia_temporal}; the scalar stratification
+score was removed, as explained in the text)}.}
 \end{tabular}
 \end{table*}
 The distinction matters epistemologically. Reaching low
@@ -2005,10 +2006,11 @@ differentiation. In the former, the gain is contingent on the calibrator's
 particular distribution and may not survive distributional shift, since the gate
 lacks semantic grounding in the transition dynamics. In the latter, the
 scheduler exploits a structural trajectory property deliberately induced during
-training and tied to the causal dynamics of the process. The
-$H_{\mathrm{strat}}$ evidence and the frontier in
-Figure~\ref{fig:curva_operacional} show the two regimes are empirically
-distinguishable, with \AFTOI occupying the organizationally grounded one.
+training and tied to the causal dynamics of the process. {\color{\revcolor}The
+trajectory morphology of Figure~\ref{fig:calibracao_entropia_temporal} and the
+frontier in Figure~\ref{fig:curva_operacional} indicate that the two regimes
+are empirically distinguishable, with \AFTOI occupying the organizationally
+grounded one.}
 \subsection{Architectural Ablation of the Non-Causal Reference}
 \label{sec:ablacao_teacher}
 To test whether the organization gains depend on the specific BiLSTM topology,
@@ -2541,8 +2543,8 @@ Temperature, Platt, and isotonic scaling improve aggregate alignment without
 touching weights or internal trajectories, and the $H(t)$ morphology around
 onset stays within the Baseline range for all three, consistent with monotonic
 rescaling not inducing temporal differentiation. Where PS and IC reach lower
-$\mathrm{TTD}_{\mathrm{ef}}$ under \MHEG, the invariant
-$H_{\mathrm{strat}}$ profile attributes the gain to threshold recalibration on
+$\mathrm{TTD}_{\mathrm{ef}}$ under \MHEG, {\color{\revcolor}the unchanged
+entropy-trajectory morphology} attributes the gain to threshold recalibration on
 the redistributed scale rather than to organizational restructuring. The frontier reachable through temporal
 induction stays qualitatively distinct from what scale adjustment can reach.
 Marginal calibration and temporally conditioned operational reliability vary
