@@ -1,0 +1,206 @@
+{
+ "mechabl_notemp": {
+  "F1": {
+   "n": 12,
+   "p_wilcoxon": 0.4609,
+   "cliffs_delta": 0.208,
+   "mean_canonical": 0.895,
+   "mean_arm": 0.8836
+  },
+  "ECE": {
+   "n": 12,
+   "p_wilcoxon": 0.0005,
+   "cliffs_delta": -1.0,
+   "mean_canonical": 0.5305,
+   "mean_arm": 0.6421
+  },
+  "FR": {
+   "n": 12,
+   "p_wilcoxon": 1.0,
+   "cliffs_delta": -0.007,
+   "mean_canonical": 0.0021,
+   "mean_arm": 0.0132
+  },
+  "TTDef": {
+   "n": 12,
+   "p_wilcoxon": 0.0161,
+   "cliffs_delta": -0.806,
+   "mean_canonical": 0.0435,
+   "mean_arm": 0.2497
+  },
+  "SupPct": {
+   "n": 12,
+   "p_wilcoxon": 0.021,
+   "cliffs_delta": -0.569,
+   "mean_canonical": 47.525,
+   "mean_arm": 58.985
+  },
+  "FR_hyb": {
+   "n": 12,
+   "p_wilcoxon": 1.0,
+   "cliffs_delta": -0.083,
+   "mean_canonical": 0.0,
+   "mean_arm": 0.0007
+  },
+  "TTDef_hyb": {
+   "n": 12,
+   "p_wilcoxon": 0.0049,
+   "cliffs_delta": -0.819,
+   "mean_canonical": 0.0509,
+   "mean_arm": 0.1804
+  }
+ },
+ "mechabl_a005": {
+  "F1": {
+   "n": 12,
+   "p_wilcoxon": 0.0742,
+   "cliffs_delta": -0.181,
+   "mean_canonical": 0.895,
+   "mean_arm": 0.9019
+  },
+  "ECE": {
+   "n": 12,
+   "p_wilcoxon": 0.0771,
+   "cliffs_delta": 0.042,
+   "mean_canonical": 0.5305,
+   "mean_arm": 0.5281
+  },
+  "FR": {
+   "n": 12,
+   "p_wilcoxon": 0.5,
+   "cliffs_delta": -0.167,
+   "mean_canonical": 0.0021,
+   "mean_arm": 0.0076
+  },
+  "TTDef": {
+   "n": 12,
+   "p_wilcoxon": 0.0488,
+   "cliffs_delta": -0.375,
+   "mean_canonical": 0.0435,
+   "mean_arm": 0.1124
+  },
+  "SupPct": {
+   "n": 12,
+   "p_wilcoxon": 0.9097,
+   "cliffs_delta": -0.208,
+   "mean_canonical": 47.525,
+   "mean_arm": 50.1183
+  },
+  "FR_hyb": {
+   "n": 12,
+   "p_wilcoxon": 1.0,
+   "cliffs_delta": 0.0,
+   "mean_canonical": 0.0,
+   "mean_arm": 0.0
+  },
+  "TTDef_hyb": {
+   "n": 12,
+   "p_wilcoxon": 0.1484,
+   "cliffs_delta": -0.167,
+   "mean_canonical": 0.0509,
+   "mean_arm": 0.0595
+  }
+ },
+ "mechabl_a030": {
+  "F1": {
+   "n": 12,
+   "p_wilcoxon": 0.3164,
+   "cliffs_delta": 0.16,
+   "mean_canonical": 0.895,
+   "mean_arm": 0.885
+  },
+  "ECE": {
+   "n": 12,
+   "p_wilcoxon": 0.2334,
+   "cliffs_delta": -0.076,
+   "mean_canonical": 0.5305,
+   "mean_arm": 0.5329
+  },
+  "FR": {
+   "n": 12,
+   "p_wilcoxon": 0.1875,
+   "cliffs_delta": -0.271,
+   "mean_canonical": 0.0021,
+   "mean_arm": 0.0153
+  },
+  "TTDef": {
+   "n": 12,
+   "p_wilcoxon": 0.375,
+   "cliffs_delta": -0.097,
+   "mean_canonical": 0.0435,
+   "mean_arm": 0.1605
+  },
+  "SupPct": {
+   "n": 12,
+   "p_wilcoxon": 0.1514,
+   "cliffs_delta": -0.16,
+   "mean_canonical": 47.525,
+   "mean_arm": 48.6058
+  },
+  "FR_hyb": {
+   "n": 12,
+   "p_wilcoxon": 1.0,
+   "cliffs_delta": -0.083,
+   "mean_canonical": 0.0,
+   "mean_arm": 0.0014
+  },
+  "TTDef_hyb": {
+   "n": 12,
+   "p_wilcoxon": 0.0938,
+   "cliffs_delta": 0.111,
+   "mean_canonical": 0.0509,
+   "mean_arm": 0.0297
+  }
+ },
+ "mechabl_a050": {
+  "F1": {
+   "n": 12,
+   "p_wilcoxon": 0.5469,
+   "cliffs_delta": 0.014,
+   "mean_canonical": 0.895,
+   "mean_arm": 0.8918
+  },
+  "ECE": {
+   "n": 12,
+   "p_wilcoxon": 0.2754,
+   "cliffs_delta": -0.125,
+   "mean_canonical": 0.5305,
+   "mean_arm": 0.5355
+  },
+  "FR": {
+   "n": 12,
+   "p_wilcoxon": 0.625,
+   "cliffs_delta": -0.16,
+   "mean_canonical": 0.0021,
+   "mean_arm": 0.0076
+  },
+  "TTDef": {
+   "n": 12,
+   "p_wilcoxon": 0.8125,
+   "cliffs_delta": 0.097,
+   "mean_canonical": 0.0435,
+   "mean_arm": 0.0786
+  },
+  "SupPct": {
+   "n": 12,
+   "p_wilcoxon": 0.1294,
+   "cliffs_delta": -0.333,
+   "mean_canonical": 47.525,
+   "mean_arm": 50.0442
+  },
+  "FR_hyb": {
+   "n": 12,
+   "p_wilcoxon": 1.0,
+   "cliffs_delta": -0.083,
+   "mean_canonical": 0.0,
+   "mean_arm": 0.0007
+  },
+  "TTDef_hyb": {
+   "n": 12,
+   "p_wilcoxon": 0.0312,
+   "cliffs_delta": 0.306,
+   "mean_canonical": 0.0509,
+   "mean_arm": 0.0092
+  }
+ }
+}

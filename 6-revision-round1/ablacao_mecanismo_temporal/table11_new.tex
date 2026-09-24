@@ -1,0 +1,16 @@
+% Nova Tabela 11 — mechanism-removal ablation + alpha sensitivity
+% 12 seeds (42--53), mean±sd, protocolo run_v29 identico nos 5 bracos.
+% F1/FR/ECE/TTDef: politica Fixa; %Sup: politica Hibrida (MHEG).
+% Estatistica pareada vs braco canonico em stats.json.
+\begin{tabular}{l c c c c c}
+\toprule
+Condition & F1$\uparrow$ & FR$\downarrow$ & ECE$\downarrow$
+  & TTD$_{\mathrm{ef}}$ (s)$\downarrow$ & \%Sup (MHEG)$\uparrow$ \\
+\midrule
+No temporal organization & 0.884$\pm$0.022 & 0.013$\pm$0.046 & 0.642$\pm$0.012 & 0.250$\pm$0.458 & 59.0$\pm$9.3 \\
+$\alpha=0.05$ & 0.902$\pm$0.034 & 0.008$\pm$0.016 & 0.528$\pm$0.019 & 0.112$\pm$0.160 & 50.1$\pm$9.5 \\
+Full \mbox{AF-TOI} ($\alpha=0.15$, canonical) & 0.895$\pm$0.032 & 0.002$\pm$0.007 & 0.531$\pm$0.017 & 0.043$\pm$0.082 & 47.5$\pm$10.0 \\
+$\alpha=0.30$ & 0.885$\pm$0.017 & 0.015$\pm$0.025 & 0.533$\pm$0.016 & 0.161$\pm$0.257 & 48.6$\pm$9.3 \\
+$\alpha=0.50$ & 0.892$\pm$0.024 & 0.008$\pm$0.017 & 0.535$\pm$0.019 & 0.079$\pm$0.172 & 50.0$\pm$7.2 \\
+\bottomrule
+\end{tabular}

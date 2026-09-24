@@ -1014,12 +1014,13 @@ def _configure_mpl() -> None:
         import matplotlib
         matplotlib.rcParams.update({
             "font.family":         "serif",
-            "font.size":           9,
-            "axes.titlesize":      9,
-            "axes.labelsize":      9,
-            "xtick.labelsize":     8,
-            "ytick.labelsize":     8,
-            "legend.fontsize":     8,
+            # 23/09: fontes ampliadas (R2.6 — figuras densas legiveis)
+            "font.size":           12,
+            "axes.titlesize":      12.5,
+            "axes.labelsize":      12,
+            "xtick.labelsize":     11,
+            "ytick.labelsize":     11,
+            "legend.fontsize":     10,
             "figure.dpi":          300,
             "savefig.dpi":         300,
             "savefig.bbox":        "tight",
