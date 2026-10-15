@@ -1,0 +1,45 @@
+\begin{tabular}{lllcccc}
+\toprule
+\textbf{Causal Target} & \textbf{Non-Causal Ref.} & \textbf{Approach}
+  & \textbf{F1}$\uparrow$
+  & \textbf{FR}$\downarrow$
+  & \textbf{TTD$_{\text{ef}}$\,(s)}$\downarrow$
+  & \textbf{ECE}$\downarrow$ \\
+\midrule
+Causal LSTM & —       & Baseline Fixed
+  & \resAblaBaseFail\ $\pm$\ \stdAblaBaseFUm
+  & \resAblaBaseFail\ $\pm$\ \stdAblaBaseFail
+  & \resAblaBaseTTDef\ $\pm$\ \stdAblaBaseTTDef
+  & \resAblaBaseECE\ $\pm$\ \stdAblaBaseECE \\
+\rowcolor{gray!8}
+\textbf{Causal LSTM} & \textbf{BiLSTM} & \textbf{AF-TOI method}
+  & \textbf{\resAblaAlvoFUm\ $\pm$\ \stdAblaAlvoFUm}
+  & \textbf{\resAblaAlvoFail\ $\pm$\ \stdAblaAlvoFail}
+  & \textbf{\resAblaAlvoTTDef\ $\pm$\ \stdAblaAlvoTTDef}
+  & \textbf{\resAblaAlvoECE\ $\pm$\ \stdAblaAlvoECE} \\
+Causal LSTM & Transformer & TransTOI method
+  & \resAblaTransFUm\ $\pm$\ \stdAblaTransFUm
+  & \resAblaTransFail\ $\pm$\ \stdAblaTransFail
+  & \resAblaTransTTDef\ $\pm$\ \stdAblaTransTTDef
+  & \resAblaTransECE\ $\pm$\ \stdAblaTransECE \\
+\midrule
+\rowcolor{gray!8}
+Causal Transformer & —       & Baseline Fixed
+  & \resAblaTfBaseFUm\ $\pm$\ \stdAblaTfBaseFUm
+  & \resAblaTfBaseFail\ $\pm$\ \stdAblaTfBaseFail
+  & ---
+  & \resAblaTfBaseECE\ $\pm$\ \stdAblaTfBaseECE \\
+Causal Transformer & BiLSTM  & AF-TOI method
+  & \resAblaTfAlvoFUm\ $\pm$\ \stdAblaTfAlvoFUm
+  & \resAblaTfAlvoFail\ $\pm$\ \stdAblaTfAlvoFail
+  & ---
+  & \resAblaTfAlvoECE\ $\pm$\ \stdAblaTfAlvoECE \\
+\bottomrule
+\multicolumn{7}{p{0.92\textwidth}}{\scriptsize
+Absolute FR values exceed the main factorial study because the
+three-phase structural alignment scheduler was omitted to isolate
+the reference architecture effect ($n{=}4$ seeds, 60 epochs).
+TTD$_{\text{ef}}$ omitted for Causal Transformer configurations
+due to near-complete coverage failure. \textbf{Bold}: canonical
+configuration of the main study.}
+\end{tabular}

@@ -1,0 +1,265 @@
+--- artigo_v7_BACKUP.tex	2026-10-11 09:03:58.778322100 -0300
++++ artigo.tex	2026-10-11 09:10:44.659398300 -0300
+@@ -194,7 +194,8 @@
+ causal model's uncertainty trajectory around the risk onset; and \mbox{MHEG}
+ exploits the resulting entropy stratification at runtime. In a controlled
+ synthetic, single-node $2\times2$ factorial over twelve seeds, scheduling
+-unorganized trajectories is the cheapest configuration, but does not improve coverage while worsening effective detection delay ($\mathrm{TTD}_{\mathrm{ef}}$) by
++unorganized trajectories is the cheapest configuration, but does not improve coverage while worsening effective detection delay ($\mathrm{TTD}_{\mathrm{ef}}$,
++measured with retrospective detection markers) by
+ 13.9\% ($p=0.001$); \mbox{AF-TOI}+MHEG reduces per-frame cost by
+ \CostReduction\% relative to Baseline Fixed (0.340 vs.\ 0.677\,ms/frame) with
+ $\mathrm{TTD}_{\mathrm{ef}}$ of 0.099\,s versus 0.570\,s under Baseline+MHEG.
+@@ -1138,7 +1139,8 @@
+ \caption{Efficient inference cycle of the \mbox{MHEG} runtime computation scheduler}
+ \label{alg:inferencia}
+ \begin{algorithmic}[1]
+-\REQUIRE Weights $\theta_{\text{LSTM}}$; thresholds $\tau_\Delta$,
++\REQUIRE Weights $\theta_{\text{LSTM}}$; window length $W{=}96$
++  (prefix-window with left-padding; Section~\ref{sec:protocolo}); thresholds $\tau_\Delta$,
+   $\tau_H$, $\theta_1{=}0.15$, $\theta_2{=}0.38$, $\theta_3{=}0.50$;
+   $h_0 {=} \mathbf{0}$;\; $p_0 {=} 0$;\; {\color{\revcolor}$x_0 {=} \mathbf{0}$
+   (the $t{=}1$ disjunct forces a full update on the first frame, as
+@@ -1149,11 +1151,12 @@
+       x_{t-1}^{(k)}|$
+     \STATE $H_t \leftarrow H(p_{t-1})$
+     \IF{$(t = 1)$ \OR $(\Delta x_t \geq \tau_\Delta)$ \OR $(H_t \geq \tau_H)$}
+-        \STATE $(p_t, h_t) \leftarrow \mathrm{LSTM}(x_t, h_{t-1};\,
+-          \theta_{\text{LSTM}})$ \hfill \textit{[Invest computation]}
++        \STATE $p_t \leftarrow \mathrm{LSTM}\bigl(\mathrm{window}_W(x_{1..t});\,
++          \theta_{\text{LSTM}}\bigr)$ \hfill \textit{[recompute causal window
++          (evaluated semantics); single-step variant: Section~\ref{sec:runtime}]}
+     \ELSE
+-        \STATE $p_t \leftarrow p_{t-1}$;\; $h_t \leftarrow h_{t-1}$
+-          \hfill \textit{[Reuse buffer -- suppress computation]}
++        \STATE $p_t \leftarrow p_{t-1}$
++          \hfill \textit{[Reuse emitted probability -- suppress computation]}
+     \ENDIF
+     \STATE $\ell_t \leftarrow \mathbf{1}[p_t \ge \theta_3]\cdot 3
+       + \mathbf{1}[\theta_2 \le p_t < \theta_3]\cdot 2
+@@ -1173,27 +1176,29 @@
+ The worst case (no suppression) equals the full LSTM cost plus
+ $\mathcal{O}(K)$; the best case is the gate alone.
+ 
+-Two execution semantics must be distinguished. Algorithm~\ref{alg:inferencia}
+-as written is the persistent-state deployment target: one recurrent step per
+-executed update, and suppressed frames are never processed. The evaluation
+-protocol of Section~\ref{sec:protocolo} implements each executed update by
+-recomputing the causal prefix window of the last $W{=}96$ available frames
+-(left-padded; a verification script accompanies the artifact), so an executed
+-update costs $W$ recurrent steps and later updates re-read the inputs of
+-previously suppressed frames. The two semantics agree on FR under the fixed
+-policy (identical detections; $\mathrm{TTD}_b$ differs by $6$\,ms on
+-seed~42, a left-padding warm-up effect), but they are \emph{not} equivalent
+-under suppression: with the same seed-42 thresholds, the evaluated
+-recompute-on-update semantics yields $\mathrm{TTD}_{\mathrm{ef}} = 0.023$\,s
+-at $44.7\%$ suppression, whereas literal single-step skipping yields
+-$0.170$\,s at $44.4\%$. All scheduled results in this paper therefore refer
+-to the recompute-on-update semantics, whose per-frame compute is
+-$c_{\mathrm{gate}} + (1-s)\,W\,\mathcal{O}(4(DH{+}H^2)+8H^2)$ and whose
+-measured ms/frame figures (Tables~\ref{tab:resultados_principais}
+-and~\ref{tab:deployment}) are wall-clock times of this simulation; deploying
+-the single-step variant of Algorithm~\ref{alg:inferencia} with its
+-lower per-update cost would require recalibrating the thresholds and
+-re-evaluating detection under that semantics, which we have not done.}
++Algorithm~\ref{alg:inferencia} states the semantics that every scheduled
++result in this paper was evaluated under: an executed update recomputes the
++causal prefix window of the last $W{=}96$ available frames (left-padded with
++the first frame; state reinitialized at the window start), so it costs $W$
++recurrent steps, ${\approx}96 \times 57.2\,\mathrm{K} \approx
++5.49$\,M~MACs, re-reads the inputs of previously suppressed frames (the
++input window must therefore be buffered), and a suppressed frame reuses only
++the emitted probability. The expected per-frame compute is
++$c_{\mathrm{gate}} + (1-s)\,W\,\mathcal{O}(4(DH{+}H^2)+8H^2)$, and the
++ms/frame figures of Tables~\ref{tab:resultados_principais}
++and~\ref{tab:deployment} are wall-clock times of exactly this execution.
++A cheaper \emph{persistent-state single-step} variant -- one recurrent step
++(${\approx}57.2$\,K MACs) per executed update, suppressed frames never
++processed, per-frame cost $c_{\mathrm{gate}} +
++(1-s)\,\mathcal{O}(4(DH{+}H^2)+8H^2)$ -- is the natural deployment target
++but is \emph{not validated here}: with the same frozen seed-42 checkpoints
++and thresholds it agrees with the evaluated semantics on FR under the fixed
++policy ($\mathrm{TTD}_b$ differs by $6$\,ms, a padding warm-up effect) but
++is not equivalent under suppression ($\mathrm{TTD}_{\mathrm{ef}} =
++0.170$\,s at $44.4\%$ suppression, against $0.023$\,s at $44.7\%$ for the
++evaluated semantics), so it would require its own threshold calibration and
++evaluation. A verification script reproducing this comparison accompanies
++the artifact.}
+ \subsection{Computational Complexity and Edge Deployment}
+ \label{sec:complexidade}
+ This subsection checks whether the ecosystem is compatible with resource-constrained deployment under strict offline--online separation.
+@@ -1240,7 +1245,7 @@
+   & Training only & \ding{55} \\
+ \midrule
+ Causal LSTM (embedded target arch.) & On-device recurrent inference
+-  & {\color{\revcolor}$\mathcal{O}(4(DH{+}H^2)+8H^2)$/step (two layers)} & Continuous runtime & \ding{51} \\
++  & {\color{\revcolor}$\mathcal{O}(4(DH{+}H^2)+8H^2)$/step; $W{\times}$ per update$^{\ddagger}$} & Continuous runtime & \ding{51} \\
+ \rowcolor{gray!8}
+ \mbox{MHEG} (runtime) & Runtime computation scheduler / adaptive inference controller
+   & {\color{\revcolor}$\mathcal{O}(K)$/step} & Continuous runtime & \ding{51} \\
+@@ -1258,7 +1263,8 @@
+ $E$: training episodes; $T$: episode temporal length;
+ $D$: input dimensionality; $H$: LSTM hidden dimension;
+ {\color{\revcolor}$K$: number of monitored kinematic channels ($K \le D$);}
+-$L$: number of combinations evaluated in grid search.
++$L$: number of combinations evaluated in grid search;
++{\color{\revcolor}$^{\ddagger}$evaluated windowed semantics (Section~\ref{sec:runtime}): each executed update recomputes the causal $W$-frame window.}
+ \end{table*}
+ %%============================================================
+ \section{Experimental Evaluation}
+@@ -1838,7 +1844,7 @@
+ rank-biserial $r_{\mathrm{rb}}=0.87$ against removal), ${\approx}3\times$
+ the \emph{worst} value in the $\alpha$
+ grid ($0.059$\,s at $\alpha=0.05$; $p=0.003$, $r_{\mathrm{rb}}=0.90$), and
+-${\approx}4.8\times$ the grid mean ($p=0.001$). Frame-level ECE degrades
++${\approx}4.8\times$ the grid mean ($p=0.001$). Episode-level ECE ($\mathrm{ECE}_{\mathrm{v29}}$) degrades
+ against every grid point in twelve of twelve seeds ($0.642$ vs.\
+ $0.528$--$0.535$; $p=0.0005$), and the ablated model suppresses \emph{more}
+ ($59.0\%$ vs.\ $47.5\%$; $p=0.021$) while detecting later, so the additional
+@@ -2029,13 +2035,14 @@
+ 
+ {\color{\revcolor}A note on scale: ECE values in this paper are
+ protocol-specific and are therefore named: $\mathrm{ECE}_{\mathrm{pipe}}$
+-(the factorial evaluation of Table~\ref{tab:resultados_principais},
+-frame-level under the main-campaign pipeline),
++(the factorial evaluation of Table~\ref{tab:resultados_principais};
++episode-level -- episode scores against episode labels -- under the
++main-campaign pipeline),
+ $\mathrm{ECE}_{\mathrm{replay}}$ (the frame-level reliability diagram of
+ Figure~\ref{fig:entropy_dist}, replay logs of seed~42),
+ $\mathrm{ECE}_{\mathrm{cal}}$ (this subsection), and
+ $\mathrm{ECE}_{\mathrm{v29}}$ (the mechanism-removal ablation of
+-Table~\ref{tab:ablacao_alpha}, replication protocol). Each computes ECE over
++Table~\ref{tab:ablacao_alpha}; episode-level, replication protocol). Each computes ECE over
+ a different probability stream, partition, and binning; magnitudes are
+ comparable within, but not across, these analyses
+ (Table~\ref{tab:protocol_map}). All four variants use ten equal-width bins
+@@ -2068,9 +2075,9 @@
+ (Figure~\ref{fig:calibracao_entropia_temporal}a) the temporal entropy
+ profile around onset is unchanged. When \MHEG thresholds are re-calibrated to that scale,
+ lower suppression cost is achievable at a given coverage. This is a threshold
+-calibration effect, not an organizational one: the operational frontier in
+-Figure~\ref{fig:curva_operacional} does not move to a qualitatively distinct
+-location. \AFTOI, by contrast, induces an organization regime that
++calibration effect, not an organizational one: the calibrated operating points in
++Figure~\ref{fig:curva_operacional}(a) stay within the calibration family's
++own region of its $\mathrm{ECE}_{\mathrm{cal}}$ panel. \AFTOI, by contrast, induces an organization regime that
+ probability-scale adjustment does not reproduce, visible in the temporal
+ morphology of panel~(b): $H(t)$ is elevated around the onset and suppressed in
+ stable phases, a differentiation that tracks onset proximity and is absent
+@@ -2208,8 +2215,7 @@
+ \end{tabular}
+ \end{table*}
+ 
+-The two routes to low $\mathrm{TTD}_{\mathrm{ef}}$ differ in mechanism. Reaching it
+-$\mathrm{TTD}_{\mathrm{ef}}$ through threshold recalibration to a redistributed
++The two routes to low $\mathrm{TTD}_{\mathrm{ef}}$ differ in mechanism. Reaching it through threshold recalibration to a redistributed
+ probability scale differs from reaching it through induced temporal
+ differentiation. In the former, the gain is contingent on the calibrator's
+ particular distribution and may not survive distributional shift, since the gate threshold has no
+@@ -2217,7 +2223,7 @@
+ scheduler exploits a structural trajectory property deliberately induced during
+ training and tied to the causal dynamics of the process. {\color{\revcolor}The
+ trajectory morphology of Figure~\ref{fig:calibracao_entropia_temporal} and the
+-frontier in Figure~\ref{fig:curva_operacional} indicate that the two regimes are
++measured operating points in Figure~\ref{fig:curva_operacional} indicate that the two regimes are
+ empirically distinguishable in the measured trajectories and operating
+ points.}
+ \subsection{Architectural Ablation of the Non-Causal Reference}
+@@ -2409,7 +2415,12 @@
+ Section~\ref{sec:protocolo}), alongside the temporal semantics of the emitted
+ signal: the fraction of pre-onset frames of critical episodes already above
+ $\theta$ (PreOcc) and the fraction of frames of normal episodes above
+-$\theta$ (NormOcc).
++$\theta$ (NormOcc). {\color{\revcolor}The matched-suppression point equalizes
++the \emph{fraction of executed updates}, not compute: an executed Skip-RNN
++update costs one recurrent step, whereas each executed update of the frozen
++\mbox{AF-TOI}(+\MHEG) replay recomputes a $W$-frame window
++(Section~\ref{sec:runtime}), so equal suppression does not imply equal
++MACs.}
+ 
+ At matched suppression ($50.9\%$ vs.\ $48.7\%$), Skip-RNN matches or exceeds
+ the frozen \mbox{AF-TOI}(+\MHEG) models on the primary detection endpoints of
+@@ -2532,8 +2543,9 @@
+ added a post-hoc matched-budget diagnostic: for each seed$\times$duration
+ cell, the entropy threshold of Baseline+MHEG was adjusted by bisection --
+ the budget-matching protocol of Section~\ref{sec:robustness_controls} --
+-until its computation rate matched that of \mbox{AF-TOI}+MHEG on the same
+-cell (all 108 cells matched within $1.9\%$, tolerance $2\%$;
++until its computation rate (fraction of executed window updates; both arms
++share the recompute semantics of Section~\ref{sec:runtime}) matched that of
++\mbox{AF-TOI}+MHEG on the same cell (all 108 cells matched within $1.9\%$, tolerance $2\%$;
+ Figure~\ref{fig:temporal_scale}d). Because the matching uses the evaluated
+ condition itself, this is a diagnostic of allocation quality at equal cost,
+ not a prospective deployment policy. At matched computation cost, no
+@@ -2631,7 +2643,10 @@
+ \begin{table}
+ \centering
+ \caption{Embedded deployment viability indicators (unit-batch mode).
+-{\color{\revcolor}FLOP figures use the 1\,MAC${}={}$2\,FLOPs convention.}}
++{\color{\revcolor}FLOP figures use the 1\,MAC${}={}$2\,FLOPs convention.
++$^{\ddagger}$Evaluated windowed semantics (Section~\ref{sec:runtime}); the
++input-window figure is the explicit $96\times31$ FP32 window, an estimate
++rather than measured peak RAM.}}
+ \label{tab:deployment}
+ \footnotesize
+ \renewcommand{\arraystretch}{1.18}
+@@ -2644,7 +2659,9 @@
+ Parameters & \multicolumn{3}{c}{$\approx 58$\,K} \\
+ FP32 / INT8 & \multicolumn{3}{c}{$\approx 228$\,KB / $\approx 57$\,KB} \\
+ Recurrent buffer & \multicolumn{3}{c}{$1024$\,bytes} \\
+-{\color{\revcolor}MACs/timestep} & \multicolumn{3}{c}{{\color{\revcolor}$\approx 57.2$\,K ($\approx 115$\,KFLOPs)}} \\
++{\color{\revcolor}MACs/recurrent step} & \multicolumn{3}{c}{{\color{\revcolor}$\approx 57.2$\,K ($\approx 115$\,KFLOPs)}} \\
++{\color{\revcolor}MACs/update$^{\ddagger}$ ($W{=}96$)} & \multicolumn{3}{c}{{\color{\revcolor}$\approx 5.49$\,M}} \\
++{\color{\revcolor}Input-window buffer$^{\ddagger}$} & \multicolumn{3}{c}{{\color{\revcolor}$\approx 11.9$\,KB}} \\
+ \midrule
+ Latency (ms/f) & ${\color{\revcolor}\resBaseFixoCost}$ & ${\color{\revcolor}\resAlvoFixoCost}$
+   & ${\color{\revcolor}\mathbf{\resAlvoHibrCost}}$ \\
+@@ -2721,10 +2738,14 @@
+ Taken together, the six movements converge on a consistent picture within this controlled synthetic, single-node setting: temporal differentiation is what enables coverage-preserving selective inference, with driver monitoring as the concrete case. {\color{\revcolor}Under the budget-matched diagnostics of Sections~\ref{sec:robustness_controls} and~\ref{sec:temporal_scale}, the advantage concentrates on coverage and detection timeliness under the frozen operating policy, rather than on where computation lands at strictly equal cost.} \AFTOI induces the differentiation that
+ makes \MHEG's criterion discriminative, so computation goes to emergence windows and
+ is withheld through redundant ones; the gain traces to a reorganized
+-failure distribution rather than a lower mean, it holds across seeds, and it carries
+-over to intermediate-risk episodes never seen in training. All of this runs within
+-$\approx$58\,K parameters and 1,024 bytes of static RAM -- a footprint that
+-automotive-grade microcontrollers and low-power accelerators can carry.
++failure distribution rather than a lower mean, it holds across seeds, and -- descriptively, under a second evaluation
++protocol -- it carries over to intermediate-risk episodes never seen in
++training. All of this runs within $\approx$58\,K parameters, a 1,024-byte recurrent
++state, and -- in the evaluated windowed semantics -- an ${\approx}11.9$\,KB
++input-window buffer (Section~\ref{sec:runtime}); the parameter and state
++footprints are within reach of automotive-grade microcontrollers and
++low-power accelerators, while the per-update compute depends on which of the
++two execution semantics is deployed.
+ \paragraph{Artifact availability}
+ Source code and \TERAGen synthetic datasets are publicly available as
+ described in the Data Availability statement.
+@@ -2823,9 +2844,12 @@
+ and no on-line retraining. {\color{\revcolor}\MHEG's own overhead per timestep is
+ $\mathcal{O}(K)$ for the kinematic gate plus $\mathcal{O}(1)$ for the entropy
+ and level thresholds, negligible beside the recurrent update it gates.} At $\approx$58\,K parameters, a 1,024-byte
+-buffer, and {\color{\revcolor}$\approx$57.2\,K MACs ($\approx$115\,KFLOPs) per
+-timestep}, the deployed model sits within the
+-envelope of current automotive-grade microcontrollers and accelerators, and because
++recurrent state, and {\color{\revcolor}$\approx$57.2\,K MACs
++($\approx$115\,KFLOPs) per recurrent step -- $W$ such steps per executed
++update in the evaluated windowed semantics, plus an ${\approx}11.9$\,KB
++input-window buffer (Section~\ref{sec:runtime})}, the model's parameter and
++state footprints sit within the envelope of current automotive-grade
++microcontrollers and accelerators, and because
+ the only artifacts that move to the device are calibrated weights and thresholds, it
+ is compatible with OTA updates and needs no connectivity at inference time. The
+ $\ell_t$ signal{\color{\revcolor}, whose level is obtained from $p_t$ by an $O(1)$
+@@ -3084,8 +3108,10 @@
+ The scope of the present validation should be stated explicitly. TERA is validated
+ as a temporal-organization and scheduling substrate for a \emph{single} embedded
+ node, under strictly causal inference, on controlled synthetic data with a
+-deterministic onset; the whole deployed workflow fits in $\approx$58\,K parameters
+-and 1{,}024\,bytes of recurrent buffer, within reach of automotive-grade platforms.
++deterministic onset; the deployed model fits in $\approx$58\,K parameters and a
++1{,}024-byte recurrent state{\color{\revcolor}, with the evaluated windowed
++semantics additionally buffering the ${\approx}11.9$\,KB input window
++(Section~\ref{sec:runtime})}, within reach of automotive-grade platforms.
+ {\color{\revcolor}Controlled temporal-scale OOD tests further show aggregate
+ robustness of coverage and effective delay under unseen synthetic
+ risk-transition durations (Section~\ref{sec:temporal_scale}).}

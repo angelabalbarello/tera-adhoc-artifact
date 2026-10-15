@@ -1,0 +1,20 @@
+# V9 — Rodada final restrita (11/10/2026)
+
+Builds: **artigo_v9.pdf** (38 pp; 20 overfulls = linha de base pré-existente; 0 refs indefinidas) e **rebuttal_v9.pdf** (25 pp, 0 overfull). Diffs: `DIFF_v8_to_v9_*.diff` (201 linhas, gerados contra o commit v8). Suíte 0 FAIL/40 OK + 9/9. **Inspeção visual feita** (página 24 renderizada e examinada: Fig. 12 e Fig. 13 conferidas em pixels, não por grep).
+
+| # | Item | O que foi feito | Verificação |
+|---|---|---|---|
+| 1 | 1º parágrafo pós-Alg. 1 contradizia o novo algoritmo | **Substituído integralmente**: um passo recorrente = 57,2 K MACs (grandeza básica); a recomputação da linha 5 roda W=96 passos ⇒ ≈5,49 M MACs por atualização executada; custo esperado por frame **com o fator W**; a fórmula sem W agora aparece uma única vez, reservada à "non-validated persistent-state variant discussed below"; o 2º parágrafo foi enxugado (sem custo duplicado) e mantém padding/reinicialização/buffer/releitura + os números da não-equivalência | texto final conferido no PDF; locks |
+| 2 | Espelho R1 C5 citava o parágrafo antigo | Resposta **reescrita citando o texto final** (quote nova com 5,49 M e o fator W; a antiga citação + ressalva foi removida) | quote = excerto literal do §3.4 atual |
+| 3 | Fig. 2 / Tab. 4 / h₀ descreviam a variante incremental | Caption da Fig. 2: "whether to run a full causal-window update or reuse the emitted probability"; Tab. 4, linha do estado: "Reinitialized at each window recomputation (evaluated semantics); persistent only in the non-validated single-step variant"; REQUIRE: h=0 definido como **inicialização de cada janela recomputada**; §3.3 frase "full LSTM update or reuse the previous state" alinhada | grep zero resíduos; compile |
+| 4 | Figuras | **Fig. 13 em largura de duas colunas** (figure* + \textwidth; legibilidade conferida visualmente na p. 24). **Fig. 12 consertada por overlay vetorial sobre o PDF existente**: as curvas originais estão 100% intactas (nenhum dado tocado); a faixa de títulos foi coberta e reescrita sem colisão, e o supertítulo conclusivo ("does not restructure...") virou neutro ("Mean entropy trajectories H(t) around onset (seed 42)"); fonte do overlay versionada (`fig12_title_overlay.tex`); original preservado em `.pre-v9` | previews renderizados e inspecionados (antes/depois) |
+| 5 | Abstract 231 > norma ~200 | Reduzido a **220 palavras** preservando a qualificação dos marcadores retrospectivos (cortes: travessão "skipping or reusing...", "cheapest configuration"→"cheapest", "indicates that...are"→"shows...to be", "of 0.099"→"0.099", "a confidence-driven scheduler"→"the scheduler"); espelho literal no rebuttal; contagens sincronizadas (×4); **checker restaurado a 195–230** — o critério é a faixa em torno da norma ~200 citada pelo R2 C1, e o relatório agora reporta o valor exato (220) em vez de acomodar o texto | contagem pdftotext no build v9 = 220; checker `(220, pdftotext:artigo_v9.pdf)` |
+
+## Evidências anexadas (pedido da auditoria)
+**`evidence_package_v9.zip`** (446 KB, na pasta revisao-round1) contém tudo o que as auditorias v6–v9 citaram e que não havia sido anexado: `nplstm_numpy_reader.py` (leitor de checkpoint sem torch + LSTM numpy), `check_inference_semantics.py` (com assert contra o valor publicado), `inference_semantics_seed42.csv`, `tab13_fr_reconciliation_seed42.csv`, os **checkpoints congelados** `student_seed42.pt` e `baseline_seed42.pt` (≈230 KB cada), `calibration_summary.csv` (limiares) e `expanded_per_seed.csv` (valores publicados por seed). Com o `X_te_seed42.npy` do repositório público, a reprodução independente é: `python3 check_inference_semantics.py`.
+
+## Pendências que permanecem (declaradas, não resolvidas)
+1. Avaliação própria da variante single-step (se o custo incremental for reivindicado) — GPU.
+2. Refresh/IC sob shift — não testados (declarado no texto).
+3. FS per-seed do stress — REQUIRES RECOMPUTATION.
+4. Arquivos de preview (`fig12_preview*.png`, `fig13_check.png`) ficaram na pasta porque o mount não permite exclusão — **podem ser apagados**.

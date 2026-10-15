@@ -1,0 +1,2005 @@
+Tera-Claude
+\documentclass[5p,times]{elsarticle}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[numbers]{natbib}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsthm}
+\newtheorem{remark}{Observação de Projeto}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{caption}
+\usepackage{graphicx}
+\usepackage{bm}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+\usepackage{pgfplots}
+\usepackage{pgfplotstable}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=1.18}
+\usepackage{booktabs,multirow,array,tabularx,makecell}
+\usepackage[table]{xcolor}
+\usepackage{colortbl}
+\usepackage{siunitx}
+\sisetup{output-decimal-marker={.}}
+\usepackage{pifont,ragged2e,microtype,float,dblfloatfix,placeins}
+\usepackage{enumitem,xspace,url}
+\usepackage[hidelinks]{hyperref}
+\usepackage[htt]{hyphenat}
+
+\setlength{\abovedisplayskip}{3pt}
+\setlength{\belowdisplayskip}{3pt}
+\setlength{\textfloatsep}{6pt plus 1pt minus 2pt}
+\setlength{\intextsep}{6pt plus 1pt minus 2pt}
+\setlength{\floatsep}{6pt plus 1pt minus 2pt}
+\setlength{\abovecaptionskip}{3pt}
+\setlength{\belowcaptionskip}{3pt}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.8}
+
+%%═══════════════════════════════════════════════════════════════════════════════
+%% INJEÇÃO AUTOMÁTICA DE RESULTADOS — TERA PIPELINE v1.0
+%%═══════════════════════════════════════════════════════════════════════════════
+\newcommand{\onsetFrame}{37}
+\newcommand{\decisionThr}{0.10}
+\input{paper_metrics_macros.tex}
+
+%%═══════════════════════════════════════════════════════════════════════════════
+\begin{document}
+\begin{frontmatter}
+
+\title{Supervisão Temporal Orientada ao Onset para Inferência Adaptativa
+       Eficiente em Edge AI: Destilação, MHEG e Cobertura sob
+       Restrições de Streaming Causal}
+
+\author[unb]{Ângela Brígida Albarello\corref{cor1}}
+\ead{angela.albarello@aluno.unb.br}
+\author[unb]{Edna Dias Canedo}       \ead{ednacanedo@unb.br}
+\author[unb]{Vinícius P. Gonçalves}  \ead{vpgvinicius@unb.br}
+\author[unicamp]{Leandro A. Villas}  \ead{lvillas@unicamp.br}
+\author[usp]{Rodolfo I. Meneguette}  \ead{meneguette@icmc.usp.br}
+\author[unb,uesb]{Geraldo P. Rocha Filho}
+  \ead{geraldo.rocha@uesb.edu.br}
+\cortext[cor1]{Autor correspondente.}
+
+\address[unb]{Departamento de Ciência da Computação,
+  Universidade de Brasília (UnB), Brasília, DF, 70910-900, Brasil}
+\address[unicamp]{Instituto de Computação, Universidade Estadual de
+  Campinas (UNICAMP), Campinas, SP, 13083-852, Brasil}
+\address[usp]{ICMC, Universidade de São Paulo (USP),
+  São Carlos, SP, 13566-590, Brasil}
+\address[uesb]{Universidade Estadual do Sudoeste da Bahia (UESB),
+  Jequié, BA, 45206-190, Brasil}
+
+%% ─── ABSTRACT ────────────────────────────────────────────────────────────────
+%% MUDANÇA [ABS-1]: Reframing central do abstract.
+%% ANTES: girava em torno de "sinais precursores / amplificar sensibilidade".
+%% DEPOIS: ênfase em "preservação de cobertura sob supressão adaptativa".
+%% MUDANÇA [ABS-2]: Último período do abstract reescrito para eliminar
+%% interpretação de "antecipação" e centrar em "redução de supressão insegura".
+\begin{abstract}
+Inferência temporal adaptativa em streaming para Edge AI crítica à
+segurança enfrenta um conflito estrutural entre eficiência computacional
+e cobertura de detecção. Suprimir instantes de processamento reduz o
+custo, mas compromete a cobertura quando o mecanismo de controle não
+distingue redundância genuína de risco emergente. Abordagens baseadas
+em confiança preditiva~\cite{campos2018skip,wu2019adaframe} falham
+sistematicamente nessa distinção em modelos sem supervisão temporal
+orientada ao onset do risco. No domínio de monitoramento de motoristas,
+esse problema é agravado pela ausência de métricas que penalizem
+episódios não detectados e pela imprecisão de datasets naturalísticos
+na anotação do instante de início do evento.
+Este trabalho propõe o TERA (\textit{Temporal Evaluation and Risk
+Assessment}), um ecossistema de inferência temporal adaptativa em
+streaming para Edge AI crítica à segurança aplicado ao monitoramento
+de risco do motorista. O ecossistema integra três componentes com papéis
+hierárquicos distintos. O módulo TERA-Gen sintetiza episódios com onset
+determinístico e progressão de risco calibrada pelos \textit{odds ratios}
+do SHRP2, fornecendo um benchmark reproduzível com 4.160 episódios
+anotados com precisão de quadro. O protocolo AF-TKD
+(\textit{Adaptive-Focus Temporal Knowledge Distillation}) ajusta a
+trajetória temporal das predições do aluno para estabilizar a cobertura
+de detecção durante a emergência do risco, transferindo essa dinâmica de
+um professor BiLSTM bidirecional para um aluno LSTM causal leve por meio
+de ponderação exponencial concentrada nos instantes anteriores ao onset,
+sem modificar a arquitetura de inferência. O mecanismo MHEG
+(\textit{Motion and Hybrid Entropy Gating}) converte essa dinâmica em
+eficiência operacional por meio de uma proteção híbrida de dois gatilhos
+complementares: um gatilho cinemático, que preserva a resposta a
+transições abruptas do veículo, e um gatilho entrópico, que atua como
+sinal auxiliar para evitar supressão durante janelas de ambiguidade
+temporal. Um estudo de ablação fatorial $2{\times}2$ indica que a
+supressão sem supervisão temporal orientada ao onset degrada
+sistematicamente a cobertura de detecção, ao passo que o ecossistema
+completo alcança F1${=}\resAlvoHibrFUm$, taxa de falha de
+$\resAlvoHibrFail\pm\stdAlvoHibrFail$ e custo de
+$\resAlvoHibrCost$\,ms por instante com $\SkipRate$\% de supressão,
+correspondendo a uma redução de \CostReduction\% no custo efetivo de
+processamento. O componente de inferência embarcado compreende o aluno
+LSTM causal de duas camadas (${\approx}58$\,K parâmetros,
+${\approx}228$\,KB em FP32), o mecanismo MHEG de custo $\mathcal{O}(1)$,
+o buffer fixo do estado oculto ($1.024$\,bytes) e os limiares escalares
+calibrados. Esse perfil de memória constante prescinde de quantização
+inteira pós-treinamento, sugerindo compatibilidade direta com plataformas
+como NVIDIA Jetson Nano e Qualcomm SA8155P. Os resultados indicam que
+supervisão temporal orientada ao onset favorece a preservação de cobertura
+sob supressão adaptativa causal, ao reduzir supressão insegura durante a
+emergência do risco sem comprometer a viabilidade de inferência em Edge AI.
+\end{abstract}
+
+\begin{keyword}
+detecção de risco do motorista \sep
+Edge AI \sep
+inferência temporal adaptativa em streaming \sep
+destilação de conhecimento orientada ao onset \sep
+cobertura de detecção temporal \sep
+MHEG adaptativo híbrido \sep
+streaming causal multimodal \sep
+sistemas inteligentes de transporte
+\end{keyword}
+\end{frontmatter}
+
+\setlist{nosep}
+
+%%═══════════════════════════════════════════════════════════════════════════════
+%%  §1  INTRODUÇÃO
+%%═══════════════════════════════════════════════════════════════════════════════
+\section{Introdução}
+\label{sec:introducao}
+
+Inferência temporal adaptativa em streaming para sistemas embarcados
+críticos à segurança impõe um conflito estrutural entre dois objetivos
+concorrentes. Processar continuamente todos os instantes do fluxo
+garante cobertura de detecção, mas impõe custo computacional
+incompatível com plataformas de Edge AI com orçamento energético restrito.
+Suprimir instantes redundantes reduz o custo, mas compromete a cobertura
+quando o mecanismo de controle não consegue distinguir instantes
+genuinamente redundantes daqueles em que o risco está emergindo.
+Métodos de inferência adaptativa baseados em confiança
+preditiva~\cite{campos2018skip,wu2019adaframe} assumem que baixa
+incerteza do modelo indica condição estável. Em modelos sem supervisão
+temporal explícita, no entanto, essa incerteza tende a permanecer
+baixa mesmo durante a janela de emergência do risco, privando o
+mecanismo de supressão de qualquer sinal discriminante útil.
+
+O monitoramento contínuo de motoristas em hardware automotivo de borda
+representa um caso de uso representativo para esse problema. Inferências
+preditivas precisam ocorrer de forma estritamente causal, baseadas
+apenas no histórico disponível até o instante corrente, em plataformas
+com restrições de memória, largura de banda e orçamento
+energético~\cite{shi2020edgeai,hariharan2023driveredge}. Arquiteturas
+compactas tendem a agir de forma reativa, identificando risco apenas
+quando os sinais já atingiram intensidade diagnóstica plena; modelos
+com profundidade temporal suficiente para capturar padrões precursores
+sutis impõem custo incompatível com streaming causal
+contínuo~\cite{bouhsissin2023driver,lstr2021}. Em situações de
+emergência rápida, onde o perigo se consolida em frações de segundo,
+essa lacuna está associada a falhas de detecção com impacto operacional
+direto.
+
+O \textit{SHRP2 Naturalistic Driving Study} ancora esse problema ao
+evidenciar que comportamentos de distração secundária, tais como
+discagem manual de celular e desvio prolongado do olhar, elevam o risco
+de colisão em até 12 vezes~\cite{dingus2016shrp2}. Essas ações emergem
+ao longo de sequências temporalmente estruturadas, nas quais múltiplos
+sinais biométricos e comportamentais evoluem de forma coordenada. A
+interação entre estado comportamental do condutor e respostas
+cinemáticas do veículo constitui um fator de risco não redutível à
+análise de quadros isolados: uma desaceleração brusca analisada
+isoladamente pode ser inócua, mas contextualizada pelo histórico
+recente de fixações oculares pode indicar perda de controle iminente.
+Essa dependência temporal e intermodal exige modelagem contínua que
+arquiteturas puramente reativas não proveem.
+
+%% MUDANÇA [INT-1]: Parágrafo do cenário representativo.
+%% ANTES: "antecipar o risco antes que os sinais atinjam intensidade diagnóstica".
+%% DEPOIS: reframing para "preservar cobertura de detecção robusta" —
+%% evitando sugerir que o sistema detecta antes do baseline.
+Em um cenário representativo, o condutor inicia microdesvios do olhar
+para a central multimídia durante uma curva acentuada; um sistema efetivo
+integraria o histórico de fixações com vetores de aceleração lateral e taxa
+de guinada para manter cobertura de detecção mesmo quando sinais individuais
+ainda não atingiram intensidade diagnóstica plena. Em arquiteturas restritas
+com supressão não controlada, a cobertura degrada justamente nos instantes
+de maior relevância, pois o mecanismo de decisão não distingue redundância
+de risco emergente.
+
+Essa limitação é agravada por uma dificuldade metodológica: datasets
+naturalísticos como SHRP2, DADA~\cite{fang2022dada} e
+DMD~\cite{ortega2020dmd} determinam o instante de início do risco
+por anotação humana retrospectiva, sujeita a variabilidade típica de
+$\pm k$ posições. A 9,6\,fps, $k{=}3$ corresponde a
+${\approx}0{,}31$\,s de incerteza, suficiente para ocultar diferenças
+reais entre sistemas; episódios não detectados desaparecem das médias
+de latência sem penalidade explícita.
+
+A hipótese central deste trabalho é que esses problemas compartilham
+uma limitação relacionada à ausência de supervisão temporal orientada
+ao onset do risco. Ao ajustar a trajetória temporal das predições do
+modelo para concentrar o aprendizado nos instantes próximos ao onset,
+a supressão seletiva de instantes torna-se compatível com cobertura
+adequada. Essa propriedade não emerge por treinamento convencional,
+pois requer um protocolo que tome o onset como ancoragem explícita
+para a transferência de dinâmica temporal orientada à emergência do
+risco. A verificação dessa hipótese exige, adicionalmente, infraestrutura
+de avaliação com anotação determinística e métricas que penalizem
+episódios não detectados.
+
+Para endereçar essas lacunas, este trabalho propõe o TERA
+(\textit{Temporal Evaluation and Risk Assessment}), um ecossistema de
+inferência temporal adaptativa em streaming para Edge AI crítica à
+segurança, aplicado ao monitoramento de risco do motorista. A
+contribuição central não é propor isoladamente um gerador sintético,
+uma estratégia de destilação ou uma regra de supressão de quadros, mas
+demonstrar como esses elementos se organizam em uma arquitetura
+integrada com papéis hierárquicos e complementares. Nessa arquitetura,
+o TERA-Gen fornece a infraestrutura experimental necessária para medir
+atraso e cobertura com precisão de onset; o AF-TKD induz no aluno
+causal uma dinâmica temporal orientada ao onset que estabiliza a
+cobertura de detecção sob supressão adaptativa; e o MHEG utiliza essa
+dinâmica em conjunto com salvaguardas cinemáticas para reduzir
+processamento sem elevar a taxa de falha. O ecossistema TERA
+deve ser entendido como uma infraestrutura integrada para avaliar e
+executar inferência temporal adaptativa sob restrições de segurança,
+e não como uma composição de módulos independentes.
+
+O artigo é organizado da seguinte forma. A Seção~\ref{sec:relacionados}
+revisa a literatura sobre monitoramento de motoristas, fusão multimodal
+e inferência eficiente em Edge~AI. A Seção~\ref{sec:framework} descreve
+os objetivos e a arquitetura geral do ecossistema TERA. Dentro dessa
+infraestrutura, a subseção~\ref{sec:tera} apresenta o TERA-Gen como
+infraestrutura experimental habilitadora, e as
+subseções~\ref{sec:aftkd} e~\ref{sec:gating} detalham,
+respectivamente, o protocolo AF-TKD e o mecanismo MHEG.
+A Seção~\ref{sec:complexidade} consolida a análise de complexidade
+computacional e o perfil de memória embarcada. A
+Seção~\ref{sec:avaliacao} reporta a avaliação experimental e os estudos
+de ablação, seguida pela Seção~\ref{sec:discussao}, que discute os
+resultados e limitações. A Seção~\ref{sec:conclusao} apresenta as
+conclusões e perspectivas futuras.
+
+%%═══════════════════════════════════════════════════════════════════════════════
+%%  §2  TRABALHOS RELACIONADOS
+%%═══════════════════════════════════════════════════════════════════════════════
+\section{Trabalhos Relacionados}
+\label{sec:relacionados}
+
+\subsection{Monitoramento de Motoristas e Avaliação Temporal}
+\label{sec:rel_dms}
+
+Sistemas baseados em câmera frontal e sensores fisiológicos
+estabeleceram a viabilidade da detecção automática de distração e
+sonolência em ambiente naturalístico. O dataset
+DMD~\cite{ortega2020dmd} oferece anotações densas e sincronizadas para
+sete classes de comportamento de risco, e o dataset
+DADA~\cite{fang2022dada} complementa esse cenário com rastreamento
+ocular em 54 cenários de pré-colisão. Embora representem avanços
+fundamentais na taxonomia do comportamento ao volante, essas bases
+não delimitam com precisão o momento de transição entre estado basal
+e emergência do risco, tornando a medição de atraso e cobertura
+metodologicamente ambígua.
+
+A revisão de Bouhsissin et al.~\cite{bouhsissin2023driver} documenta a
+transição de classificadores baseados em quadros isolados para
+arquiteturas recorrentes e mecanismos de atenção, consolidando ganhos
+consistentes de modelos temporais sobre abordagens estáticas. Esse
+ganho é coerente com a evidência epidemiológica do SHRP2, que associou
+comportamentos de distração a aumentos de risco de até
+12$\times$~\cite{dingus2016shrp2} ao longo de sequências dinâmicas de
+múltiplos segundos. No entanto, tanto os datasets consolidados quanto
+os protocolos de validação adotam métricas de desempenho agregado
+herdadas de reconhecimento de ações em clipes fechados,
+desconsiderando a dimensão temporal do risco e a janela de segurança.
+Uma avaliação que incorpore explicitamente o onset e penalize atrasos
+de detecção permanece ausente nessa literatura.
+
+\subsection{Fusão Multimodal e Modelagem Temporal de Risco}
+\label{sec:rel_multimodal}
+
+Michelaraki et al.~\cite{michelaraki2023realtime} indicam que a
+combinação de vídeo frontal e telemetria veicular melhora a detecção
+de fadiga em relação a abordagens unimodais, corroborando que
+modalidades complementares reduzem falsos negativos por falhas
+perceptuais locais. A escolha da estratégia de fusão, contudo, impõe
+implicações computacionais diretas. A fusão tardia oferece flexibilidade
+ao custo de múltiplos caminhos de inferência paralelos; a fusão precoce
+por concatenação apresenta desempenho competitivo com overhead menor,
+consolidando-se como estratégia preferida em projetos de Edge
+AI~\cite{shi2020edgeai,hariharan2023driveredge}. Arquiteturas de atenção
+cruzada intermodal ampliam a capacidade de capturar correlações
+complexas, mas exibem complexidade quadrática incompatível com
+inferência causal contínua.
+
+\subsection{Inferência em Borda e Restrições de Plataforma Embarcada}
+\label{sec:rel_edgeai}
+
+Plataformas como Jetson Nano, Qualcomm SA8155P e variantes de Raspberry
+Pi impõem restrições de memória, largura de banda e orçamento
+energético~\cite{shi2020edgeai}. Hariharan et al.~\cite{hariharan2023driveredge}
+indicam que quantização inteira de 8 bits permite implantar detectores
+de distração com aceleração significativa sem degradação perceptível na
+acurácia. Esse protocolo avalia viabilidade por contagem de quadros por
+segundo e latência em modo batch${=}1$, mas não trata a cobertura
+temporal como critério de projeto.
+
+Sob restrições de causalidade e streaming online, redes recorrentes
+como LSTM e GRU apresentam custo por passo fixo, independente do
+comprimento da sequência~\cite{campos2018skip}, tornando-se adequadas
+para execução sustentada com restrições energéticas. Modelos Transformer
+com atenção global pressupõem acesso a contexto futuro e geram custo
+que cresce quadraticamente com o tempo de condução, inviabilizando
+streaming causal contínuo. A capacidade de operar sob causalidade estrita
+representa uma dimensão de avaliação que métricas de acurácia sobre
+lotes estáticos não capturam.
+
+\subsection{Modelagem Temporal Profunda e Destilação de Conhecimento}
+\label{sec:rel_temporal}
+
+Modelos como LSTR~\cite{lstr2021}, TeSTra~\cite{zhao2022testra} e
+MAT~\cite{wang2023mat} estabeleceram novos patamares em benchmarks de
+reconhecimento de ação, mas foram projetados para clipes previamente
+segmentados, divergindo da detecção em tempo real. A destilação de
+conhecimento~\cite{hinton2015distilling} oferece um caminho para
+transferir capacidade representacional para modelos compactos adequados
+para streaming. O TempDistiller~\cite{zheng2024tempdistiller} propõe
+transferência por reconstrução de memória mascarada; Bajestani e
+Yang~\cite{bajestani2020tkd} utilizam seleção de keyframes para guiar
+o aluno. Ambas as abordagens tratam a sequência como bloco homogêneo,
+distribuindo a perda uniformemente entre todos os quadros e não
+ancorando a transferência no instante exato de início da transição de
+estado. %% MUDANÇA [REL-1]: Substituída "antecipação efetiva" por
+%% "preservação de cobertura durante a emergência do risco".
+Nos instantes imediatamente anteriores ao onset concentram-se os padrões
+temporais de maior relevância para a cobertura de detecção, cuja
+assimilação pelo aluno é necessária para preservar cobertura durante a
+emergência do risco.
+
+\subsection{Supressão Adaptativa de Quadros em Contextos de Segurança}
+\label{sec:rel_eficiencia}
+
+SkipRNN~\cite{campos2018skip}, AdaFrame~\cite{wu2019adaframe},
+ACT~\cite{graves2016adaptive} e LiteEval~\cite{wu2019liteeval} indicam
+que mecanismos de supressão reduzem custo em 40\% a 70\% sem degradação
+perceptível na acurácia. Em tarefas convencionais de reconhecimento de
+atividades, onde padrões visuais possuem alta redundância temporal em
+clipes longos, suprimir instantes de baixa confiança tende a funcionar
+bem. Em monitoramento veicular, a transição entre condução normal e
+risco emergente pode ser gradual, mantendo a confiança do classificador
+elevada justamente nos quadros que antecedem o onset. O mecanismo de
+supressão é assim induzido a eliminar instantes de alta relevância.
+A validade dessa heurística sobre eventos de emergência rápida não é
+verificada empiricamente nos trabalhos
+tradicionais~\cite{campos2018skip,wu2019adaframe}, limitando a
+aplicabilidade dessas estratégias em segurança crítica sem supervisão
+temporal prévia.
+
+\subsection{Lacunas e Posicionamento}
+\label{sec:rel_gap}
+
+A revisão evidencia quatro limitações que se reforçam mutuamente. A
+pesquisa em monitoramento do motorista avançou em modelagem temporal,
+mas persiste em avaliação por desempenho agregado sem métricas
+orientadas ao onset. Os trabalhos de fusão multimodal melhoram a
+robustez, mas elevam o custo sem estratégias compatíveis com execução
+causal contínua. Os métodos de destilação temporal produzem modelos
+compactos, mas não tratam o onset como ancoragem para transferência de
+sensibilidade precursora. Os mecanismos de supressão reduzem custo
+expressivamente, mas sua premissa de redundância temporal não foi
+verificada sobre episódios críticos, agravada pela ausência de
+benchmarks com anotação determinística de onset.
+
+Como consequência, nenhum trabalho existente trata conjuntamente a
+geração de cenários com onset determinístico, a supervisão temporal
+orientada ao início do evento, a avaliação explícita de cobertura e a
+ablação de eficiência em um ecossistema unificado para monitoramento de
+motoristas em borda. A Tabela~\ref{tab:panorama} sintetiza esse
+posicionamento em cinco dimensões operacionais.
+
+\begin{table}[!t]
+\centering
+\caption{Posicionamento em relação à literatura, onde \textbf{Onset}
+representa cenários com onset determinístico, \textbf{Multimod.}
+indica fusão de múltiplas modalidades, \textbf{Causal} define
+inferência online sem acesso ao contexto futuro, \textbf{Cobert.}
+expressa avaliação explícita de cobertura de detecção, \textbf{Efic.}
+denota ablação de eficiência computacional e o símbolo $\circ$ aponta
+item parcialmente satisfeito.}
+\label{tab:panorama}
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{0.95}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Trabalho} & \textbf{Onset} & \textbf{Multimod.} &
+\textbf{Causal} & \textbf{Cobert.} & \textbf{Efic.} \\
+\midrule
+\multicolumn{6}{l}{\textit{Monitoramento e comportamento do motorista}} \\
+Ortega et al.\ (DMD)~\cite{ortega2020dmd}
+  & \ding{55} & \ding{51} & \ding{55} & \ding{55} & \ding{55} \\
+Bouhsissin et al.~\cite{bouhsissin2023driver}
+  & \ding{55} & \ding{51} & \ding{55} & \ding{55} & \ding{55} \\
+Michelaraki et al.~\cite{michelaraki2023realtime}
+  & \ding{55} & \ding{51} & \ding{55} & \ding{55} & \ding{55} \\
+\midrule
+\multicolumn{6}{l}{\textit{Edge AI e inferência eficiente}} \\
+Hariharan et al.~\cite{hariharan2023driveredge}
+  & \ding{55} & \ding{55} & $\circ$ & \ding{55} & \ding{51} \\
+Campos et al.\ (SkipRNN)~\cite{campos2018skip}
+  & \ding{55} & \ding{55} & \ding{51} & \ding{55} & \ding{51} \\
+Wu et al.\ (AdaFrame)~\cite{wu2019adaframe}
+  & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{51} \\
+\midrule
+\multicolumn{6}{l}{\textit{Modelagem temporal e destilação}} \\
+Zhao \& Krähenbühl~\cite{zhao2022testra}
+  & \ding{55} & \ding{55} & \ding{51} & \ding{55} & \ding{55} \\
+Zheng et al.~\cite{zheng2024tempdistiller}
+  & \ding{55} & \ding{55} & \ding{55} & \ding{55} & $\circ$$^\dagger$ \\
+Bajestani \& Yang~\cite{bajestani2020tkd}
+  & \ding{55} & \ding{55} & \ding{55} & \ding{55} & \ding{55} \\
+\midrule
+\rowcolor{gray!12}
+\textbf{Este trabalho}
+  & \textbf{\ding{51}} & \textbf{\ding{51}} & \textbf{\ding{51}}
+  & \textbf{\ding{51}} & \textbf{\ding{51}} \\
+\bottomrule
+\multicolumn{6}{@{}p{\columnwidth}}{\tiny
+$^\dagger$~Ablação parcial de eficiência sem métricas de cobertura
+correspondentes.}
+\end{tabular}}
+\end{table}
+
+%%═══════════════════════════════════════════════════════════════════════════════
+%%  §3  FRAMEWORK
+%%═══════════════════════════════════════════════════════════════════════════════
+\section{O Ecossistema TERA de Inferência Adaptativa em Streaming}
+\label{sec:framework}
+
+O TERA é proposto como um ecossistema de inferência temporal adaptativa
+em streaming para Edge AI crítica à segurança, no qual infraestrutura
+experimental controlada, supervisão temporal orientada ao onset e
+mecanismo híbrido de supressão de quadros cooperam para reduzir custo
+computacional sem comprometer a cobertura de detecção. A contribuição
+não reside em nenhum dos três componentes isoladamente, mas na
+organização hierárquica e complementar desses elementos para endereçar
+o trade-off entre eficiência e cobertura que abordagens convencionais
+não conseguem satisfazer simultaneamente.
+
+Todo sistema de detecção de risco embarcado processa sinais
+estritamente na ordem de chegada, sem acesso a observações futuras.
+Essa restrição de causalidade define a engenharia do ecossistema TERA:
+o modelo de inferência deve ser causalmente correto para implantação,
+ao mesmo tempo que sensível a padrões precursores que historicamente
+só são identificáveis com acesso bidirecional.
+
+O pipeline ingere um fluxo contínuo $\mathbf{x} = (x_1, x_2, \ldots)$,
+em que cada vetor $x_t \in \mathbb{R}^D$ codifica observações nos
+domínios visual, cinemático, contextual e acústico do veículo. A saída
+preditiva $y_t$ é função exclusiva do histórico acumulado
+$\{x_1, \ldots, x_t\}$, separando estruturalmente o modelo de inferência
+local das arquiteturas bidirecionais empregadas como professores durante
+o treinamento.
+
+O núcleo preditivo consiste em uma rede LSTM unidirecional de duas
+camadas, com custo por passo de $\mathcal{O}(4(DH{+}H^2))$,
+equilibrando capacidade representacional temporal e viabilidade de
+execução em hardware embarcado de baixo consumo.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.95\textwidth, keepaspectratio]
+  {image/solucao_proposta_ajustada.png}
+%% MUDANÇA [FIG1-1]: Legenda ajustada — removida referência a "antecipação".
+%% Ênfase em proteção híbrida e exportação de pesos para inferência causal.
+\caption{%
+\textbf{Arquitetura de implantação offline-to-edge do ecossistema TERA},
+com separação explícita entre treinamento \textit{offline} e inferência
+embarcada \textit{online}. Na fase \textit{offline}: o TERA-Gen sintetiza
+episódios com onset determinístico; o professor BiLSTM é treinado com
+acesso bidirecional; o AF-TKD ajusta a trajetória temporal do aluno
+LSTM causal para estabilizar cobertura de detecção durante a emergência
+do risco; pesos e limiares são exportados ao dispositivo. Na fase
+\textit{online}: sensores coletam sinais em tempo real; o MHEG aplica
+proteção híbrida a cada instante, combinando salvaguarda cinemática e
+sinal auxiliar entrópico; o aluno LSTM infere nos instantes selecionados;
+a probabilidade contínua é mapeada em nível de alerta $\ell_t$.
+Professor, AF-TKD e TERA-Gen não residem no dispositivo.%
+}
+\label{fig:arquitetura}
+\end{figure*}
+
+A Figura~\ref{fig:arquitetura} sintetiza a arquitetura completa, cuja
+característica estrutural mais relevante é a separação entre treinamento
+\textit{offline} e inferência \textit{online}.
+
+\paragraph{Fase \textit{offline} (servidor)}
+Quatro etapas constroem e transferem o conhecimento que habitará o
+dispositivo. O TERA-Gen~(etapa~1) sintetiza episódios com marcos de
+onset determinísticos, provendo a ancoragem temporal necessária ao
+protocolo de destilação. O professor BiLSTM~(etapa~2) é treinado com
+acesso bidirecional ao sinal, desenvolvendo sensibilidade a padrões
+precursores que o aluno, por causalidade, não observará durante a
+inferência. O AF-TKD~(etapa~3) explora essa assimetria para transferir,
+quadro a quadro, a dinâmica temporal do professor para o aluno LSTM
+causal~(etapa~4), estruturando a trajetória preditiva para reduzir
+supressão insegura durante a emergência do risco. Concluída a
+destilação, os pesos do aluno e os limiares do MHEG são exportados ao
+dispositivo~(etapa~5); professor, TERA-Gen e AF-TKD não residem no
+hardware embarcado.
+
+\paragraph{Fase \textit{online} (dispositivo embarcado)}
+O dispositivo opera em malha fechada sobre o fluxo contínuo de sensores.
+A cada instante $t$, o mecanismo MHEG~(etapa~2) avalia a variação
+cinemática e a ambiguidade temporal para decidir, de forma binária,
+entre suprimir o quadro ou acionar a atualização da LSTM. Apenas nos
+instantes selecionados o aluno~(etapa~3) executa a inferência completa,
+mapeando o histórico acumulado em probabilidade contínua de risco,
+que é traduzida em nível de alerta $\ell_t$~(etapa~4).
+
+\paragraph{Objetivos de desempenho}
+A avaliação organiza-se em três objetivos complementares
+(Tabela~\ref{tab:objetivos}). A qualidade preditiva é mensurada por
+F1-Score, Precisão e Revocação. A eficiência computacional é capturada
+pelo custo médio em ms/q, taxa de supressão e throughput em FPS. A
+cobertura de detecção verifica se os eventos críticos são identificados
+dentro de uma janela que permita intervenção útil, expressa pela taxa
+de falhas e pelo atraso efetivo de detecção ($\mathrm{TTD}_{\mathrm{ef}}$).
+
+\begin{table}[!t]
+\centering
+\caption{Objetivos de desempenho para validação do ecossistema TERA.}
+\label{tab:objetivos}
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\columnwidth}{l l l >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Objetivo} & \textbf{Métricas} & \textbf{Meta} &
+\textbf{Significado Operacional} \\
+\midrule
+Detecção & F1, Prec., Rev. & Maximizar &
+  Qualidade preditiva global sobre o fluxo contínuo multimodal \\
+\rowcolor{gray!8}
+Eficiência & ms/q, \%Sup, FPS & Minimizar/Maximizar &
+  Viabilidade de execução em hardware Edge AI \\
+Cobertura & FR, TTD$_\text{ef}$ & Minimizar &
+  Proporção e tempestividade dos alertas emitidos em tempo útil \\
+\bottomrule
+\end{tabularx}
+\vspace{4pt}
+%% MUDANÇA [TAB-OBJ-1]: ECE explicitamente tratado como indicador auxiliar,
+%% sem atribuição de papel de calibração probabilística.
+\par\noindent\footnotesize A métrica ECE é reportada exclusivamente como
+indicador auxiliar diagnóstico da estruturação da trajetória temporal,
+sem papel primário na avaliação de cobertura.
+\end{table}
+
+A formulação do $\mathrm{TTD}_{\mathrm{ef}}$ corrige uma distorção
+metodológica presente na literatura de sistemas de assistência ao
+condutor. Quando apenas episódios detectados entram no cálculo da média
+de latência, os eventos com falha desaparecem da estatística, produzindo
+indicadores artificialmente otimistas. A métrica proposta incorpora
+penalidade explícita baseada no impacto operacional da omissão,
+seguindo o princípio das curvas de característica de operação para
+detecção de atividades~\cite{fawcett1999activity}:
+
+\begin{equation}
+  \mathrm{TTD}_{\mathrm{ef}} = \mathrm{TTD}_{\mathrm{det}} +
+  \mathrm{FR} \times T_{\mathrm{ep}}, \quad
+  T_{\mathrm{ep}} = 10{,}0\,\text{s}.
+  \label{eq:ttdef_sys}
+\end{equation}
+
+Onde $\mathrm{TTD}_{\mathrm{det}}$ é o atraso bruto dos acertos,
+$\mathrm{FR}$ a taxa de falha e $T_{\mathrm{ep}}$ a penalidade máxima.
+Um sistema com alta FR e baixo $\mathrm{TTD}_{\mathrm{det}}$ produz
+$\mathrm{TTD}_{\mathrm{ef}}$ elevado, quantificando o impacto
+operacional real dos episódios não detectados. Essa distinção é crítica
+para comparações entre configurações: um sistema que detecta rapidamente
+quando detecta, mas falha com frequência elevada, apresenta
+$\mathrm{TTD}_{\mathrm{det}}$ aparentemente favorável mas
+$\mathrm{TTD}_{\mathrm{ef}}$ substancialmente superior.
+
+As subseções seguintes detalham os três componentes do ecossistema.
+O TERA-Gen estabelece a infraestrutura experimental habilitadora com
+marcos de onset determinísticos. O AF-TKD explora essa ancoragem para
+ajustar a dinâmica temporal do aluno causal, preservando cobertura sob
+supressão adaptativa. O MHEG converte essa dinâmica em eficiência
+operacional por meio de proteção híbrida durante a inferência em streaming.
+
+%%══════════════════════════════════════════════════════════════════════
+\subsection{TERA-Gen: Infraestrutura Experimental com Onset Determinístico}
+\label{sec:tera}
+
+Medir atraso de detecção com precisão de instante requer saber com
+exatidão quando o comportamento de risco teve início. Nas bases
+naturalísticas disponíveis, SHRP2~\cite{dingus2016shrp2},
+DADA~\cite{fang2022dada} e DMD~\cite{ortega2020dmd}, esse instante é
+determinado por anotação humana retrospectiva, sujeita a variabilidade
+típica de $\pm k$ posições. A 9,6\,fps, $k{=}3$ corresponde a
+${\approx}0{,}31$\,s de incerteza, suficiente para ocultar diferenças
+reais entre sistemas. Episódios não detectados são excluídos das médias
+de latência sem penalidade explícita, produzindo indicadores
+artificialmente otimistas.
+
+O TERA-Gen é introduzido como infraestrutura experimental habilitadora
+para produzir episódios com onset determinístico e progressão de risco
+inteiramente parametrizada, convertendo a avaliação em um benchmark
+reproduzível. O TERA-Gen não substitui datasets naturalísticos como
+SHRP2, DADA ou DMD; ele complementa essas bases ao permitir avaliação
+controlada de atraso, cobertura, supressão e falhas de detecção sob
+regimes de emergência progressiva e abrupta, propriedades difíceis de
+medir quando o onset depende de anotação humana retrospectiva. O sistema
+representa a interação temporal entre comportamento humano, dinâmica
+veicular, contexto operacional e sinais acústicos em 31 atributos que
+funcionam como proxies multimodais de fatores de risco documentados em
+estudos naturalísticos.
+
+\paragraph{Estrutura dos episódios}
+O vetor $x_t \in \mathbb{R}^{31}$ cobre quatro domínios complementares.
+O domínio visual-comportamental codifica o estado do operador em sete
+classes (\textit{one-hot}): condução normal, uso de celular, ajuste de
+rádio, alimentação, pegar objeto, \textit{grooming} e conversa com
+passageiro, representando combinações de distração visual, manual e
+cognitiva do SHRP2~\cite{dingus2016shrp2}. Inclui também indicadores
+de cinto de segurança, desvio lateral de faixa e
+\textit{eye\_gaze\_off\_road} calibrado pelo \textit{odds ratio} 7,1 do
+SHRP2.
+
+O domínio cinemático registra velocidade normalizada, aceleração e
+frenagem bruscas, sinais giroscópicos e a interação entre uso de celular
+e velocidade corrente, distinguindo cenários de risco qualitativamente
+distintos: veículo parado, tráfego urbano e rodovia de alta velocidade.
+
+O domínio contextual captura tipo de via, precipitação, regime noturno
+e densidade de tráfego, enquanto o domínio acústico incorpora sirene,
+buzina, toque de celular e demais sinais sonoros relevantes. Ambos são
+incluídos como amplificações aditivas ao alvo de risco do episódio.
+Dois atributos adicionais modelam a confiança dos detectores embarcados,
+representando degradação perceptual em condições de oclusão.
+
+\paragraph{Calibração epidemiológica}
+Os alvos de risco são ancorados nos \textit{odds ratios} do SHRP2,
+transferidos ao domínio contínuo $[0{,}05,\,1{,}00]$ pelo mapeamento:
+\begin{equation}
+  \textit{risk\_target} \approx 0{,}05 +
+  \frac{\mathrm{OR} - 1}{12{,}5},
+  \label{eq:or_mapping}
+\end{equation}
+preservando relações ordinais entre comportamentos
+(Tabela~\ref{tab:shrp2_calibracao}). O rótulo de episódio pondera
+trajetória temporal e intensidade dos picos:
+\begin{equation}
+  y_{\text{ep}} =
+  0{,}7\,\mathrm{mean}(y_{\mathrm{frame}}) +
+  0{,}3\,p_{95}(y_{\mathrm{frame}}),
+  \label{eq:agregacao}
+\end{equation}
+refletindo que picos breves mas intensos contribuem
+desproporcionalmente para a severidade global do episódio.
+
+\begin{table}[!t]
+\centering
+\caption{Comportamentos de risco calibrados pelo SHRP2~\cite{dingus2016shrp2}.}
+\label{tab:shrp2_calibracao}
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{l c c c}
+\toprule
+\textbf{Comportamento} & \textbf{Categoria} &
+\textbf{OR} & \textbf{\textit{risk\_target}} \\
+\midrule
+Condução normal              & Normal   & 1{,}0  & 0{,}050 \\
+\rowcolor{gray!8}
+Conversa via viva-voz        & Atenção  & 1{,}3  & 0{,}074 \\
+Fadiga leve / sonolência     & Alerta   & 4{,}0  & 0{,}290 \\
+\rowcolor{gray!8}
+Pegar objeto em movimento    & Crítico  & 9{,}1  & 0{,}698 \\
+Discagem manual de celular   & Crítico  & 12{,}2 & 0{,}946 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Regimes de emergência}
+O TERA-Gen contempla dois padrões temporais complementares. Episódios
+\textbf{progressivos} (60\% dos críticos) simulam distração sustentada
+ou fadiga acumulada, com fase latente de 8 a 20 instantes e janela de
+pré-onset de ${\approx}1{,}4$\,s. Episódios \textbf{abruptos}
+(40\% restantes) modelam perturbações de rampa rápida com janela
+pré-onset inferior a 0,6\,s, constituindo o regime de maior
+dificuldade para sistemas em tempo real e o de maior risco de supressão
+insegura. Em ambos os casos, $t_0$ é determinístico, tornando atraso
+de detecção e taxa de falhas mensuráveis com precisão de quadro.
+
+\paragraph{Taxonomia de receitas e desenho binário de supervisão}
+Os episódios são gerados a partir de receitas, templates que especificam
+sequência de comportamentos, velocidade, contexto e alvo de risco.
+O conjunto de treino compreende 13 receitas: três de condução normal
+(N01--N03) e dez de situação crítica (C01--C10, cobrindo as principais
+categorias de distração do SHRP2: celular, fadiga, \textit{grooming},
+pegar objeto, alimentação e combinações).
+
+O conjunto de treino é \textbf{estritamente binário}, Normal ou Crítico,
+espelhando a estrutura dos datasets naturalísticos de referência (SHRP2,
+DMD), nos quais rótulos disponíveis correspondem a eventos de
+crash/near-crash sem anotação de severidade intermediária. O objetivo
+é verificar se supervisão binária com ancoragem temporal ao onset é
+suficiente para que o modelo produza probabilidades contínuas com
+estrutura semântica coerente como subproduto, hipótese testada na
+Seção~\ref{app:borderline}.
+
+\paragraph{Receitas borderline para avaliação de generalização}
+Para testar a generalização a severidades não supervisionadas,
+definem-se seis receitas exclusivas para avaliação
+(Tabela~\ref{tab:receitas}). Três receitas de \textbf{Atenção}
+(A01--A03) representam condução sem distração comportamental mas com
+contexto adverso sustentado: chuva intensa, período noturno e
+congestionamento. Três receitas de \textbf{Alerta} (L01--L03) cobrem
+distração fraca a velocidade reduzida: conversa prolongada em rodovia,
+ajuste de rádio em velocidade moderada e alimentação em trecho urbano
+lento. Nenhuma dessas receitas é apresentada durante o treino ou
+validação. A hierarquia esperada é Normal~$<$~Atenção~$<$~Alerta~$<$~Crítico;
+os resultados são apresentados na Seção~\ref{app:borderline}.
+
+\begin{table}[!t]
+\centering
+\caption{Taxonomia de receitas do TERA-Gen.}
+\label{tab:receitas}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l l c c}
+\toprule
+\textbf{Conjunto} & \textbf{Nível} & \textbf{Receitas} & \textbf{Uso} \\
+\midrule
+\multirow{2}{*}{Treino}
+  & Normal   & N01--N03 & Treino / Val / Teste \\
+  & Crítico  & C01--C10 & Treino / Val / Teste \\
+\midrule
+\multirow{2}{*}{Borderline}
+  & Atenção  & A01--A03 & Apenas avaliação \\
+  & Alerta   & L01--L03 & Apenas avaliação \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Composição do conjunto de dados}
+O conjunto reúne 4.160 episódios em quatro sementes (42--45), com 1.040
+por semente, particionados em 70/15/15 com estratificação por receita.
+Cada episódio contém $T{=}96$ instantes a ${\approx}9{,}6$\,fps, com
+$D{=}31$ atributos e anotação de onset com precisão de quadro.
+
+%%══════════════════════════════════════════════════════════════════════
+\subsection{AF-TKD: Supervisão Temporal Orientada ao Onset por Destilação}
+\label{sec:aftkd}
+
+A restrição de causalidade estrita impede que a rede LSTM unidirecional
+recorra ao contexto futuro para reconhecer assinaturas latentes que só
+se tornam identificáveis retrospectivamente. Em cenários de transição
+abrupta, onde a janela pré-onset é inferior a $0{,}6$\,s, essa
+limitação, combinada com supressão adaptativa não orientada, eleva o
+risco de falha de detecção. O protocolo \textit{Adaptive-Focus Temporal
+Knowledge Distillation} (AF-TKD) aborda essa assimetria durante o
+treinamento, sem alterar a complexidade computacional ou a topologia de
+inferência causal do aluno.
+
+%% MUDANÇA [AFTKD-1]: Reposicionamento do objetivo do AF-TKD.
+%% ANTES: "amplificar a sensibilidade a sinais precursores" como fim em si.
+%% DEPOIS: a amplificação de sensibilidade é o MECANISMO cujo objetivo
+%% operacional é a preservação de cobertura e a redução de supressão insegura.
+O arcabouço emprega um professor BiLSTM ($\mathcal{M}_P$) com acesso
+bidirecional irrestrito à sequência temporal completa $\mathbf{X}_{1:T}$.
+O professor constrói representações temporalmente ricas da sequência
+de risco e transfere essa dinâmica ao aluno causal ($\mathcal{M}_S$) via
+destilação assíncrona. O objetivo operacional do AF-TKD é a preservação
+de cobertura de detecção sob supressão adaptativa: ao ajustar a
+trajetória temporal das predições do aluno e concentrar densidade de
+gradiente nos instantes anteriores ao onset ($t_0$), o protocolo reduz
+a probabilidade de supressão insegura durante a emergência do risco.
+O protocolo opera exclusivamente em modo offline; no dispositivo embarcado,
+o aluno infere de forma estritamente causal com a dinâmica temporal
+permanentemente ajustada pelo treinamento.
+
+\paragraph{Função de Perda Assimétrica}
+A otimização do aluno é governada por uma função de perda composta que
+equilibra ancoragem em rótulos reais e alinhamento à trajetória temporal
+do professor:
+\begin{equation}
+  \mathcal{L}_{\mathrm{AF-TKD}}(t) = (1 - \lambda_{\mathrm{KD}})\,\mathcal{L}_{\text{hard}}(t) + \lambda_{\mathrm{KD}}\,\mathcal{L}_{\text{soft}}(t)
+  \label{eq:perda_total}
+\end{equation}
+em que o termo de supervisão $\mathcal{L}_{\text{hard}}$ é a entropia
+cruzada binária convencional:
+\begin{equation}
+  \mathcal{L}_{\text{hard}}(t) = - \left[ y_{\text{ep}}(t) \log(\hat{p}_s(t)) + (1 - y_{\text{ep}}(t)) \log(1 - \hat{p}_s(t)) \right]
+  \label{eq:perda_hard}
+\end{equation}
+O alinhamento temporal é imposto pela divergência de Kullback-Leibler
+($\mathrm{KL}$) sobre os logits suavizados do professor ($z_p$) e do
+aluno ($z_s$), escalados por temperatura $T$:
+\begin{equation}
+  \mathcal{L}_{\text{soft}}(t) = T^2 \cdot \mathrm{KL}\!\left( \sigma\!\bigl(\tfrac{z_p(t)}{T}\bigr) \,\Big\|\, \sigma\!\bigl(\textstyle\frac{z_s(t)}{T}\bigr)\right)
+  \label{eq:perda_soft}
+\end{equation}
+Fixa-se $T = 2{,}0$ para expandir o suporte das distribuições suaves e
+facilitar a transferência de conhecimento de segunda ordem sobre os
+precursores.
+
+Para concentrar o gradiente nos instantes próximos ao onset, aplica-se
+uma ponderação exponencial $w(t)$ indexada à distância temporal relativa
+a $t_0$:
+\begin{equation}
+  w(t) = \exp(-\alpha \cdot |t - t_0|),\quad \alpha = 0{,}15
+  \label{eq:ponderacao}
+\end{equation}
+A perda efetiva por posição é $\tilde{\mathcal{L}}_{\mathrm{AF-TKD}}(t) = w(t) \cdot \mathcal{L}_{\mathrm{AF-TKD}}(t)$,
+amplificando o gradiente nos instantes pré-onset e penalizando latência
+de detecção pós-onset. Esse janelamento requer anotação determinística
+de $t_0$, evidenciando a dependência direta entre o AF-TKD e a
+infraestrutura TERA-Gen.
+
+\paragraph{Agendador de Destilação em Três Fases}
+A introdução precoce do sinal do professor sobre pesos inicializados
+aleatoriamente induz instabilidade de gradiente. Para mitigar esse
+comportamento, o hiperparâmetro de acoplamento $\lambda_{\mathrm{KD}}$
+é modulado em três fases ao longo das épocas $e$:
+\begin{equation}
+  \lambda_{\mathrm{KD}}(e) = \begin{cases}
+    0, & 1 \le e \le E_{\text{warm}} \\
+    \displaystyle\frac{e - E_{\text{warm}}}{E_{\text{ramp}} - E_{\text{warm}}}, & E_{\text{warm}} < e \le E_{\text{ramp}} \\
+    1{,}0, & E_{\text{ramp}} < e \le E_{\text{total}}
+  \end{cases}
+  \label{eq:scheduler}
+\end{equation}
+onde $E_{\text{warm}}{=}10$ define a fase de aquecimento (ancoragem
+exclusiva em rótulos reais), $E_{\text{ramp}}{=}27$ delimita a
+introdução linear do sinal do professor e $E_{\text{total}}{=}80$ o
+regime estacionário. %% MUDANÇA [AFTKD-2]: Removida "replicar a antecipação do professor".
+%% Substituída por formulação focada em estabilidade de cobertura temporal.
+Sob $\lambda_{\mathrm{KD}}{=}1{,}0$, o aluno refina sua dinâmica
+temporal orientada ao onset, gerando uma trajetória preditiva mais
+estável que viabiliza supressão seletiva segura pelo MHEG e
+reduz falhas de cobertura durante a emergência do risco.
+
+%%══════════════════════════════════════════════════════════════════════
+\subsection{MHEG: Proteção Híbrida por Gatilhos Cinemático e Entrópico}
+\label{sec:gating}
+
+%% MUDANÇA [MHEG-1]: Reposicionamento do MHEG.
+%% ANTES: enfatizava "entropy gating" e "confiança calibrada".
+%% DEPOIS: ênfase em proteção híbrida, salvaguarda cinemática e
+%% prevenção de supressão insegura. O gatilho entrópico é sinal auxiliar.
+Em tempo de execução, o MHEG combina dois gatilhos complementares em
+uma camada de proteção híbrida posicionada entre o sensor e a LSTM.
+O gatilho cinemático é a salvaguarda primária: preserva a resposta a
+transições abruptas do veículo, independentemente do estado atual de
+incerteza do classificador. O gatilho entrópico atua como sinal auxiliar
+de ambiguidade temporal: evita supressão quando a trajetória preditiva
+indica maior incerteza próxima ao onset. Essa arquitetura híbrida
+garante que o sistema não dependa exclusivamente da confiança do
+classificador para decidir supressão — propriedade crítica em contextos
+de segurança, nos quais modelos convencionalmente treinados podem
+apresentar confiança artificialmente elevada durante a emergência do risco.
+
+Essa arquitetura requer que a supervisão temporal tenha sido aplicada
+pelo AF-TKD. Sem esse ajuste, a trajetória preditiva de modelos
+convencionalmente treinados não diferencia instantes estáveis de
+instantes de risco emergente, como documentado pelo controle negativo
+Baseline+MHEG na Seção~\ref{sec:avaliacao}. O mecanismo toma decisões
+a cada instante sem modificar os pesos do modelo, tornando-o
+transparente ao treinamento e removível para ablação.
+
+\paragraph{Critério de ativação}
+O gatilho cinemático $|\Delta x_t|$ detecta mudanças abruptas de estado
+sensorial que devem ser processadas independentemente da ambiguidade
+temporal corrente. Essa salvaguarda garante que episódios abruptos,
+com janela pré-onset inferior a 0,6\,s e sem precursores entrópicos
+suficientes, sejam sempre processados — constituindo a proteção
+primária do mecanismo. O gatilho entrópico baseia-se na entropia
+preditiva do instante anterior:
+\begin{equation}
+H(p_{t-1}) = -p_{t-1}\log_2 p_{t-1} -
+(1 - p_{t-1})\log_2(1 - p_{t-1}),
+\label{eq:entropia}
+\end{equation}
+que, após supervisão temporal orientada ao onset, atua como sinal
+auxiliar de ambiguidade, assumindo valores elevados nos instantes onde
+a supressão comprometeria a cobertura. O núcleo LSTM é ativado quando:
+\begin{equation}
+(|\Delta x_t| \ge \tau_\Delta) \;\lor\; (H(p_{t-1}) \ge \tau_H);
+\label{eq:gating}
+\end{equation}
+caso contrário, saída e estado anteriores são propagados sem custo.
+A cobertura complementar dos dois gatilhos é fundamental: o cinemático
+responde a episódios abruptos sem precursores entrópicos; o entrópico
+captura emergência progressiva de risco sem perturbação sensorial imediata.
+Juntos, os dois gatilhos proveem proteção híbrida sem depender de
+nenhum único sinal.
+
+\paragraph{Calibração dos limiares}
+Com os pesos do aluno congelados, a calibração percorre uma grade de
+limiares por semente, maximizando a taxa de supressão sob restrições
+de cobertura em validação.
+
+%%══════════════════════════════════════════════════════════════════════
+\subsection{Ciclo de Inferência e Saída Graduada de Risco}
+\label{sec:saida}
+
+O Algoritmo~\ref{alg:inferencia} formaliza o ciclo completo de
+inferência no dispositivo. O MHEG resolve em $\mathcal{O}(1)$; quando
+não ativa o modelo, o estado anterior é propagado sem custo. O nível
+$\ell_t \in \{0,1,2,3\}$ é emitido a cada instante, incluindo
+$\ell_t{=}0$ (Normal), garantindo que o sistema ADAS receba confirmação
+contínua de estado. Todo o ciclo é determinístico e livre de gradiente
+no dispositivo.
+
+A probabilidade $p_t$ é convertida em quatro níveis de severidade com
+limiares calibrados empiricamente sobre a distribuição de saída do
+modelo treinado (Seção~\ref{app:borderline}), preservando a ordenação
+ordinal da escala epidemiológica do SHRP2~\cite{dingus2016shrp2}:
+\begin{equation}
+  \ell_t =
+  \begin{cases}
+    0\;\text{(Normal)}   & p_t < 0{,}15 \\
+    1\;\text{(Atenção)}  & 0{,}15 \le p_t < 0{,}38 \\
+    2\;\text{(Alerta)}   & 0{,}38 \le p_t < 0{,}50 \\
+    3\;\text{(Crítico)}  & p_t \ge 0{,}50
+  \end{cases}
+  \label{eq:alerta}
+\end{equation}
+permitindo que sistemas ADAS calibrem a intensidade da intervenção ao
+grau de risco estimado.
+
+\begin{algorithm}[t]
+\caption{Ciclo de inferência eficiente em tempo de execução}
+\label{alg:inferencia}
+\begin{algorithmic}[1]
+\REQUIRE Pesos $\theta_{\text{LSTM}}$; limiares $\tau_\Delta$,
+         $\tau_H$, $\theta_1{=}0{,}15$, $\theta_2{=}0{,}38$,
+         $\theta_3{=}0{,}50$;
+         $h_0 {=} \mathbf{0}$;\; $y_0 {=} 0$
+\ENSURE  Nível $\ell_t \in \{0,1,2,3\}$ emitido a cada instante $t$
+\FOR{cada quadro $x_t$}
+    \STATE $\Delta x_t \leftarrow
+            \max_{k \in \mathcal{K}}|x_t^{(k)} - x_{t-1}^{(k)}|$
+            \hfill{$\mathcal{K}$: índices cinemáticos}
+    \STATE $H_t \leftarrow H(y_{t-1})$
+            \hfill{Eq.~\ref{eq:entropia}}
+    \IF{$(\Delta x_t \geq \tau_\Delta)$ \OR $(H_t \geq \tau_H)$}
+        \STATE $(y_t, h_t) \leftarrow
+                \mathrm{LSTM}(x_t, h_{t-1};\, \theta_{\text{LSTM}})$
+                \hfill{custo $\mathcal{O}(4(DH{+}H^2))$}
+    \ELSE
+        \STATE $y_t \leftarrow y_{t-1}$;\;
+               $h_t \leftarrow h_{t-1}$
+               \hfill{custo $\approx 0$}
+    \ENDIF
+    \STATE $\ell_t \leftarrow
+            \mathbf{1}[y_t \ge \theta_3]\cdot 3 +
+            \mathbf{1}[\theta_2 \le y_t < \theta_3]\cdot 2 +
+            \mathbf{1}[\theta_1 \le y_t < \theta_2]\cdot 1$
+    \STATE \textbf{Emite} $\ell_t$
+            \hfill{sempre emitido, inclusive $\ell_t{=}0$}
+\ENDFOR
+\end{algorithmic}
+\smallskip
+{\footnotesize Inferência causal e determinística, sem gradiente no
+dispositivo.}
+\end{algorithm}
+
+%% ════════════════════════════════════════════════════════════════════════
+\subsection{Complexidade Computacional e Footprint Embarcado}
+\label{sec:complexidade}
+
+A viabilidade de implantação em plataformas automotivas de recursos
+restritos baseia-se na separação de escopo entre o ambiente de
+treinamento e o dispositivo de borda. Conforme sistematizado na
+Tabela~\ref{tab:complexidade}, os componentes de alta intensidade
+computacional --- TERA-Gen, professor BiLSTM, retropropagação AF-TKD e
+calibração de limiares MHEG --- operam exclusivamente no servidor de
+treinamento, sem impor nenhum overhead ao hardware embarcado.
+
+Em tempo de execução, o dispositivo opera com quatro estruturas fixas:
+o aluno LSTM causal, o mecanismo MHEG, o estado oculto persistente e
+os limiares calibrados. A cada instante $t$, o MHEG avalia gatilhos
+cinemático e entrópico em $\mathcal{O}(1)$. Nos instantes suprimidos,
+a atualização da LSTM é inteiramente evitada; nos instantes selecionados,
+a inferência recorrente executa em $\mathcal{O}(4(DH{+}H^2))$ por
+passo. Os limiares $(\tau_\Delta, \tau_H, \bm{\theta})$ são constantes
+escalares de $\mathcal{O}(1)$, eliminando gerenciamento dinâmico de
+memória e garantindo execução determinística compatível com RTOS.
+
+O perfil de memória em tempo de execução é estritamente limitado e
+constante. Para a configuração de duas camadas com $H{=}64$ unidades
+ocultas, o estado recorrente $(h_t, c_t)$ exige $1.024$\,bytes de RAM
+estática, invariante ao tempo de sessão. Diferentemente de modelos com
+atenção global ou janelas deslizantes, a LSTM causal mantém toda a
+representação do histórico no estado oculto de tamanho fixo, sem
+alocação dinâmica durante a sessão --- propriedade relevante para
+execução sustentada em plataformas com SRAM limitada.
+
+\begin{table*}[!t]
+\centering
+\caption{%
+Perfil de complexidade computacional dos componentes do ecossistema
+TERA. $E$: número de episódios de treino; $T$: comprimento de episódio
+($T{=}96$); $D$: dimensão de entrada ($D{=}31$); $H$: dimensão oculta;
+$L$: número de combinações de limiares na grade de calibração.
+Componentes marcados como ``Apenas treinamento'' não consomem
+recursos no dispositivo embarcado.%
+}
+\label{tab:complexidade}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.22}
+\begin{tabularx}{\textwidth}{l >{\raggedright\arraybackslash}X c c c}
+\toprule
+\textbf{Componente} & \textbf{Papel Funcional} &
+\textbf{Complexidade} & \textbf{Executa em} &
+\textbf{Reside no Dispositivo} \\
+\midrule
+TERA-Gen
+  & Síntese de episódios com onset determinístico; benchmark de
+    avaliação controlada
+  & $\mathcal{O}(E \cdot T \cdot D)$
+  & Apenas treinamento
+  & \ding{55} \\
+\rowcolor{gray!8}
+Professor BiLSTM
+  & Supervisão bidirecional; transfere dinâmica temporal orientada ao onset
+    ao aluno via AF-TKD
+  & $\mathcal{O}(8(DH{+}H^2))$/passo
+  & Apenas treinamento
+  & \ding{55} \\
+AF-TKD
+  & Ajuste da trajetória temporal do aluno; ponderação exponencial
+    centrada no onset para preservação de cobertura sob supressão
+  & $\mathcal{O}(T)$ por episódio
+  & Apenas treinamento
+  & \ding{55} \\
+\rowcolor{gray!8}
+Calibração MHEG
+  & Busca em grade de limiares por semente
+  & $\mathcal{O}(L \cdot E_{\mathrm{val}} \cdot T)$
+  & Apenas treinamento
+  & \ding{55} \\
+\midrule
+LSTM causal (aluno)
+  & Núcleo preditivo embarcado; atualiza estado oculto e emite
+    probabilidade de risco
+  & $\mathcal{O}(4(DH{+}H^2))$/passo
+  & Runtime contínuo
+  & \ding{51} \\
+\rowcolor{gray!8}
+MHEG (runtime)
+  & Proteção híbrida de dois gatilhos: salvaguarda cinemática
+    primária e sinal auxiliar entrópico; decide supressão ou
+    inferência em $\mathcal{O}(1)$
+  & $\mathcal{O}(1)$/passo
+  & Runtime contínuo
+  & \ding{51} \\
+Estado oculto $h_t$
+  & Memória recorrente persistente; propagado sem custo nos
+    instantes suprimidos
+  & $\mathcal{O}(H)$ (buffer fixo)
+  & Runtime contínuo
+  & \ding{51} \\
+\rowcolor{gray!8}
+Limiares $(\tau_\Delta, \tau_H, \bm{\theta})$
+  & Parâmetros escalares exportados do treinamento;
+    constantes em runtime
+  & $\mathcal{O}(1)$ (5 escalares)
+  & Runtime contínuo
+  & \ding{51} \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+O aluno LSTM causal de duas camadas ($H{=}64$) possui
+${\approx}58$\,K parâmetros, correspondendo a ${\approx}228$\,KB em
+FP32 ou ${\approx}57$\,KB em INT8 pós-treinamento. O mecanismo MHEG
+acrescenta cinco escalares imutáveis e dois registradores de comparação
+por instante. Esse perfil é compatível com microcontroladores
+automotivos típicos (família STM32H7, 256\,KB--1\,MB de SRAM) e
+módulos de inferência dedicados (Cortex-M55 com extensões Helium),
+sugerindo implantação direta em plataformas como NVIDIA Jetson Nano e
+Qualcomm SA8155P sem necessidade de quantização inteira pós-treinamento.
+
+%%═══════════════════════════════════════════════════════════════════════════════
+%%  §4  AVALIAÇÃO EXPERIMENTAL
+%%═══════════════════════════════════════════════════════════════════════════════
+\section{Avaliação Experimental}
+\label{sec:avaliacao}
+
+A avaliação experimental testa diretamente a hipótese central: a
+supervisão temporal orientada ao \textit{onset} reestrutura a trajetória
+preditiva do aluno de modo que a variação de entropia ao longo das fases
+de condução torna-se operacionalmente útil para viabilizar supressão
+adaptativa segura sob restrições causais de Edge AI. O pipeline determinístico e reproduzível integra
+geração sintética controlada (TERA-Gen), supervisão temporal orientada
+ao \textit{onset} (AF-TKD), supressão adaptativa (MHEG) e um engine de
+avaliação que agrega simultaneamente métricas de cobertura, qualidade
+preditiva e eficiência computacional. A Figura~\ref{fig:pipeline_deterministico}
+sintetiza o fluxo completo.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{image/pipeline_deterministico_tera.png}
+%% MUDANÇA [FIG2-1]: Legenda ajustada — ênfase em cobertura e
+%% redução de supressão insegura; removida linguagem de "antecipação".
+\caption{%
+\textbf{Pipeline experimental determinístico do ecossistema TERA.}
+O TERA-Gen produz episódios com \textit{onset} determinístico e
+divisões estratificadas multi-\textit{seed}.
+O AF-TKD transfere dinâmica temporal do professor BiLSTM para
+o aluno causal, estruturando a trajetória preditiva para preservar
+cobertura durante a emergência do risco.
+O mecanismo MHEG combina salvaguarda cinemática e sinal auxiliar
+entrópico para reduzir inferências redundantes sem comprometer a cobertura.
+O engine de avaliação agrega métricas de cobertura, atraso efetivo
+e eficiência computacional, exportando automaticamente CSVs canônicos
+e macros \LaTeX\ reproduzíveis.%
+}
+\label{fig:pipeline_deterministico}
+\end{figure*}
+
+% ────────────────────────────────────────────────────────────────────────
+\subsection{Protocolo Experimental}
+\label{sec:protocolo}
+% ────────────────────────────────────────────────────────────────────────
+
+Os experimentos cobrem 4.160 episódios em quatro sementes independentes
+(42--45), particionados em 70/15/15 com estratificação por receita.
+Todas as configurações do fatorial $2{\times}2$ foram avaliadas com o
+mesmo conjunto de sementes. Nos experimentos híbridos, os limiares de
+supressão $(\tau_\Delta, \tau_H)$ são calibrados independentemente por
+semente via busca em grade sobre o conjunto de validação. Os resultados
+são reportados como média $\pm$ desvio padrão entre sementes.
+
+A detecção é considerada válida apenas quando o modelo permanece acima
+do limiar $\theta_{\mathrm{TTD}}$ por três instantes consecutivos,
+evitando ativações espúrias por flutuações locais. O atraso efetivo é
+calculado como:
+%
+\begin{equation}
+\begin{split}
+\mathrm{TTD}_{\mathrm{det}} &= (t_{\mathrm{det}} - t_0)\cdot\Delta t,
+   \quad \Delta t = 10/T, \\
+t_{\mathrm{det}} &= \min\bigl\{t \ge t_0 \mid
+   p_t,\,p_{t+1},\,p_{t+2} \ge \theta_{\mathrm{TTD}}\bigr\}.
+\end{split}
+\label{eq:ttd_formal}
+\end{equation}
+%
+Episódios sem $t_{\mathrm{det}}$ contribuem com penalidade de
+$T_{\mathrm{ep}}{=}10$\,s. O custo computacional (ms/q) é medido em
+modo \textit{batch}${=}1$ numa GPU NVIDIA RTX~3050~Ti (PyTorch~2.0),
+com sincronização explícita após aquecimento de 100 passos. As
+comparações entre configurações são verificadas pelo teste de Wilcoxon
+pareado ($n{=}4$) com delta de Cliff~\cite{cliff1993dominance} e
+intervalos de confiança de 95\% por \textit{bootstrap} estratificado.
+
+\input{paper_table_seed_coverage.tex}
+
+% ────────────────────────────────────────────────────────────────────────
+\subsection{Evidência Temporal Frame-a-Frame}
+\label{sec:evidencia_temporal}
+% ────────────────────────────────────────────────────────────────────────
+
+A hipótese mecanística exige que a supervisão temporal orientada ao
+\textit{onset} ajuste a trajetória preditiva do aluno de modo que o
+perfil de entropia $H(t)$ passe a variar de forma coerente com as
+fases de condução, tornando a supressão seletiva operacionalmente
+segura. A Figura~\ref{fig:temporal_trace}
+documenta esse comportamento em escala de quadro.
+
+%% MUDANÇA [EV-1]: Ajuste interpretativo — não afirmar que AF-TKD
+%% "detecta mais cedo", mas que opera com maior estabilidade de cobertura.
+No Baseline, $p(t)$ permanece abaixo do limiar até após $t_0$ e $H(t)$
+mantém-se uniformemente baixa, indicando confiança artificial elevada
+mesmo em estados de risco emergente — condição que priva o MHEG de sinal
+discriminante e eleva o risco de supressão insegura. No AF-TKD+MHEG,
+$p(t)$ cresce na janela pré-\textit{onset} em episódios progressivos e
+$H(t)$ estratifica-se ao longo das fases de condução: elevada nos
+instantes de maior ambiguidade temporal, reduzida nos períodos estáveis.
+Essa estruturação é a condição necessária para que o MHEG discrimine
+instantes suprimíveis de instantes críticos, conforme analisado na
+Seção~\ref{sec:ablacao_fatorial}.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.95\textwidth]{image/fig_temporal_trace_pt.pdf}
+%% MUDANÇA [FIG3-1]: Legenda reescrita — ênfase em seletividade de supressão
+%% e estabilidade de cobertura; removida linguagem de "antecipação precoce".
+\caption{%
+Evidência temporal \textit{frame-a-frame} (semente~42, fins
+ilustrativos; métricas quantitativas reportadas como
+média $\pm$ dp sobre as sementes 42--45).
+Colunas: Baseline (esq.) e AF-TKD+MHEG (dir.).
+Linhas: episódio progressivo (sup.) e abrupto (inf.).
+Curva sólida: $p(t)$; curva tracejada: $H(t)$.
+Linha vertical: $t_0$. Marcador $\triangledown$: $t_{\rm det}$.
+Regiões cinzas: instantes suprimidos pelo MHEG.
+No AF-TKD+MHEG, as supressões concentram-se nos períodos de
+$H(t)$ baixa (estado estável), evidenciando seletividade
+condicionada à dinâmica temporal ajustada e preservação de
+cobertura nos instantes de risco emergente.%
+}
+\label{fig:temporal_trace}
+\end{figure*}
+
+%% MUDANÇA [EV-2]: Interpretação do ECE tratada como sinal auxiliar,
+%% não como evidência de calibração probabilística robusta.
+A Figura~\ref{fig:entropy_dist} complementa essa análise mostrando a
+estrutura de incerteza por fase de condução. No Baseline, as
+distribuições de $H_t$ das quatro fases colapsam em faixa estreita
+($0{,}22$–$0{,}42$\,nats), tornando $H_t$ incapaz de distinguir
+instantes estáveis de instantes de risco emergente. No AF-TKD, as
+fases estratificam-se ao longo da faixa de entropia
+($\bar{H}{=}0{,}37$\,nats no regime estável vs.\
+$\bar{H}{=}0{,}63$\,nats pós-\textit{onset}), provendo ao MHEG um
+sinal auxiliar operacionalmente útil para supressão seletiva. O
+diagrama de calibração em nível de quadro (Fig.~\ref{fig:entropy_dist})
+indica que o AF-TKD apresenta trajetória temporal com maior alinhamento
+à diagonal (ECE$_{\text{frame}}{=}0{,}044$ vs.\ $0{,}129$ do Baseline);
+esse indicador auxilia o diagnóstico da estruturação da trajetória
+temporal, embora não constitua evidência primária de cobertura.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{image/fig_entropy_dist_pt.pdf}
+%% MUDANÇA [FIG4-1]: Legenda ajustada — ECE posicionado como indicador
+%% auxiliar; ênfase em separação de fases para supressão seletiva.
+\caption{%
+Estrutura de incerteza por fase de condução (semente~42,
+configurações \texttt{\_fixed}).
+\textbf{(a)}~Baseline: distribuições de $H_t$ das quatro fases
+colapsam em faixa estreita, impedindo discriminação temporal e
+tornando qualquer supressão potencialmente insegura.
+\textbf{(b)}~AF-TKD: fases estratificam-se; Pós-\textit{onset}
+satura próximo a $\ln 2$, provendo sinal auxiliar para o MHEG.
+\textbf{(c)}~Diagrama de calibração em nível de quadro ($p_t$
+vs.\ alvo contínuo $y_{\mathrm{frame}}$): AF-TKD permanece mais
+próximo da diagonal (ECE$_{\mathrm{frame}}{=}0{,}044$
+vs.\ $0{,}129$); reportado como indicador auxiliar diagnóstico
+da trajetória temporal, sem papel primário na avaliação de cobertura.
+O ECE de episódio da Tabela~\ref{tab:resultados_principais} usa
+métrica distinta (agregação por episódio).%
+}
+\label{fig:entropy_dist}
+\end{figure*}
+
+% ────────────────────────────────────────────────────────────────────────
+\subsection{Estudo de Ablação Fatorial $2{\times}2$}
+\label{sec:ablacao_fatorial}
+% ────────────────────────────────────────────────────────────────────────
+
+A hipótese central é testada via fatorial $2{\times}2$ que isola os
+efeitos da supervisão temporal orientada ao \textit{onset} (AF-TKD) e
+da supressão adaptativa (MHEG) sobre cobertura, atraso e eficiência
+computacional. O desenho experimental é apresentado na
+Tabela~\ref{tab:design}.
+
+\begin{table}[!t]
+\centering
+\caption{Desenho fatorial $2{\times}2$ (todas as configurações:
+sementes 42--45).}
+\label{tab:design}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\columnwidth}{l c c X}
+\toprule
+\textbf{Config.} & \textbf{AF-TKD} & \textbf{MHEG}
+  & \textbf{Papel} \\
+\midrule
+Baseline Fixo  & \ding{55} & \ding{55}
+  & Referência sem supervisão temporal ou supressão \\
+Baseline+MHEG  & \ding{55} & \checkmark
+  & Controle negativo: supressão sem dinâmica ajustada \\
+AF-TKD Fixo    & \checkmark & \ding{55}
+  & Supervisão temporal isolada \\
+AF-TKD+MHEG   & \checkmark & \checkmark
+  & Ecossistema completo \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table*}[!t]
+\centering
+\caption{Resultados do fatorial $2{\times}2$ em \textit{streaming}
+causal (média $\pm$ dp, 4 sementes 42--45 em todas as
+configurações).}
+\label{tab:resultados_principais}
+\footnotesize
+\setlength{\tabcolsep}{4.5pt}
+\renewcommand{\arraystretch}{1.22}
+\begin{tabular}{l l c c c c c c c c}
+\toprule
+\textbf{Modelo} & \textbf{MHEG}
+  & \textbf{F1}$\uparrow$
+  & \textbf{ECE}$\downarrow$
+  & \textbf{FR}$\downarrow$
+  & \textbf{TTD$_{p}$(s)}$\downarrow$
+  & \textbf{TTD$_b$(s)}$\downarrow$
+  & \textbf{TTD$_\text{ef}$(s)}$\downarrow$
+  & \textbf{ms/q}$\downarrow$
+  & \textbf{\%Sup}$\uparrow$ \\
+\midrule
+\input{paper_table2_rows.tex}
+\\
+\bottomrule
+%% MUDANÇA [TAB2-1]: Nota de rodapé ajustada — esclarece TTDb como
+%% indicador parcial; ECE explicitamente como auxiliar.
+\multicolumn{10}{p{0.96\linewidth}}{\footnotesize
+TTD$_{p}$: atraso temporal no cenário progressivo frame-level via $\theta_{\mathrm{TTD}}$;\;
+TTD$_b$: atraso bruto restrito a episódios detectados com sucesso (sem penalidade por falha);
+atenção: TTD$_b$ isolado pode produzir interpretação enganosa pois exclui episódios não detectados.
+TTD$_\text{ef}$ (Eq.~\ref{eq:ttdef_sys}) é a métrica operacionalmente relevante.
+ECE: indicador auxiliar diagnóstico da estruturação da trajetória temporal.}
+\end{tabular}
+\end{table*}
+
+A análise é organizada em quatro elos que isolam cada passo da
+cadeia mecanística: AF-TKD $\to$ trajetória temporal estável ao onset
+$\to$ variação de entropia coerente com as fases de condução $\to$
+MHEG compatível com cobertura $\to$ inferência eficiente.
+
+%% MUDANÇA [ELO1-1]: Título do Elo 1 reescrito — removida "antecipação",
+%% substituída por "preservação de cobertura e redução de falhas".
+\paragraph{Elo 1 — supervisão temporal orientada ao \textit{onset}
+preserva cobertura e reduz falhas de detecção}
+
+O Baseline sem supervisão temporal apresenta limitações consistentes em
+cenários causais de streaming online: elevada taxa de falha e
+$\text{TTD}_{\text{ef}}$ alto, indicando que episódios não detectados
+degradam substancialmente o atraso efetivo de cobertura. Os resultados
+indicam que o AF-TKD reduz a taxa de falha (FR) e melhora o
+$\text{TTD}_{\text{ef}}$, com ganho consistente nas métricas de
+cobertura. Nos episódios progressivos, o modelo mantém cobertura de
+detecção de forma mais consistente, com detecção robusta sob restrições
+causais, resultado coerente com a transferência de dinâmica temporal
+orientada ao onset promovida pelo professor bidirecional.
+
+%% MUDANÇA [ELO1-2]: Esclarecimento explícito sobre TTDb vs TTDef —
+%% passagem requerida pelo prompt editorial (Seção 3).
+Vale ressaltar a distinção operacional entre TTD$_b$ e TTD$_\text{ef}$:
+embora o baseline possa apresentar menor atraso bruto médio entre
+episódios detectados com sucesso, essa métrica isoladamente produz
+interpretação operacionalmente enganosa, pois episódios não detectados
+são excluídos do cálculo. A métrica TTD$_\text{ef}$ incorpora
+explicitamente penalidade por falha, revelando que o AF-TKD reduz
+substancialmente o atraso efetivo de cobertura mesmo quando o atraso
+bruto dos acertos é ligeiramente superior. O que importa
+operacionalmente não é quão rápido o sistema detecta quando detecta,
+mas com que consistência mantém cobertura sobre todos os episódios críticos.
+
+O efeito em F1 e ECE é de magnitude grande pelo delta de Cliff
+($\delta{=}1{,}000$; Tabela~\ref{tab:cliff_delta}); em FR e
+TTD$_\text{ef}$ o efeito quantitativo indica o ganho de cobertura
+promovido pela destilação assimétrica.
+
+\begin{table}[!t]
+\centering
+\caption{%
+Delta de Cliff e Wilcoxon pareado ($n{=}4$),
+Baseline Fixo vs.\ AF-TKD Fixo.%
+}
+\label{tab:cliff_delta}
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{l c c c}
+\toprule
+\textbf{Métrica}
+  & \textbf{$\delta_{\mathrm{Cliff}}$}$\uparrow$
+  & \textbf{Magnitude} & \textbf{$p$} \\
+\midrule
+ECE             & $+1{,}000$ & Grande  & $0{,}0625$ \\
+F1              & $+1{,}000$ & Grande  & $0{,}0625$ \\
+\bottomrule
+\multicolumn{4}{p{0.94\columnwidth}}{\footnotesize
+$n{=}4$: menor $p$ atingível${=}0{,}0625$.
+Magnitudes conforme Romano et al.~\cite{romano2006appropriate}.}
+\end{tabular}
+\end{table}
+
+\paragraph{Elo 2/3 — dinâmica temporal estruturada viabiliza MHEG seletivo}
+
+Com a dinâmica temporal ajustada pelo AF-TKD, o MHEG pode suprimir
+instantes de baixa ambiguidade (estado estável) e preservar atualizações
+nos instantes de alta ambiguidade, sem ajuste manual de janelas temporais.
+O controle negativo (Baseline+MHEG) confirma o papel da supervisão
+temporal: sem ela, a supressão degrada a cobertura, indicando que o
+MHEG remove instantes de alta relevância quando operando sobre trajetória
+temporal não ajustada. O efeito é particularmente visível no regime
+abrupto, onde episódios com janela pré-onset curta são prejudicados
+na ausência de sinal temporal estruturado — condição mitigada pelo
+gatilho cinemático do MHEG, que preserva processamento de transições
+abruptas independentemente da entropia corrente.
+
+O AF-TKD+MHEG, operando sob taxa de supressão expressiva condicionada à
+dinâmica ajustada, mitiga esses riscos. A Figura~\ref{fig:gating_heatmap}
+exibe o perfil temporal comparado de $H_t$: no Baseline, $H_t$ decresce
+pós-$t_0$, privando o MHEG de sinal discriminante; no AF-TKD, $H_t$
+cresce monotonicamente, provendo ao MHEG sinal auxiliar de ambiguidade
+contínuo e temporalmente discriminante.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{image/fig_gating_heatmap_en.pdf}
+%% MUDANÇA [FIG5-1]: Legenda ajustada — ênfase na ausência de sinal
+%% discriminante no Baseline e sinal auxiliar no AF-TKD.
+\caption{%
+Perfil de $H_t$ sobre 120 episódios críticos (semente~42).
+Painéis (a)--(b): mapa de calor de cobertura de supressão para
+Baseline+MHEG e AF-TKD+MHEG.
+Painel (c): $\bar{H}_t \pm \tfrac{1}{2}\sigma$ relativo a
+$\Delta t = t-t_0$.
+No Baseline, $H_t$ decresce pós-$t_0$ (linha vermelha tracejada),
+privando o MHEG de sinal auxiliar discriminante nos instantes mais
+críticos; no AF-TKD, $H_t$ cresce monotonicamente (linha azul),
+provendo ao MHEG sinal de ambiguidade temporal que favorece
+decisões de supressão mais seguras.%
+}
+\label{fig:gating_heatmap}
+\end{figure*}
+
+\paragraph{Elo 4 — supressão segura viabiliza inferência eficiente}
+
+Os resultados indicam redução substancial no custo computacional do
+sistema completo, consolidando uma economia de \CostReduction\%. O
+ganho decorre da supressão adaptativa ($\SkipRate\%$ de instantes);
+como o MHEG não altera a arquitetura de inferência, a latência nos
+instantes processados é determinística --- requisito operacional em
+sistemas embarcados. A análise por regime (Tabela~\ref{tab:estratificado})
+e o mapa de desempenho conjunto (Figura~\ref{fig:tradeoff}) corroboram
+as vantagens operacionais do ecossistema completo.
+
+\begin{table*}[!t]
+\centering
+\caption{%
+Desempenho estratificado por regime operacional (média $\pm$ dp, 4 sementes 42--45).%
+}
+\label{tab:estratificado}
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.22}
+\begin{tabular}{l cc cc cc}
+\toprule
+& \multicolumn{2}{c}{\textbf{Progressivo (60\%)}} & \multicolumn{2}{c}{\textbf{Abrupto (40\%)}} & \multicolumn{2}{c}{\textbf{Global}} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7}
+\textbf{Configuração} & \textbf{FR} & \textbf{TTD$_{p}$ (s)} & \textbf{FR} & \textbf{TTD$_b$ (s)} & \textbf{FR} & \textbf{TTD$_{\text{ef}}$ (s)} \\
+\midrule
+\input{paper_table_stratified_rows.tex}%
+\end{tabular}
+\end{table*}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\columnwidth]{image/fig_tradeoff_pt.pdf}
+%% MUDANÇA [FIG6-1]: Legenda ajustada — ênfase no trade-off
+%% cobertura vs. custo; evitada linguagem de "dominância total".
+\caption{%
+Mapa de desempenho conjunto: FR versus ms/q com IC~95\%.
+Região sombreada: FR${>}0{,}05$ (cobertura operacionalmente
+insatisfatória).
+Apenas AF-TKD+MHEG satisfaz FR${=}0$ e baixo custo
+simultaneamente nas sementes avaliadas, indicando que a
+compatibilização do trade-off cobertura--eficiência requer
+ambos os componentes. As demais configurações operam fora
+da região de cobertura satisfatória, no interior da restrição,
+ou com custo elevado.%
+}
+\label{fig:tradeoff}
+\end{figure}
+
+% ────────────────────────────────────────────────────────────────────────
+\subsection{Robustez e Sensibilidade}
+\label{sec:robustez}
+% ────────────────────────────────────────────────────────────────────────
+
+\paragraph{Análise multi-semente}
+
+A Figura~\ref{fig:multiseed} apresenta o desempenho por semente com
+IC~95\%. %% MUDANÇA [ROB-1]: Reframing para foco em estabilidade de cobertura.
+Sob partições estruturalmente mais complexas, onde os padrões
+de risco concentram rampas rápidas com janelas pré-onset reduzidas,
+a proteção híbrida do MHEG atua como salvaguarda de cobertura
+complementar: a regra cinemático-entrópica contribui para estabilizar
+o envelope de segurança veicular, particularmente nos episódios abruptos
+onde o gatilho cinemático preserva o processamento independentemente do
+estado de entropia corrente.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{image/fig_multiseed_pt.pdf}
+%% MUDANÇA [FIG7-1]: Legenda mantida — já adequada ao foco em cobertura.
+\caption{%
+Desempenho por semente com IC~95\% ($n{=}4$, todas as
+configurações). Linha tracejada em FR${=}0{,}05$: limite de
+cobertura operacionalmente satisfatória. Apenas AF-TKD+MHEG
+opera abaixo dessa linha em todas as quatro sementes, indicando
+estabilidade de cobertura robusta ao longo das partições avaliadas.%
+}
+\label{fig:multiseed}
+\end{figure*}
+
+\paragraph{Sensibilidade ao parâmetro $\alpha$}
+
+A Tabela~\ref{tab:ablacao_alpha} reporta a sensibilidade do AF-TKD ao
+parâmetro de ponderação exponencial $\alpha$ (semente~42, sem MHEG).
+O valor $\alpha{=}0{,}15$ apresenta o melhor equilíbrio observado entre
+cobertura de detecção (FR) e qualidade preditiva (F1): valores menores
+diluem o foco sobre precursores, comprometendo a preservação de cobertura;
+valores maiores introduzem sensibilidade excessiva aos instantes
+imediatamente anteriores ao \textit{onset}. Os resultados indicam
+robustez moderada ao redor do ótimo, sem degradação abrupta na
+vizinhança de $\alpha{=}0{,}15$.
+
+\begin{table}[!t]
+\centering
+\caption{Sensibilidade a $\alpha$ (AF-TKD sem MHEG, semente~42).}
+\label{tab:ablacao_alpha}
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{c c c c c}
+\toprule
+$\alpha$
+  & F1$\uparrow$ & FR$\downarrow$
+  & ECE$\downarrow$ & TTD$_\partial$(s)$\uparrow$ \\
+\midrule
+$0{,}05$
+  & ${\approx}0{,}88$ & ${\approx}0{,}05$
+  & ${\approx}0{,}53$ & ${\approx}0{,}40$ \\
+\rowcolor{gray!8}
+$\mathbf{0{,}15}$
+  & $\mathbf{0{,}876}$ & $\mathbf{0{,}000}$
+  & $\mathbf{0{,}324}$ & $\mathbf{1{,}155}$ \\
+$0{,}30$
+  & ${\approx}0{,}90$ & ${\approx}0{,}008$
+  & ${\approx}0{,}54$ & ${\approx}0{,}60$ \\
+$0{,}50$
+  & ${\approx}0{,}89$ & ${\approx}0{,}010$
+  & ${\approx}0{,}56$ & ${\approx}0{,}55$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ────────────────────────────────────────────────────────────────────────
+\subsection{Viabilidade de Implantação}
+\label{sec:deployment}
+% ────────────────────────────────────────────────────────────────────────
+
+A viabilidade de implantação embarcada depende exclusivamente do
+componente de \textit{runtime}: o aluno LSTM de duas camadas e $H{=}64$
+ocupa memória constante e fixa. O mecanismo MHEG acrescenta apenas
+cinco escalares e dois valores de comparação por instante, sem buffers
+adicionais. Esse perfil de memória é compatível com microcontroladores
+automotivos típicos (e.g., família STM32H7, 256\,KB--1\,MB de SRAM) e
+módulos de inferência dedicados (Cortex-M55 com extensões Helium).
+
+Na GPU de referência (RTX~3050~Ti), o AF-TKD+MHEG alcança latência em
+escala de microssegundos por quadro sob streaming causal, sugerindo
+compatibilidade com plataformas embarcadas mais capazes como Jetson Nano
+e Qualcomm SA8155P. A Tabela~\ref{tab:deployment} consolida os indicadores
+principais. Estimativas para plataformas embarcadas baseiam-se em
+extrapolação a partir do hardware de referência e devem ser confirmadas
+em experimentos físicos antes de qualquer implantação em produção
+(detalhes no Apêndice~\ref{app:deployment}).
+
+\begin{table}[!t]
+\centering
+\caption{%
+Indicadores de viabilidade de implantação.
+Latência medida em GPU NVIDIA RTX~3050~Ti (PyTorch~2.0,
+\textit{batch}${=}1$, média das sementes).
+Throughput e margem calculados a $\Delta t_{\max}{=}100$\,ms.%
+}
+\label{tab:deployment}
+\footnotesize
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\columnwidth}{l c c c}
+\toprule
+\textbf{Indicador}
+  & \textbf{Baseline}
+  & \textbf{AF-TKD}
+  & \textbf{AF-TKD+MHEG} \\
+\midrule
+Parâmetros (aluno LSTM)
+  & \multicolumn{3}{c}{${\approx}58$\,K (2 camadas)} \\
+Footprint FP32 / INT8
+  & \multicolumn{3}{c}{${\approx}228$\,KB / ${\approx}57$\,KB} \\
+Estado oculto ($h_t, c_t$)
+  & \multicolumn{3}{c}{$1.024$\,bytes (buffer fixo)} \\
+FLOPs/instante ativo
+  & \multicolumn{3}{c}{${\approx}28$\,KFLOPs} \\
+\midrule
+Latência (ms/q)
+  & $\resBaseFixoCost$ & $\resAlvoFixoCost$ & $\mathbf{\resAlvoHibrCost}$ \\
+Skip rate
+  & $0\%$ & $0\%$ & $\SkipRate\%$ \\
+\bottomrule
+\multicolumn{4}{p{0.96\columnwidth}}{\footnotesize
+$\Delta t_{\max}{=}100$\,ms a 10\,Hz. Estimativas para Jetson Nano no Apêndice~\ref{app:deployment}.}
+\end{tabularx}
+\end{table}
+
+\paragraph{Síntese experimental}
+
+Os resultados das quatro sementes indicam ganhos consistentes do
+ecossistema completo TERA dentro das restrições de streaming causal
+estrito. O principal ganho reside na redução drástica da taxa de falha
+e na consequente melhora do atraso efetivo de cobertura, compatibilizando
+proteção ativa e economia operacional.
+
+O código-fonte, os conjuntos de dados sintéticos e os manifestos de
+experimento serão disponibilizados em repositório público após a
+aceitação do artigo.
+
+% ════════════════════════════════════════════════════════════════════════
+% SEÇÃO 5 — DISCUSSÃO
+% ════════════════════════════════════════════════════════════════════════
+
+\section{Discussão}
+\label{sec:discussao}
+
+%% MUDANÇA [DISC-1]: Parágrafo inicial revisado — foco no controle
+%% negativo como evidência principal; ECE mencionado como sinal auxiliar.
+O resultado mais informativo do fatorial $2{\times}2$ não é o desempenho
+do ecossistema completo, mas o padrão do controle negativo. O
+Baseline+MHEG eleva a taxa de falha em relação ao Baseline sem supressão.
+Esse resultado indica que suprimir instantes de processamento sem
+supervisão temporal orientada ao \textit{onset} não é uma escolha neutra
+--- o modelo não dispõe, em sua trajetória preditiva, de estrutura
+suficiente para distinguir instantes genuinamente redundantes daqueles em
+que o risco está emergindo. Um fator contribuinte identificável é a
+superconfiança estrutural documentada na Figura~\ref{fig:entropy_dist}:
+sem ajuste da dinâmica temporal, a incerteza $H_t$ tende a permanecer
+baixa independentemente do estado de risco, privando o MHEG de sinal
+auxiliar discriminante operacionalmente útil.
+
+%% MUDANÇA [DISC-2]: Esclarecimento sobre TTDb vs TTDef — passagem
+%% requerida explicitamente pelo prompt editorial (Seção 3).
+A interpretação dos resultados de atraso requer atenção metodológica
+específica. Embora o baseline apresente menor atraso bruto médio entre
+episódios detectados com sucesso (TTD$_b$), essa métrica isoladamente
+produz interpretação operacionalmente enganosa, pois episódios não
+detectados são excluídos do cálculo. A métrica TTD$_\text{ef}$ incorpora
+explicitamente penalidade por falha, revelando que o AF-TKD reduz
+substancialmente o atraso efetivo de cobertura mesmo apresentando atraso
+bruto ligeiramente superior. Em contextos de segurança crítica, o que
+importa não é quão rápido o sistema detecta quando detecta, mas com que
+consistência mantém cobertura sobre a totalidade dos episódios de risco.
+
+%% MUDANÇA [DISC-3]: Ganho principal reposicionado — redução de falhas
+%% e preservação de cobertura como interpretação dominante.
+O principal ganho do ecossistema é operacional: a redução drástica da
+taxa de falha. Essa propriedade é particularmente relevante nos episódios
+abruptos, onde a janela pré-onset é inferior a 0,6\,s e a probabilidade
+de supressão insegura é mais alta. Nesses cenários, o gatilho cinemático
+do MHEG atua como salvaguarda primária, preservando o processamento
+independentemente da entropia corrente. O gatilho entrópico complementa
+essa proteção em episódios progressivos, onde a emergência gradual do
+risco produz ambiguidade temporal detectável. A combinação dos dois
+gatilhos garante que o sistema não dependa exclusivamente da confiança
+do classificador, que pode permanecer artificialmente elevada justamente
+durante a janela de emergência.
+
+%% MUDANÇA [DISC-4]: ECE tratado explicitamente como métrica auxiliar.
+O indicador ECE apresenta melhora no AF-TKD em relação
+ao Baseline, o que é coerente com o ajuste da trajetória temporal
+orientada ao onset. Contudo, os resultados não sustentam uma interpretação
+forte de calibração probabilística clássica: o ECE deve ser lido como
+indicador auxiliar diagnóstico, refletindo que o ajuste da dinâmica
+temporal favorece decisões de supressão mais estáveis, sem implicar que a
+incerteza do modelo passa a refletir precisamente o risco instantâneo
+em termos probabilísticos absolutos.
+
+Esse padrão sugere uma limitação das abordagens de inferência adaptativa
+baseadas em confiança
+preditiva~\cite{teerapittayanon2016branchynet,laskaridis2021adaptive,kaya2019shallow},
+que assumem implicitamente que a confiança do modelo é informativa sobre
+o estado de segurança do ambiente. Os resultados indicam que essa
+propriedade tende a se tornar operacionalmente útil apenas quando a
+dinâmica temporal das predições é explicitamente ajustada durante o
+treinamento para concentrar o aprendizado nos instantes próximos ao onset.
+O fatorial
+$2{\times}2$ torna essa distinção quantitativamente verificável,
+separando o efeito da supervisão temporal do efeito da supressão
+adaptativa em condições controladas.
+
+A verificação depende de condições que conjuntos de dados naturalísticos
+disponíveis tipicamente não proveem de forma sistemática. O TERA-Gen
+supre essa lacuna ao fornecer anotação determinística do instante de
+\textit{onset} e penalização explícita de episódios não detectados,
+ancoradas nos \textit{odds ratios} do SHRP2. Essa ancoragem é relevante
+para transferência futura a dados reais: episódios progressivos requerem
+sinais distribuídos por múltiplas modalidades antes de produzir
+evidência diagnóstica em qualquer canal isolado, e essa
+característica precisa estar representada para que o protocolo de
+destilação disponha de instantes informativos sobre os quais concentrar
+o gradiente de aprendizado.
+
+O protocolo AF-TKD é extensível a outros pares professor-aluno em tarefas
+de detecção temporal com anotação de \textit{onset} disponível. A ablação
+do professor (Apêndice~\ref{app:bidirecionalidade}) é consistente com a
+interpretação de que a propriedade transferida é a dinâmica temporal
+orientada ao onset, mediada pelo acesso ao contexto futuro: substituir o
+BiLSTM por um professor Transformer bidirecional preserva os ganhos de
+estabilidade da trajetória temporal, mas apresenta maior variância no
+TTD$_{p}$, sugerindo menor consistência na transferência de dinâmica
+pré-\textit{onset}. Essa separação sugere que o princípio se mantém
+desde que o professor disponha de acesso bidirecional ao contexto
+temporal durante o treinamento offline.
+
+Três limitações circunscrevem o escopo atual. \textit{Gap sim-to-real:}
+episódios sintéticos não capturam integralmente a variabilidade
+comportamental humana nem as condições de ruído de implantações reais,
+tornando a validação em conjuntos naturalísticos (e.g., DMD, AUC
+Distracted Driver) o próximo passo mais necessário. \textit{Robustez
+modal:} a robustez à ausência parcial de modalidades não foi avaliada
+experimentalmente, representando uma fragilidade potencial em frotas com
+sensoriamento heterogêneo. \textit{Validação embarcada:} os indicadores
+de eficiência reportados baseiam-se em extrapolação a partir de GPU de
+referência; benchmarks diretos em plataformas físicas, com variação de
+clock e perfil energético completo, estão além do escopo atual e
+constituem etapa necessária antes de implantação em escala.
+
+%% MUDANÇA [DISC-5]: Parágrafo conclusivo da discussão reescrito —
+%% princípio de projeto centrado em preservação de cobertura sob supressão.
+Em conjunto, os resultados sugerem um princípio de projeto mais amplo:
+a supervisão temporal orientada ao \textit{onset} parece ser condição
+necessária para supressão adaptativa segura em cenários de detecção com
+estrutura temporal assimétrica. Sem essa condição, eficiência
+computacional e cobertura de detecção tendem a estar em tensão; com ela,
+os resultados indicam que os dois objetivos passam a ser compatíveis nas
+condições avaliadas, porque a supressão é concentrada em instantes
+genuinamente redundantes em vez de instantes de emergência. Esse princípio
+é relevante para sistemas Edge AI com restrições de orçamento de
+processamento nos quais a preservação de cobertura temporal sob supressão
+constitui o critério de projeto dominante.
+
+% ════════════════════════════════════════════════════════════════════════
+% SEÇÃO 6 — CONCLUSÃO
+% ════════════════════════════════════════════════════════════════════════
+
+\section{Conclusão}
+\label{sec:conclusao}
+
+%% MUDANÇA [CONC-1]: Abertura reescrita — objetivo central é cobertura
+%% sem sacrifício por supressão, não "antecipação".
+Este trabalho investigou se é possível construir um sistema de detecção
+de risco temporal leve o suficiente para operar continuamente em hardware
+embarcado sem sacrificar a cobertura de eventos críticos por supressão
+insegura. A evidência experimental indica que esse objetivo é alcançável
+nas condições testadas, desde que a trajetória temporal das predições do
+modelo seja ajustada para estabilizar a cobertura de detecção durante a
+emergência do risco --- requisito que o treinamento convencional não
+satisfaz e cuja ausência o fatorial $2{\times}2$ torna observável de
+forma controlada.
+
+Os resultados do ecossistema completo sob restrições de streaming causal
+estrito decorrem de dois mecanismos em cadeia: o AF-TKD transfere
+dinâmica temporal do professor BiLSTM para o aluno causal, estruturando
+$H_t$ de forma a estratificar instantes estáveis de instantes de risco
+emergente; o MHEG explora essa estrutura por meio de proteção híbrida
+--- salvaguarda cinemática primária e sinal auxiliar entrópico --- para
+suprimir instantes redundantes sem comprometer a cobertura, com latência
+determinística nos instantes processados. O componente de \textit{runtime}
+é operacionalmente compacto (${\approx}58$\,K parâmetros, ${\approx}228$\,KB
+em FP32, buffer recorrente fixo de $1.024$\,bytes), com professor, AF-TKD
+e TERA-Gen restritos ao ambiente de treinamento.
+
+%% MUDANÇA [CONC-2]: Princípio de projeto reescrito — "supressão seletiva
+%% segura" como resultado de preservação de cobertura, não antecipação.
+O princípio de projeto subjacente --- supervisão temporal orientada ao
+\textit{onset} como condição para supressão seletiva segura e preservação
+de cobertura --- sugere que eficiência computacional e cobertura de
+detecção podem ser complementares quando a dinâmica temporal das
+predições é explicitamente ajustada durante o treinamento. Nas condições
+avaliadas, esse princípio se manteve de forma consistente, independentemente
+do par arquitetural específico, desde que o professor disponha de acesso
+bidirecional ao contexto temporal durante o treinamento offline.
+
+As extensões prioritárias concentram-se em fechar as lacunas
+identificadas: validar o ecossistema em conjuntos naturalísticos com
+anotação de \textit{onset} (e.g., DMD, AUC Distracted Driver); avaliar
+a robustez à ausência parcial de modalidades em frotas heterogêneas; e
+confirmar os indicadores de eficiência em plataformas embarcadas físicas
+com perfil energético completo. A confirmação dessas propriedades em
+dados reais e em hardware físico constitui a condição necessária para
+implantação em escala em sistemas de segurança ativos.
+
+% ════════════════════════════════════════════════════════════════════════
+% APÊNDICES
+% ════════════════════════════════════════════════════════════════════════
+
+\appendix
+% ────────────────────────────────────────────────────────────────────────
+\section{Impacto da Bidirecionalidade do Professor}
+\label{app:bidirecionalidade}
+% ────────────────────────────────────────────────────────────────────────
+Esta análise suplementar isola a contribuição da bidirecionalidade do
+professor (Eixo A) da implantabilidade do aluno (Eixo B), testando a
+hipótese de que a vantagem do BiLSTM reside no acesso bidirecional ao
+contexto temporal, não em escala paramétrica.
+
+\paragraph{Eixo A — bidirecionalidade versus capacidade}
+
+%% MUDANÇA [APP-1]: Removida "antecipação" como ganho central;
+%% substituída por "estruturação da trajetória temporal" e cobertura.
+Os resultados indicam que Transformer e BiLSTM apresentam melhoria na
+estabilidade da trajetória temporal em relação ao Baseline. A diferença
+emerge na consistência de cobertura: a codificação bidirecional transfere
+dinâmica temporal orientada ao onset de forma mais estável nas sementes
+avaliadas, resultando em menor taxa de falha. A falha residual observada
+na política fixa é mitigada pela proteção híbrida do MHEG, que reduz
+lapsos de cobertura mantendo o ganho de estabilidade temporal.
+
+\paragraph{Eixo B — implantabilidade do aluno}
+
+O aluno Transformer atinge F1 elevado e baixa taxa de falhas, mas com
+custo computacional consideravelmente superior ao do núcleo recorrente
+LSTM. Quatro fatores indicam incompatibilidade com orçamento embarcado:
+(i)~latência ativa elevada com margem insuficiente para módulos
+paralelos; (ii)~footprint acentuadamente maior; (iii)~variabilidade no
+tempo de processamento comprometendo o determinismo de tempo real;
+(iv)~demanda energética incompatível com plataformas de baixo consumo.
+O LSTM causal preserva esses requisitos ao mesmo tempo que, com AF-TKD,
+apresenta cobertura comparável nas sementes avaliadas.
+
+% ────────────────────────────────────────────────────────────────────────
+\section{Representação Contínua de Risco}
+\label{app:borderline}
+% ────────────────────────────────────────────────────────────────────────
+
+O modelo é treinado com rótulos binários, mas $p_t$ é contínuo. Esta
+análise verifica se essa continuidade reflete gradação coerente com a
+escala de severidade, em episódios com receitas não vistas durante o
+treinamento.
+
+%% MUDANÇA [APP2-1]: Interpretação da representação contínua ajustada —
+%% não afirmar "calibração precisa", mas "gradação coerente como subproduto".
+A escala aprendida é consistente com a hierarquia de risco: os níveis de
+Atenção e Alerta apresentam gradação monotônica que emerge sem supervisão
+explícita sobre os níveis intermediários. Essa propriedade indica que a
+supervisão temporal orientada ao onset favorece uma representação contínua
+coerente com a escala epidemiológica como subproduto — sem implicar
+calibração probabilística plena em sentido estrito. Uma fração de
+episódios normais apresenta ativações flutuantes locais, mas nenhum
+satisfaz o critério estável ($m{=}3$ consecutivos), resultado consistente
+com taxa de falso positivo operacional nula nas sementes avaliadas. A
+Figura~\ref{fig:prob_dist} apresenta as distribuições de
+$\bar{p}_{\max}$ por nível de risco.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{image/fig_prob_dist_pt.pdf}
+%% MUDANÇA [FIG8-1]: Legenda ajustada — separação como subproduto
+%% da dinâmica temporal, não como evidência de calibração.
+\caption{%
+Distribuições de $\bar{p}_{\max}$ por nível de risco em episódios
+\textit{borderline} (semente~42). No Baseline, Atenção e Alerta
+apresentam alta sobreposição. No AF-TKD, separação consistente entre
+os quatro níveis emerge como subproduto da dinâmica temporal orientada
+ao \textit{onset}, sem supervisão sobre níveis intermediários;
+essa gradação coerente favorece decisões de alerta operacionalmente
+úteis, embora não implique calibração probabilística plena.%
+}
+\label{fig:prob_dist}
+\end{figure*}
+
+% ────────────────────────────────────────────────────────────────────────
+\section{Detalhes de Implantação Embarcada}
+\label{app:deployment}
+% ────────────────────────────────────────────────────────────────────────
+
+O footprint total do runtime embarcado é dominado pelos pesos do aluno
+LSTM: ${\approx}228$\,KB (FP32) ou ${\approx}57$\,KB (INT8), mais
+${\approx}1$\,KB de estado recorrente permanente. Esse perfil é
+compatível com microcontroladores automotivos de entrada (família
+STM32H7, 256\,KB--1\,MB de SRAM) e módulos de inferência dedicados como
+Cortex-M55 com extensões Helium. Em plataformas mais capazes (Jetson
+Nano, Qualcomm SA8155P, Jetson Orin Nano, Raspberry Pi~4), o modelo
+ocupa fração negligenciável da memória disponível.
+
+A propriedade de memória de runtime limitada e constante decorre da
+arquitetura recorrente causal: ao contrário de modelos com janelas
+deslizantes ou atenção global, a LSTM mantém toda a representação do
+passado no estado oculto de tamanho fixo, sem alocação dinâmica durante
+a sessão. Essa propriedade é relevante para execução sustentada em
+plataformas com RTOS sem gerenciamento dinâmico de memória.
+
+Estimando-se a latência no Jetson Nano com fator de desaceleração
+$\rho{=}10\times$ em relação à GPU de referência (razão consistente
+com a diferença de largura de banda de memória: 128 vs.\ 25{,}6\,GB/s),
+os indicadores sugerem compatibilidade com restrições de tempo real em
+malha fechada. A economia de energia estimada é proporcional à taxa de
+supressão introduzida pelo MHEG. Esses valores são extrapolações a
+partir de hardware de referência e devem ser confirmados em plataformas
+físicas com perfil energético completo antes de implantação em produção.
+
+\begin{table}[!t]
+\centering
+\caption{%
+Estimativas de implantação embarcada. Latência medida em GPU RTX~3050~Ti.
+Latência no Jetson Nano estimada com $\rho{=}10\times$ (extrapolação;
+requer validação em hardware físico).%
+}
+\label{tab:deployment_appendix}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{l c c c}
+\toprule
+\textbf{Indicador}
+  & \textbf{Baseline}
+  & \textbf{AF-TKD}
+  & \textbf{AF-TKD+MHEG} \\
+\midrule
+Latência GPU (ms/q)
+  & \resBaseFixoCost & \resAlvoFixoCost & $\mathbf{\resAlvoHibrCost}$ \\
+Skip rate
+  & $0\%$ & $0\%$ & $\SkipRate\%$ \\
+\midrule
+Compat.\ Qualcomm SA8155P
+  & \multicolumn{3}{c}{\checkmark (DSP dedicado, 12\,GB LPDDR4X)} \\
+Compat.\ Jetson Orin Nano
+  & \multicolumn{3}{c}{\checkmark (1024-core GPU, 8\,GB LPDDR5)} \\
+Compat.\ Raspberry Pi~4
+  & \multicolumn{3}{c}{\checkmark (ARM Cortex-A72, até 8\,GB)} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section*{Declaração de contribuição dos autores (CRediT)}
+\textbf{Ângela Brígida Albarello} atuou na Conceitualização,
+Desenvolvimento da Metodologia, Desenvolvimento de Software, Análise
+formal, Investigação, Redação do rascunho original, além da Redação
+envolvendo revisão e edição do manuscrito. \\
+\textbf{Edna Dias Canedo} contribuiu na Supervisão acadêmica,
+Conceitualização do projeto, além da Redação envolvendo revisão e
+edição. \\
+\textbf{Vinícius P. Gonçalves} participou da Redação envolvendo revisão
+e edição. \\
+\textbf{Leandro A. Villas} colaborou na Supervisão, além da Redação
+envolvendo revisão e edição. \\
+\textbf{Rodolfo I. Meneguette} atuou na Redação envolvendo revisão e
+edição. \\
+\textbf{Geraldo P. Rocha Filho} participou da Supervisão geral, com
+Redação envolvendo revisão e edição do artigo final.
+
+\section*{Declaração de conflito de interesses}
+Os autores declaram não possuir interesses financeiros concorrentes nem
+relações pessoais que possam ter influenciado os resultados reportados.
+
+\section*{Disponibilidade de dados}
+O código do TERA-Gen e os datasets sintéticos serão disponibilizados em
+repositório público após a aceitação do artigo.
+
+\section*{Financiamento}
+Esta pesquisa não recebeu financiamento específico de agências de fomento.
+
+\section*{Agradecimentos}
+Os autores agradecem à infraestrutura de computação da Universidade de
+Brasília pelo suporte às avaliações experimentais.
+
+\begin{sloppypar}
+\section*{Declaração sobre o uso de IA generativa}
+Durante a preparação deste artigo, os autores utilizaram ferramentas de
+inteligência artificial generativa para assistência linguística e melhoria
+de legibilidade. Todo o conteúdo foi subsequentemente revisado e editado
+pelos autores, que assumem plena responsabilidade pela integridade do
+material publicado.
+\end{sloppypar}
+
+\bibliographystyle{elsarticle-num}
+\bibliography{references}
+
+\end{document}

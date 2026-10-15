@@ -1,0 +1,13 @@
+config,regime,phase_eval,suppression_rate,update_rate,n_frames
+afkd_hybrid,abrupt,onset-window,0.2638888888888889,0.7361111111111112,288
+afkd_hybrid,abrupt,post-onset,0.6015840220385675,0.3984159779614325,2904
+afkd_hybrid,abrupt,pre-onset,0.6426553672316384,0.3573446327683616,1416
+afkd_hybrid,progressive,onset-window,0.44212962962962965,0.5578703703703703,432
+afkd_hybrid,progressive,post-onset,0.5636442894507411,0.4363557105492589,2294
+afkd_hybrid,progressive,pre-onset,0.5183946488294314,0.4816053511705686,4186
+baseline_hybrid,abrupt,onset-window,0.2638888888888889,0.7361111111111112,288
+baseline_hybrid,abrupt,post-onset,0.6015840220385675,0.3984159779614325,2904
+baseline_hybrid,abrupt,pre-onset,0.6426553672316384,0.3573446327683616,1416
+baseline_hybrid,progressive,onset-window,0.44212962962962965,0.5578703703703703,432
+baseline_hybrid,progressive,post-onset,0.5636442894507411,0.4363557105492589,2294
+baseline_hybrid,progressive,pre-onset,0.5183946488294314,0.4816053511705686,4186

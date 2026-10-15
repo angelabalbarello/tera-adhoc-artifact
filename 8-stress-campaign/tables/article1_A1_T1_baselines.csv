@@ -1,0 +1,7 @@
+method_id,method_name,temporal_org,entropy,kinematics,calibration,selective_suppression,role
+always,Always compute,No,No,No,No,No,upper-cost baseline
+unstructured,Unstructured + scheduler,No,Yes,No,No,Yes,negative control
+entropy,MHEG entropy-only,Yes,Yes,No,No,Yes,ablation
+kinematic,MHEG kinematic-only,Yes,No,Yes,No,Yes,ablation
+hybrid,MHEG entropy+kinematic,Yes,Yes,Yes,No,Yes,proposed
+hybrid_cal,MHEG hybrid + calibrated thresholds,Yes,Yes,Yes,Yes,Yes,proposed calibrated

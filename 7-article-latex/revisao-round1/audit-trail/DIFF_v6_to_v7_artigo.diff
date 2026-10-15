@@ -1,0 +1,195 @@
+--- artigo_v6_BACKUP.tex	2026-10-11 08:43:35.367429200 -0300
++++ artigo.tex	2026-10-11 08:44:22.217203500 -0300
+@@ -1167,11 +1167,33 @@
+ $\mathcal{O}(1)$, respectively (a maximum over the $K$ monitored kinematic
+ channels of Eq.~\ref{eq:delta_kin}, one closed-form binary entropy, and three
+ threshold comparisons),
+-and involve no matrix operation. The recurrent update of line~5 costs $\mathcal{O}(4(DH{+}H^2)+8H^2)$ for the two stacked layers (the second layer's input has dimension $H$), i.e., ${\approx}57.2$\,K MACs per executed update for $D{=}31$, $H{=}64$, and executes only when the disjunction of line~4 fires, so the expected per-frame cost is $c_{\mathrm{gate}} + (1-s)\,\mathcal{O}(4(DH{+}H^2)+8H^2)$, where $s$ is the
++and involve no matrix operation. The recurrent update of line~5 costs $\mathcal{O}(4(DH{+}H^2)+8H^2)$ for the two stacked layers (the second layer's input has dimension $H$), i.e., ${\approx}57.2$\,K MACs per executed update for $D{=}31$, $H{=}64$, and executes only when the disjunction of line~4 fires, so the expected per-frame cost of this persistent-state algorithm is $c_{\mathrm{gate}} + (1-s)\,\mathcal{O}(4(DH{+}H^2)+8H^2)$, where $s$ is the
+ suppression rate (\%Sup) and $c_{\mathrm{gate}} = \mathcal{O}(K)$ the gate
+ overhead, constant for a deployment with fixed $K$.
+ The worst case (no suppression) equals the full LSTM cost plus
+-$\mathcal{O}(K)$; the best case is the gate alone.}
++$\mathcal{O}(K)$; the best case is the gate alone.
++
++Two execution semantics must be distinguished. Algorithm~\ref{alg:inferencia}
++as written is the persistent-state deployment target: one recurrent step per
++executed update, and suppressed frames are never processed. The evaluation
++protocol of Section~\ref{sec:protocolo} implements each executed update by
++recomputing the causal prefix window of the last $W{=}96$ available frames
++(left-padded; a verification script accompanies the artifact), so an executed
++update costs $W$ recurrent steps and later updates re-read the inputs of
++previously suppressed frames. The two semantics agree on FR under the fixed
++policy (identical detections; $\mathrm{TTD}_b$ differs by $6$\,ms on
++seed~42, a left-padding warm-up effect), but they are \emph{not} equivalent
++under suppression: with the same seed-42 thresholds, the evaluated
++recompute-on-update semantics yields $\mathrm{TTD}_{\mathrm{ef}} = 0.023$\,s
++at $44.7\%$ suppression, whereas literal single-step skipping yields
++$0.170$\,s at $44.4\%$. All scheduled results in this paper therefore refer
++to the recompute-on-update semantics, whose per-frame compute is
++$c_{\mathrm{gate}} + (1-s)\,W\,\mathcal{O}(4(DH{+}H^2)+8H^2)$ and whose
++measured ms/frame figures (Tables~\ref{tab:resultados_principais}
++and~\ref{tab:deployment}) are wall-clock times of this simulation; deploying
++the single-step variant of Algorithm~\ref{alg:inferencia} with its
++lower per-update cost would require recalibrating the thresholds and
++re-evaluating detection under that semantics, which we have not done.}
+ \subsection{Computational Complexity and Edge Deployment}
+ \label{sec:complexidade}
+ This subsection checks whether the ecosystem is compatible with resource-constrained deployment under strict offline--online separation.
+@@ -1339,7 +1361,11 @@
+ Thresholds $\tau_\Delta$ and $\tau_H$ are calibrated per seed via grid search
+ on the validation partition, selecting the configuration that maximizes
+ suppression under $\mathrm{FR}\le0.05$. A detection is valid only when
+-$p_t \ge \theta_{\mathrm{TTD}}$ for $m=3$ consecutive timesteps.
++$p_t \ge \theta_{\mathrm{TTD}}$ for $m=3$ consecutive timesteps{\color{\revcolor};
++the reported detection instant $t_{\mathrm{det}}$ is the \emph{first} frame
++of that run (a retrospective marker), while causal confirmation occurs at its
++third frame, so a causal alarm would fire $(m{-}1)\Delta t \approx 0.21$\,s
++after the reported instant}.
+ \begin{equation}
+ \begin{aligned}
+ \mathrm{TTD}_{\mathrm{det}} &= (t_{\mathrm{det}} - t_0)\cdot\Delta t,\\
+@@ -1367,7 +1393,7 @@
+ and is therefore not the tabulated quantity).}
+ \paragraph{Infrastructure and significance tests}
+ Latency is measured in unit-batch mode ($N_{\text{batch}}=1$) on an
+-NVIDIA RTX~3050~Ti GPU with PyTorch~2.0 and 100-iteration warmup.
++NVIDIA RTX~3050~Ti GPU with PyTorch~2.0 and 100-iteration warmup{\color{\revcolor}, per frame of the prefix-window streaming simulation (each executed update runs one full causal window; Section~\ref{sec:runtime})}.
+ Hypotheses use the paired Wilcoxon test~\cite{wilcoxon1945}, with effect
+ size quantified by the {\color{\revcolor}matched-pairs rank-biserial
+ correlation~\cite{kerby2014simple}, computed on the signed ranks of the
+@@ -1612,9 +1638,11 @@
+ Baseline: on slowly developing episodes the organized trajectory crosses the
+ detection threshold well before the deterministic onset. Because the global
+ $\text{TTD}_b$ of Table~\ref{tab:resultados_principais} measures only the
+-post-onset delay of detected episodes, such pre-onset detections enter it
+-with ${\approx}0$ delay, which is why the global means
+-($0.069$--$0.223$\,s) sit below the per-regime latencies: $A_p$ and
++post-onset delay of detected episodes, an episode whose trajectory is still
++above threshold at the onset enters it with zero delay, while an early
++activation that fades before the onset re-enters with its own post-onset
++delay -- both patterns occur in the seed-42 data. This is why the global
++means ($0.069$--$0.223$\,s) sit below the per-regime figures: $A_p$ and
+ $\text{TTD}_b$ are different quantities on different temporal references,
+ not two aggregations of the same measure. The coverage benefit concentrates
+ in the abrupt regime, where the miss rate falls from 0.082 to 0.004, exactly
+@@ -1961,8 +1989,8 @@
+ \label{fig:prob_dist}
+ \end{figure*}
+ 
+-The results give preliminary evidence that the induction extends beyond the
+-training recipes. Normal and Attention episodes stay mostly below the activation
++The results give preliminary, descriptive evidence that the induction
++extends beyond the training recipes. Normal and Attention episodes stay mostly below the activation
+ threshold, while Alert and Critical trigger activation with progressively higher
+ frequency, qualitatively aligned with increasing risk exposure despite no
+ explicit severity objective during training.
+@@ -1977,13 +2005,16 @@
+ high-response trajectories) makes the activation fraction the more stable
+ summary within those levels.}
+ 
+-The evidence therefore does not support the claim that \AFTOI learned a severity
+-scale. It suggests instead that the induction produces decision dynamics that
+-grow progressively more likely to activate as criticality increases, even for
+-intermediate-risk conditions unseen in training. Whether this holds on
++The evidence therefore does not support the claim that \AFTOI learned a
++severity scale{\color{\revcolor}, and -- because the four levels are not all
++measured under one checkpoint and protocol -- the joint ordering is a
++description across two evaluation pipelines, not a single-model measurement.
++Within that limit, the observed pattern is a progressively higher activation
++fraction at higher severity, including for intermediate-risk conditions
++unseen in training}. Whether this holds on
+ naturalistic data, and whether full ordinal separation can emerge under broader
+ conditions, remain open (Section~\ref{sec:limitations}).
+-\subsection{Epistemological Control via Post-hoc Calibration}
++\subsection{Post-hoc Calibration Control}
+ \label{sec:controle_calibracao}
+ A complementary question is whether temporal organization could be approximated
+ by post-hoc calibration of Baseline probabilities. Three techniques were
+@@ -2033,8 +2064,9 @@
+ The lower $\mathrm{TTD}_{\mathrm{ef}}$ for PS and IC under \MHEG does not come
+ from temporal reorganization. Both redistribute the probability scale, and IC in
+ particular compresses probabilities toward empirical frequencies, shifting the
+-operating regime of the entropy-based gate without altering the temporal
+-ordering of uncertainty. When \MHEG thresholds are re-calibrated to that scale,
++operating regime of the entropy-based gate; in the measured trajectories
++(Figure~\ref{fig:calibracao_entropia_temporal}a) the temporal entropy
++profile around onset is unchanged. When \MHEG thresholds are re-calibrated to that scale,
+ lower suppression cost is achievable at a given coverage. This is a threshold
+ calibration effect, not an organizational one: the operational frontier in
+ Figure~\ref{fig:curva_operacional} does not move to a qualitatively distinct
+@@ -2080,19 +2112,26 @@
+ \end{figure*}
+ 
+ {\color{\revcolor}Figure~\ref{fig:curva_operacional} shows the measured
+-ECE--$\mathrm{TTD}_{\mathrm{ef}}$ operational locus (point estimates with
+-95\% CIs, seeds 42--45). Temperature scaling overlaps the Baseline locus;
+-Platt scaling and isotonic calibration reach lower
+-$\mathrm{TTD}_{\mathrm{ef}}$ through threshold recalibration; and the
+-\AFTOI configurations sit at jointly low $\mathrm{ECE}_{\mathrm{cal}}$ and
+-$\mathrm{TTD}_{\mathrm{ef}}$ in this plane. The figure displays measured
+-points, not an exhaustive frontier.}
++operating points against $\mathrm{TTD}_{\mathrm{ef}}$ (point estimates with
++95\% CIs, seeds 42--45), in two panels because the two ECE variants are not
++comparable (Table~\ref{tab:protocol_map}): panel~(a) places the calibration
++family on its own $\mathrm{ECE}_{\mathrm{cal}}$ axis, where Platt and
++isotonic variants reach low ECE and, combined with \MHEG, low
++$\mathrm{TTD}_{\mathrm{ef}}$; panel~(b) places the four reference
++configurations on the episode-level $\mathrm{ECE}_{\mathrm{pipe}}$ axis,
++where the \AFTOI configurations attain the lowest
++$\mathrm{TTD}_{\mathrm{ef}}$. No cross-panel ECE comparison is implied; the
++panels display measured points, not frontiers.}
+ \begin{figure}
+ \centering
+ \includegraphics[width=\columnwidth]{image/fig_neg_control_operating_curve.pdf}
+-\caption{ECE--$\mathrm{TTD}_{\mathrm{ef}}$ operational locus
+-(CI~95\%, seeds 42--45) for Baseline, post-hoc calibration variants,
+-and \mbox{AF-TOI}.}
++\caption{{\color{\revcolor}Operating points vs.\
++$\mathrm{TTD}_{\mathrm{ef}}$ (CI~95\%, seeds 42--45). Panel~(a): post-hoc
++calibration family on the frame-level $\mathrm{ECE}_{\mathrm{cal}}$ axis;
++panel~(b): reference configurations on the episode-level
++$\mathrm{ECE}_{\mathrm{pipe}}$ axis. The two ECE variants are
++protocol-specific and not comparable, hence the separate axes
++(Table~\ref{tab:protocol_map}).}}
+ \label{fig:curva_operacional}
+ \end{figure}
+ 
+@@ -2169,18 +2208,18 @@
+ \end{tabular}
+ \end{table*}
+ 
+-The distinction matters epistemologically. Reaching low
++The two routes to low $\mathrm{TTD}_{\mathrm{ef}}$ differ in mechanism. Reaching it
+ $\mathrm{TTD}_{\mathrm{ef}}$ through threshold recalibration to a redistributed
+ probability scale differs from reaching it through induced temporal
+ differentiation. In the former, the gain is contingent on the calibrator's
+-particular distribution and may not survive distributional shift, since the gate
+-lacks semantic grounding in the transition dynamics. In the latter, the
++particular distribution and may not survive distributional shift, since the gate threshold has no
++fixed relation to the transition dynamics it must protect. In the latter, the
+ scheduler exploits a structural trajectory property deliberately induced during
+ training and tied to the causal dynamics of the process. {\color{\revcolor}The
+ trajectory morphology of Figure~\ref{fig:calibracao_entropia_temporal} and the
+-frontier in Figure~\ref{fig:curva_operacional} indicate that the two regimes
+-are empirically distinguishable, with \AFTOI occupying the organizationally
+-grounded one.}
++frontier in Figure~\ref{fig:curva_operacional} indicate that the two regimes are
++empirically distinguishable in the measured trajectories and operating
++points.}
+ \subsection{Architectural Ablation of the Non-Causal Reference}
+ \label{sec:ablacao_teacher}
+ To test whether the organization gains depend on the specific BiLSTM topology,
+@@ -2760,8 +2799,10 @@
+ calibrators induced temporal differentiation in the measured trajectories. Where PS and IC reach lower
+ $\mathrm{TTD}_{\mathrm{ef}}$ under \MHEG, {\color{\revcolor}the unchanged
+ entropy-trajectory morphology} attributes the gain to threshold recalibration on
+-the redistributed scale rather than to organizational restructuring. The frontier reachable through temporal
+-induction stays qualitatively distinct from what scale adjustment can reach.
++the redistributed scale rather than to organizational restructuring. {\color{\revcolor}In the configurations measured here, temporal induction
++and probability-scale adjustment produced distinct operating points
++(Figure~\ref{fig:curva_operacional}); whether that separation persists under
++distribution shift was not tested.}
+ Marginal calibration and temporally conditioned operational reliability are
+ empirically dissociable under this protocol, with distinct mechanistic origins.
+ \paragraph{Effective coverage versus gross delay}

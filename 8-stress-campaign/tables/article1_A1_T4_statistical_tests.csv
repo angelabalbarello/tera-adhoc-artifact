@@ -1,0 +1,4 @@
+comparison,metric,test,p_value,effect_size(Cliff),significant,interpretation
+hybrid vs entropy,false_suppression,Wilcoxon,0.0,-0.5,sim,grande
+hybrid vs kinematic,TTDef,Wilcoxon,0.0,-0.25,sim,pequeno
+hybrid vs always,TTDef,Wilcoxon,1.0,0.0,nao,negligivel

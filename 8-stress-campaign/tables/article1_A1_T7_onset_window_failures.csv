@@ -1,0 +1,26 @@
+Method,Scenario,Onset type,n_onsets,n_onset_window_suppressions,onset_window_failure_rate,coverage,TTDef
+MHEG_hybrid,abrupt_onset_dominant,abrupt,306,0,0.0,1.0,0.0
+MHEG_calibrated,abrupt_onset_dominant,abrupt,306,0,0.0,1.0,0.0
+NC1_random_budget_matched,abrupt_onset_dominant,abrupt,306,949,0.758,0.997,4.36
+NC3_entropy_lagged,abrupt_onset_dominant,abrupt,306,1224,1.0,1.0,4.0
+NC6_cost_matched_unstructured,abrupt_onset_dominant,abrupt,306,898,0.82,0.997,3.91
+MHEG_hybrid,abrupt_onset_dominant,progressive,54,0,0.0,1.0,7.07
+MHEG_calibrated,abrupt_onset_dominant,progressive,54,0,0.0,1.0,7.07
+NC1_random_budget_matched,abrupt_onset_dominant,progressive,54,0,0.0,1.0,12.35
+NC3_entropy_lagged,abrupt_onset_dominant,progressive,54,0,0.0,1.0,7.07
+NC6_cost_matched_unstructured,abrupt_onset_dominant,progressive,54,0,0.0,1.0,10.63
+MHEG_hybrid,progressive_onset_dominant,abrupt,57,0,0.0,1.0,0.0
+MHEG_calibrated,progressive_onset_dominant,abrupt,57,0,0.0,1.0,0.0
+NC1_random_budget_matched,progressive_onset_dominant,abrupt,57,135,0.719,1.0,2.54
+NC3_entropy_lagged,progressive_onset_dominant,abrupt,57,228,1.0,1.0,4.0
+NC6_cost_matched_unstructured,progressive_onset_dominant,abrupt,57,149,0.842,1.0,3.0
+MHEG_hybrid,progressive_onset_dominant,progressive,303,0,0.0,1.0,7.13
+MHEG_calibrated,progressive_onset_dominant,progressive,303,0,0.0,1.0,7.13
+NC1_random_budget_matched,progressive_onset_dominant,progressive,303,0,0.0,0.997,10.41
+NC3_entropy_lagged,progressive_onset_dominant,progressive,303,0,0.0,1.0,7.13
+NC6_cost_matched_unstructured,progressive_onset_dominant,progressive,303,0,0.0,1.0,10.27
+MHEG_hybrid,rare_abrupt_critical_events,abrupt,360,0,0.0,1.0,0.0
+MHEG_calibrated,rare_abrupt_critical_events,abrupt,360,0,0.0,1.0,0.0
+NC1_random_budget_matched,rare_abrupt_critical_events,abrupt,360,1228,0.942,0.219,47.19
+NC3_entropy_lagged,rare_abrupt_critical_events,abrupt,360,1080,1.0,0.644,23.27
+NC6_cost_matched_unstructured,rare_abrupt_critical_events,abrupt,360,1214,0.942,0.244,45.74

@@ -1,0 +1,9 @@
+method,onset_type,coverage↑,false_suppression↓,TTDef↓,cost↓,n_episodes
+always,abrupt,1.0,0.0,0.0,1.0,300
+entropy,abrupt,1.0,0.034,1.0,0.167,300
+kinematic,abrupt,1.0,0.0,0.0,0.033,300
+hybrid,abrupt,1.0,0.0,0.0,0.183,300
+always,progressive,1.0,0.0,7.127,1.0,300
+entropy,progressive,1.0,0.0,7.127,0.25,300
+kinematic,progressive,0.0,1.0,60.0,0.0,300
+hybrid,progressive,1.0,0.0,7.127,0.25,300

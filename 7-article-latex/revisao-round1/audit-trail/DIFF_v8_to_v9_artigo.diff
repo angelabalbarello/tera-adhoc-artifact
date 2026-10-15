@@ -1,0 +1,150 @@
+--- /tmp/artigo_v8.tex	2026-10-11 09:28:32.925414491 -0300
++++ artigo.tex	2026-10-11 09:25:43.963831800 -0300
+@@ -179,13 +179,11 @@
+ \cortext[1]{Corresponding author.}
+ \begin{abstract}
+ Vehicular edge nodes run monitoring models continuously on hardware shared
+-with other always-on functions. Selective
+-computation -- skipping or reusing inference steps -- keeps such systems
+-within budget, but for uncertainty-driven scheduling to preserve detection
++with other always-on functions. Selective computation keeps such systems within budget, but for uncertainty-driven scheduling to preserve detection
+ coverage, the uncertainty signal must become informative around critical
+ transitions. Continuous driving streams do not guarantee this: a
+-classification-trained model can stay confident up to a transition, and a
+-confidence-driven scheduler then suppresses the frames detection depends on.
++classification-trained model can stay confident up to a transition, and the
++scheduler then suppresses the frames detection depends on.
+ We argue that what makes uncertainty usable for scheduling is its
+ \emph{temporal organization} rather than calibration. We study this through
+ the TERA ecosystem: \mbox{TERA-Gen} (the TERA episode Generator) generates
+@@ -194,13 +192,14 @@
+ causal model's uncertainty trajectory around the risk onset; and \mbox{MHEG}
+ exploits the resulting entropy stratification at runtime. In a controlled
+ synthetic, single-node $2\times2$ factorial over twelve seeds, scheduling
+-unorganized trajectories is the cheapest configuration, but does not improve coverage while worsening effective detection delay ($\mathrm{TTD}_{\mathrm{ef}}$,
++unorganized trajectories is cheapest but does not improve coverage and
++worsens effective detection delay ($\mathrm{TTD}_{\mathrm{ef}}$,
+ measured with retrospective detection markers) by
+ 13.9\% ($p=0.001$); \mbox{AF-TOI}+MHEG reduces per-frame cost by
+ \CostReduction\% relative to Baseline Fixed (0.340 vs.\ 0.677\,ms/frame) with
+-$\mathrm{TTD}_{\mathrm{ef}}$ of 0.099\,s versus 0.570\,s under Baseline+MHEG.
+-A post-hoc calibration control indicates that calibration and temporal
+-organization are empirically dissociable under this protocol. The pipeline emits a discrete
++$\mathrm{TTD}_{\mathrm{ef}}$ 0.099\,s versus 0.570\,s under Baseline+MHEG.
++A post-hoc calibration control shows calibration and temporal organization
++to be empirically dissociable under this protocol. The pipeline emits a discrete
+ operational-risk state $\ell_t$, a candidate input for vehicular edge
+ coordination.
+ \end{abstract}
+@@ -722,9 +721,10 @@
+ \includegraphics[width=\textwidth]{image/2-fig_tera_pipeline_final.png}
+ \caption{Operational architecture of TERA. Offline stages induce temporally
+ organized trajectories and export the causal LSTM with calibrated thresholds.
+-Online, at each timestep $t$, \mbox{MHEG} decides whether to update or reuse the
+-recurrent state, from $\Delta x_t$, $H_{t-1}$, and the thresholds
+-$\tau_\Delta,\tau_H$, under coverage-preservation constraints.}
++Online, at each timestep $t$, \mbox{MHEG} decides, from $\Delta x_t$,
++$H_{t-1}$, and the thresholds $\tau_\Delta,\tau_H$, whether to run a full
++causal-window update or reuse the emitted probability, under
++coverage-preservation constraints.}
+ \label{fig:tera_operational}
+ \end{figure*}
+ \paragraph{Operational problem formulation}
+@@ -1052,8 +1052,9 @@
+ from the offline-induced organization, not from the gating rule on its own. {\color{\revcolor}When the stratification is absent, the entropic component has no basis for discrimination, which is precisely the failure reproduced by the negative control.}
+ 
+ \MHEG is the runtime scheduler and adaptive inference controller of the embedded
+-system. At each timestep it decides whether to run a full LSTM update or reuse
+-the previous state, using the \AFTOI-induced organization. Its logic rests on
++system. At each timestep it decides whether to run a full causal-window update or
++reuse the emitted probability (Section~\ref{sec:runtime}), using the
++\AFTOI-induced organization. Its logic rests on
+ two components, synthesized in Figure~\ref{fig:mheg_componentes}.
+ \begin{figure}[!tbp]
+ \centering
+@@ -1142,7 +1143,8 @@
+ \REQUIRE Weights $\theta_{\text{LSTM}}$; window length $W{=}96$
+   (prefix-window with left-padding; Section~\ref{sec:protocolo}); thresholds $\tau_\Delta$,
+   $\tau_H$, $\theta_1{=}0.15$, $\theta_2{=}0.38$, $\theta_3{=}0.50$;
+-  $h_0 {=} \mathbf{0}$;\; $p_0 {=} 0$;\; {\color{\revcolor}$x_0 {=} \mathbf{0}$
++  {\color{\revcolor}$h {=} \mathbf{0}$ at the start of each recomputed
++  window};\; $p_0 {=} 0$;\; {\color{\revcolor}$x_0 {=} \mathbf{0}$
+   (the $t{=}1$ disjunct forces a full update on the first frame, as
+   implemented)}
+ \ENSURE  Level $\ell_t \in \{0,1,2,3\}$ emitted at each timestep $t$
+@@ -1170,22 +1172,29 @@
+ $\mathcal{O}(1)$, respectively (a maximum over the $K$ monitored kinematic
+ channels of Eq.~\ref{eq:delta_kin}, one closed-form binary entropy, and three
+ threshold comparisons),
+-and involve no matrix operation. The recurrent update of line~5 costs $\mathcal{O}(4(DH{+}H^2)+8H^2)$ for the two stacked layers (the second layer's input has dimension $H$), i.e., ${\approx}57.2$\,K MACs per executed update for $D{=}31$, $H{=}64$, and executes only when the disjunction of line~4 fires, so the expected per-frame cost of this persistent-state algorithm is $c_{\mathrm{gate}} + (1-s)\,\mathcal{O}(4(DH{+}H^2)+8H^2)$, where $s$ is the
+-suppression rate (\%Sup) and $c_{\mathrm{gate}} = \mathcal{O}(K)$ the gate
+-overhead, constant for a deployment with fixed $K$.
+-The worst case (no suppression) equals the full LSTM cost plus
+-$\mathcal{O}(K)$; the best case is the gate alone.
++and involve no matrix operation. One recurrent step of the two stacked
++layers costs $\mathcal{O}(4(DH{+}H^2)+8H^2)$ (the second layer's input has
++dimension $H$), i.e., ${\approx}57.2$\,K MACs for $D{=}31$, $H{=}64$. The
++window recomputation of line~5 runs $W{=}96$ such steps, so an executed
++update costs ${\approx}5.49$\,M MACs and fires only when the disjunction of
++line~4 holds; the expected per-frame cost of
++Algorithm~\ref{alg:inferencia} is therefore $c_{\mathrm{gate}} +
++(1-s)\,W\,\mathcal{O}(4(DH{+}H^2)+8H^2)$, where $s$ is the suppression rate
++(\%Sup) and $c_{\mathrm{gate}} = \mathcal{O}(K)$ the gate overhead,
++constant for a deployment with fixed $K$. The worst case (no suppression)
++is one full window per frame plus $\mathcal{O}(K)$; the best case is the
++gate alone. The single-step formula without the $W$ factor,
++$c_{\mathrm{gate}} + (1-s)\,\mathcal{O}(4(DH{+}H^2)+8H^2)$, applies only to
++the non-validated persistent-state variant discussed below.
+ 
+ Algorithm~\ref{alg:inferencia} states the semantics that every scheduled
+-result in this paper was evaluated under: an executed update recomputes the
+-causal prefix window of the last $W{=}96$ available frames (left-padded with
+-the first frame; state reinitialized at the window start), so it costs $W$
+-recurrent steps, ${\approx}96 \times 57.2\,\mathrm{K} \approx
+-5.49$\,M~MACs, re-reads the inputs of previously suppressed frames (the
++result in this paper was evaluated under: the causal prefix window of the
++last $W{=}96$ available frames is left-padded with the first frame, the
++recurrent state is reinitialized at the start of each recomputed window, the
++inputs of previously suppressed frames are re-read by later updates (the
+ input window must therefore be buffered), and a suppressed frame reuses only
+-the emitted probability. The expected per-frame compute is
+-$c_{\mathrm{gate}} + (1-s)\,W\,\mathcal{O}(4(DH{+}H^2)+8H^2)$, and the
+-ms/frame figures of Tables~\ref{tab:resultados_principais}
++the emitted probability. The ms/frame figures of
++Tables~\ref{tab:resultados_principais}
+ and~\ref{tab:deployment} are wall-clock times of exactly this execution.
+ A cheaper \emph{persistent-state single-step} variant -- one recurrent step
+ (${\approx}57.2$\,K MACs) per executed update, suppressed frames never
+@@ -1249,8 +1258,9 @@
+ \rowcolor{gray!8}
+ \mbox{MHEG} (runtime) & Runtime computation scheduler / adaptive inference controller
+   & {\color{\revcolor}$\mathcal{O}(K)$/step} & Continuous runtime & \ding{51} \\
+-Hidden state $h_t$ & Reused recurrent memory (buffer reuse on suppression)
+-  & $\mathcal{O}(H)$ & Continuous runtime & \ding{51} \\
++Recurrent state $(h,c)$ & {\color{\revcolor}Reinitialized at each window
++  recomputation (evaluated semantics); persistent only in the non-validated
++  single-step variant} & $\mathcal{O}(H)$ & Continuous runtime & \ding{51} \\
+ \rowcolor{gray!8}
+ Thresholds $(\tau_\Delta, \tau_H, \bm{\theta})$ & Constant scalar scheduling parameters
+   & $\mathcal{O}(1)$ & Continuous runtime & \ding{51} \\
+@@ -2129,9 +2139,9 @@
+ where the \AFTOI configurations attain the lowest
+ $\mathrm{TTD}_{\mathrm{ef}}$. No cross-panel ECE comparison is implied; the
+ panels display measured points, not frontiers.}
+-\begin{figure}
++\begin{figure*}[!tbp]
+ \centering
+-\includegraphics[width=\columnwidth]{image/fig_neg_control_operating_curve.pdf}
++\includegraphics[width=\textwidth]{image/fig_neg_control_operating_curve.pdf}
+ \caption{{\color{\revcolor}Operating points vs.\
+ $\mathrm{TTD}_{\mathrm{ef}}$ (CI~95\%, seeds 42--45). Panel~(a): post-hoc
+ calibration family on the frame-level $\mathrm{ECE}_{\mathrm{cal}}$ axis;
+@@ -2140,7 +2150,7 @@
+ protocol-specific and not comparable, hence the separate axes
+ (Table~\ref{tab:protocol_map}).}}
+ \label{fig:curva_operacional}
+-\end{figure}
++\end{figure*}
+ 
+ {\color{\revcolor}Probability-scale
+ correction does not modify the internal representation or how it responds to

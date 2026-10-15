@@ -1,0 +1,724 @@
+2026-08-27 11:19:03 [INFO] ========================================================================
+2026-08-27 11:19:03 [INFO]   TERA Pipeline v1.0  |  Experimento: exp_seed12_round1
+2026-08-27 11:19:03 [INFO]   Seeds:   [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53]
+2026-08-27 11:19:03 [INFO]   Estágios: ['dataset', 'training', 'calibration', 'inference', 'evaluation', 'logging', 'figures', 'export']
+2026-08-27 11:19:03 [INFO]   Device:  cuda
+2026-08-27 11:19:03 [INFO] ========================================================================
+2026-08-27 11:19:03 [INFO] 
+[Stage 1/8] DATASET
+  Seeds: [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53]
+
+  [Dataset] seed=42
+    Gerando dataset seed=42...
+    ✓ Dataset gerado: dataset_sintetico_seed42.npz
+    Criando splits...
+
+  [Dataset] seed=43
+    Gerando dataset seed=43...
+    ✓ Dataset gerado: dataset_sintetico_seed43.npz
+    Criando splits...
+
+  [Dataset] seed=44
+    Gerando dataset seed=44...
+    ✓ Dataset gerado: dataset_sintetico_seed44.npz
+    Criando splits...
+
+  [Dataset] seed=45
+    Gerando dataset seed=45...
+    ✓ Dataset gerado: dataset_sintetico_seed45.npz
+    Criando splits...
+
+  [Dataset] seed=46
+    Gerando dataset seed=46...
+    ✓ Dataset gerado: dataset_sintetico_seed46.npz
+    Criando splits...
+
+  [Dataset] seed=47
+    Gerando dataset seed=47...
+    ✓ Dataset gerado: dataset_sintetico_seed47.npz
+    Criando splits...
+
+  [Dataset] seed=48
+    Gerando dataset seed=48...
+    ✓ Dataset gerado: dataset_sintetico_seed48.npz
+    Criando splits...
+
+  [Dataset] seed=49
+    Gerando dataset seed=49...
+    ✓ Dataset gerado: dataset_sintetico_seed49.npz
+    Criando splits...
+
+  [Dataset] seed=50
+    Gerando dataset seed=50...
+    ✓ Dataset gerado: dataset_sintetico_seed50.npz
+    Criando splits...
+
+  [Dataset] seed=51
+    Gerando dataset seed=51...
+    ✓ Dataset gerado: dataset_sintetico_seed51.npz
+    Criando splits...
+
+  [Dataset] seed=52
+    Gerando dataset seed=52...
+    ✓ Dataset gerado: dataset_sintetico_seed52.npz
+    Criando splits...
+
+  [Dataset] seed=53
+    Gerando dataset seed=53...
+    ✓ Dataset gerado: dataset_sintetico_seed53.npz
+    Criando splits...
+
+  Verificando consistência dos datasets...
+  ✓ Todos os datasets OK
+2026-08-27 11:20:13 [INFO]   ✓ Dataset concluído (71s)
+2026-08-27 11:20:13 [INFO] 
+[Stage 2/8] TRAINING
+
+  [Training] seed=42
+    Treinando teacher BiLSTM (seed=42)...
+      ep= 20  loss=0.0399
+      ep= 40  loss=0.0364
+      ep= 60  loss=0.0245
+    ✓ Teacher salvo: teacher_seed42.pt
+    Treinando Baseline (seed=42)...
+      ep= 20  loss=0.0718
+      ep= 40  loss=0.0449
+      ep= 60  loss=0.0396
+    ✓ Baseline salvo: baseline_seed42.pt
+    Treinando AF-TKD Student (seed=42)...
+      ep= 20  λ=0.624  loss=3.6763  [rampup]
+      ep= 40  λ=1.000  loss=5.3650  [steady]
+      ep= 60  λ=1.000  loss=5.1178  [steady]
+      ep= 80  λ=1.000  loss=5.1669  [steady]
+    ✓ Student salvo: student_seed42.pt
+  Parâmetros do student (fc_fr + fc_ep, 2 camadas): 58,242  (~228 KB FP32)
+
+  [Training] seed=43
+    Treinando teacher BiLSTM (seed=43)...
+      ep= 20  loss=0.0300
+      ep= 40  loss=0.0266
+      ep= 60  loss=0.0319
+    ✓ Teacher salvo: teacher_seed43.pt
+    Treinando Baseline (seed=43)...
+      ep= 20  loss=0.0636
+      ep= 40  loss=0.0407
+      ep= 60  loss=0.0323
+    ✓ Baseline salvo: baseline_seed43.pt
+    Treinando AF-TKD Student (seed=43)...
+      ep= 20  λ=0.624  loss=4.0762  [rampup]
+      ep= 40  λ=1.000  loss=5.9282  [steady]
+      ep= 60  λ=1.000  loss=5.7997  [steady]
+      ep= 80  λ=1.000  loss=5.7632  [steady]
+    ✓ Student salvo: student_seed43.pt
+  Parâmetros do student (fc_fr + fc_ep, 2 camadas): 58,242  (~228 KB FP32)
+
+  [Training] seed=44
+    Treinando teacher BiLSTM (seed=44)...
+      ep= 20  loss=0.0318
+      ep= 40  loss=0.0254
+      ep= 60  loss=0.0190
+    ✓ Teacher salvo: teacher_seed44.pt
+    Treinando Baseline (seed=44)...
+      ep= 20  loss=0.0761
+      ep= 40  loss=0.0409
+      ep= 60  loss=0.0335
+    ✓ Baseline salvo: baseline_seed44.pt
+    Treinando AF-TKD Student (seed=44)...
+      ep= 20  λ=0.624  loss=4.2324  [rampup]
+      ep= 40  λ=1.000  loss=6.1807  [steady]
+      ep= 60  λ=1.000  loss=6.2116  [steady]
+      ep= 80  λ=1.000  loss=6.0757  [steady]
+    ✓ Student salvo: student_seed44.pt
+  Parâmetros do student (fc_fr + fc_ep, 2 camadas): 58,242  (~228 KB FP32)
+
+  [Training] seed=45
+    Treinando teacher BiLSTM (seed=45)...
+      ep= 20  loss=0.0347
+      ep= 40  loss=0.0250
+      ep= 60  loss=0.0246
+    ✓ Teacher salvo: teacher_seed45.pt
+    Treinando Baseline (seed=45)...
+      ep= 20  loss=0.0583
+      ep= 40  loss=0.0451
+      ep= 60  loss=0.0297
+    ✓ Baseline salvo: baseline_seed45.pt
+    Treinando AF-TKD Student (seed=45)...
+      ep= 20  λ=0.624  loss=3.9128  [rampup]
+      ep= 40  λ=1.000  loss=6.0492  [steady]
+      ep= 60  λ=1.000  loss=5.6961  [steady]
+      ep= 80  λ=1.000  loss=5.5868  [steady]
+    ✓ Student salvo: student_seed45.pt
+  Parâmetros do student (fc_fr + fc_ep, 2 camadas): 58,242  (~228 KB FP32)
+
+  [Training] seed=46
+    Treinando teacher BiLSTM (seed=46)...
+      ep= 20  loss=0.0373
+      ep= 40  loss=0.0266
+      ep= 60  loss=0.0261
+    ✓ Teacher salvo: teacher_seed46.pt
+    Treinando Baseline (seed=46)...
+      ep= 20  loss=0.0786
+      ep= 40  loss=0.0438
+      ep= 60  loss=0.0350
+    ✓ Baseline salvo: baseline_seed46.pt
+    Treinando AF-TKD Student (seed=46)...
+      ep= 20  λ=0.624  loss=4.3226  [rampup]
+      ep= 40  λ=1.000  loss=6.3280  [steady]
+      ep= 60  λ=1.000  loss=6.2154  [steady]
+      ep= 80  λ=1.000  loss=5.9998  [steady]
+    ✓ Student salvo: student_seed46.pt
+  Parâmetros do student (fc_fr + fc_ep, 2 camadas): 58,242  (~228 KB FP32)
+
+  [Training] seed=47
+    Treinando teacher BiLSTM (seed=47)...
+      ep= 20  loss=0.0338
+      ep= 40  loss=0.0318
+      ep= 60  loss=0.0267
+    ✓ Teacher salvo: teacher_seed47.pt
+    Treinando Baseline (seed=47)...
+      ep= 20  loss=0.0732
+      ep= 40  loss=0.0416
+      ep= 60  loss=0.0436
+    ✓ Baseline salvo: baseline_seed47.pt
+    Treinando AF-TKD Student (seed=47)...
+      ep= 20  λ=0.624  loss=5.4276  [rampup]
+      ep= 40  λ=1.000  loss=8.1981  [steady]
+      ep= 60  λ=1.000  loss=8.2570  [steady]
+      ep= 80  λ=1.000  loss=8.1674  [steady]
+    ✓ Student salvo: student_seed47.pt
+  Parâmetros do student (fc_fr + fc_ep, 2 camadas): 58,242  (~228 KB FP32)
+
+  [Training] seed=48
+    Treinando teacher BiLSTM (seed=48)...
+      ep= 20  loss=0.0440
+      ep= 40  loss=0.0366
+      ep= 60  loss=0.0284
+    ✓ Teacher salvo: teacher_seed48.pt
+    Treinando Baseline (seed=48)...
+      ep= 20  loss=0.0830
+      ep= 40  loss=0.0455
+      ep= 60  loss=0.0372
+    ✓ Baseline salvo: baseline_seed48.pt
+    Treinando AF-TKD Student (seed=48)...
+      ep= 20  λ=0.624  loss=5.0972  [rampup]
+      ep= 40  λ=1.000  loss=7.9568  [steady]
+      ep= 60  λ=1.000  loss=7.9172  [steady]
+      ep= 80  λ=1.000  loss=7.4600  [steady]
+    ✓ Student salvo: student_seed48.pt
+  Parâmetros do student (fc_fr + fc_ep, 2 camadas): 58,242  (~228 KB FP32)
+
+  [Training] seed=49
+    Treinando teacher BiLSTM (seed=49)...
+      ep= 20  loss=0.0421
+      ep= 40  loss=0.0302
+      ep= 60  loss=0.0257
+    ✓ Teacher salvo: teacher_seed49.pt
+    Treinando Baseline (seed=49)...
+      ep= 20  loss=0.0722
+      ep= 40  loss=0.0423
+      ep= 60  loss=0.0349
+    ✓ Baseline salvo: baseline_seed49.pt
+    Treinando AF-TKD Student (seed=49)...
+      ep= 20  λ=0.624  loss=4.5021  [rampup]
+      ep= 40  λ=1.000  loss=6.6451  [steady]
+      ep= 60  λ=1.000  loss=6.3891  [steady]
+      ep= 80  λ=1.000  loss=6.5852  [steady]
+    ✓ Student salvo: student_seed49.pt
+  Parâmetros do student (fc_fr + fc_ep, 2 camadas): 58,242  (~228 KB FP32)
+
+  [Training] seed=50
+    Treinando teacher BiLSTM (seed=50)...
+      ep= 20  loss=0.0368
+      ep= 40  loss=0.0251
+      ep= 60  loss=0.0375
+    ✓ Teacher salvo: teacher_seed50.pt
+    Treinando Baseline (seed=50)...
+      ep= 20  loss=0.0752
+      ep= 40  loss=0.0499
+      ep= 60  loss=0.0490
+    ✓ Baseline salvo: baseline_seed50.pt
+    Treinando AF-TKD Student (seed=50)...
+      ep= 20  λ=0.624  loss=5.1010  [rampup]
+      ep= 40  λ=1.000  loss=8.0460  [steady]
+      ep= 60  λ=1.000  loss=7.8082  [steady]
+      ep= 80  λ=1.000  loss=8.0243  [steady]
+    ✓ Student salvo: student_seed50.pt
+  Parâmetros do student (fc_fr + fc_ep, 2 camadas): 58,242  (~228 KB FP32)
+
+  [Training] seed=51
+    Treinando teacher BiLSTM (seed=51)...
+      ep= 20  loss=0.0358
+      ep= 40  loss=0.0385
+      ep= 60  loss=0.0222
+    ✓ Teacher salvo: teacher_seed51.pt
+    Treinando Baseline (seed=51)...
+      ep= 20  loss=0.0687
+      ep= 40  loss=0.0428
+      ep= 60  loss=0.0402
+    ✓ Baseline salvo: baseline_seed51.pt
+    Treinando AF-TKD Student (seed=51)...
+      ep= 20  λ=0.624  loss=3.6443  [rampup]
+      ep= 40  λ=1.000  loss=5.4470  [steady]
+      ep= 60  λ=1.000  loss=5.4021  [steady]
+      ep= 80  λ=1.000  loss=5.1930  [steady]
+    ✓ Student salvo: student_seed51.pt
+  Parâmetros do student (fc_fr + fc_ep, 2 camadas): 58,242  (~228 KB FP32)
+
+  [Training] seed=52
+    Treinando teacher BiLSTM (seed=52)...
+      ep= 20  loss=0.0402
+      ep= 40  loss=0.0254
+      ep= 60  loss=0.0238
+    ✓ Teacher salvo: teacher_seed52.pt
+    Treinando Baseline (seed=52)...
+      ep= 20  loss=0.0643
+      ep= 40  loss=0.0431
+      ep= 60  loss=0.0437
+    ✓ Baseline salvo: baseline_seed52.pt
+    Treinando AF-TKD Student (seed=52)...
+      ep= 20  λ=0.624  loss=4.7194  [rampup]
+      ep= 40  λ=1.000  loss=6.8550  [steady]
+      ep= 60  λ=1.000  loss=6.7745  [steady]
+      ep= 80  λ=1.000  loss=6.8905  [steady]
+    ✓ Student salvo: student_seed52.pt
+  Parâmetros do student (fc_fr + fc_ep, 2 camadas): 58,242  (~228 KB FP32)
+
+  [Training] seed=53
+    Treinando teacher BiLSTM (seed=53)...
+      ep= 20  loss=0.0419
+      ep= 40  loss=0.0298
+      ep= 60  loss=0.0235
+    ✓ Teacher salvo: teacher_seed53.pt
+    Treinando Baseline (seed=53)...
+      ep= 20  loss=0.0587
+      ep= 40  loss=0.0341
+      ep= 60  loss=0.0288
+    ✓ Baseline salvo: baseline_seed53.pt
+    Treinando AF-TKD Student (seed=53)...
+      ep= 20  λ=0.624  loss=5.4239  [rampup]
+      ep= 40  λ=1.000  loss=7.8360  [steady]
+      ep= 60  λ=1.000  loss=7.8877  [steady]
+      ep= 80  λ=1.000  loss=7.4326  [steady]
+    ✓ Student salvo: student_seed53.pt
+  Parâmetros do student (fc_fr + fc_ep, 2 camadas): 58,242  (~228 KB FP32)
+
+  ✓ Treinamento concluído para todas as seeds
+2026-08-27 14:15:08 [INFO]   ✓ Treinamento concluído (10495s)
+2026-08-27 14:15:08 [INFO] 
+[Stage 3/8] CALIBRATION
+
+  [Calibration] seed=42
+    Calibrando gating (grade)...
+      Inferência fixa (cache)... OK
+      Pré-computando deltas... OK
+      Grade 23×13=299 pts (numpy)... OK
+    thr_ep=0.050  theta_ttd=0.100  τΔ=0.0191  τH=0.12  feasible=28/299
+
+  [Calibration] seed=43
+    Calibrando gating (grade)...
+      Inferência fixa (cache)... OK
+      Pré-computando deltas... OK
+      Grade 23×13=299 pts (numpy)... OK
+    thr_ep=0.050  theta_ttd=0.100  τΔ=0.0291  τH=0.05  feasible=74/299
+
+  [Calibration] seed=44
+    Calibrando gating (grade)...
+      Inferência fixa (cache)... OK
+      Pré-computando deltas... OK
+      Grade 23×13=299 pts (numpy)... OK
+    thr_ep=0.050  theta_ttd=0.100  τΔ=0.0327  τH=0.08  feasible=93/299
+
+  [Calibration] seed=45
+    Calibrando gating (grade)...
+      Inferência fixa (cache)... OK
+      Pré-computando deltas... OK
+      Grade 23×13=299 pts (numpy)... OK
+    thr_ep=0.050  theta_ttd=0.100  τΔ=0.0344  τH=0.05  feasible=107/299
+
+  [Calibration] seed=46
+    Calibrando gating (grade)...
+      Inferência fixa (cache)... OK
+      Pré-computando deltas... OK
+      Grade 23×13=299 pts (numpy)... OK
+    thr_ep=0.050  theta_ttd=0.100  τΔ=0.0320  τH=0.08  feasible=77/299
+
+  [Calibration] seed=47
+    Calibrando gating (grade)...
+      Inferência fixa (cache)... OK
+      Pré-computando deltas... OK
+      Grade 23×13=299 pts (numpy)... OK
+    thr_ep=0.050  theta_ttd=0.100  τΔ=0.0340  τH=0.12  feasible=95/299
+
+  [Calibration] seed=48
+    Calibrando gating (grade)...
+      Inferência fixa (cache)... OK
+      Pré-computando deltas... OK
+      Grade 23×13=299 pts (numpy)... OK
+    thr_ep=0.050  theta_ttd=0.100  τΔ=0.0340  τH=0.05  feasible=40/299
+
+  [Calibration] seed=49
+    Calibrando gating (grade)...
+      Inferência fixa (cache)... OK
+      Pré-computando deltas... OK
+      Grade 23×13=299 pts (numpy)... OK
+    thr_ep=0.050  theta_ttd=0.100  τΔ=0.0321  τH=0.05  feasible=60/299
+
+  [Calibration] seed=50
+    Calibrando gating (grade)...
+      Inferência fixa (cache)... OK
+      Pré-computando deltas... OK
+      Grade 23×13=299 pts (numpy)... OK
+    thr_ep=0.050  theta_ttd=0.100  τΔ=0.0295  τH=0.10  feasible=157/299
+
+  [Calibration] seed=51
+    Calibrando gating (grade)...
+      Inferência fixa (cache)... OK
+      Pré-computando deltas... OK
+      Grade 23×13=299 pts (numpy)... OK
+    thr_ep=0.050  theta_ttd=0.100  τΔ=0.0176  τH=0.70  feasible=52/299
+
+  [Calibration] seed=52
+    Calibrando gating (grade)...
+      Inferência fixa (cache)... OK
+      Pré-computando deltas... OK
+      Grade 23×13=299 pts (numpy)... OK
+    thr_ep=0.050  theta_ttd=0.100  τΔ=0.0152  τH=0.70  feasible=0/299
+
+  [Calibration] seed=53
+    Calibrando gating (grade)...
+      Inferência fixa (cache)... OK
+      Pré-computando deltas... OK
+      Grade 23×13=299 pts (numpy)... OK
+    thr_ep=0.050  theta_ttd=0.100  τΔ=0.0273  τH=0.08  feasible=28/299
+
+  ✓ calibration_summary.csv → results\exp_seed12_round1\calibration\calibration_summary.csv
+  ✓ calibration_detail.csv → results\exp_seed12_round1\calibration\calibration_detail.csv
+2026-08-27 14:22:14 [INFO]   ✓ Calibração concluída (426s)
+2026-08-27 14:22:14 [INFO] 
+[Stage 4/8] INFERENCE
+2026-08-27 14:22:14 [INFO]   Configs: baseline_fixed, baseline_hybrid, aftkd_fixed, aftkd_hybrid
+
+  [Inference] Seed 42
+    Gating params: tau_δ=0.0191, tau_H=0.12
+    [FIX-3] Inferência VAL (thr_ep calibration)...
+    [FIX-3] VAL probs salvas (seed=42)
+    → baseline_fixed
+      FR_skip=0.0%  cost=0.986ms/q
+    → baseline_hybrid
+      FR_skip=49.1%  cost=0.529ms/q
+    → aftkd_fixed
+      FR_skip=0.0%  cost=0.968ms/q
+    → aftkd_hybrid
+      FR_skip=44.7%  cost=0.576ms/q
+
+  [Inference] Seed 43
+    Gating params: tau_δ=0.0291, tau_H=0.05
+    [FIX-3] Inferência VAL (thr_ep calibration)...
+    [FIX-3] VAL probs salvas (seed=43)
+    → baseline_fixed
+      FR_skip=0.0%  cost=1.019ms/q
+    → baseline_hybrid
+      FR_skip=61.4%  cost=0.404ms/q
+    → aftkd_fixed
+      FR_skip=0.0%  cost=0.977ms/q
+    → aftkd_hybrid
+      FR_skip=44.2%  cost=0.409ms/q
+
+  [Inference] Seed 44
+    Gating params: tau_δ=0.0327, tau_H=0.08
+    [FIX-3] Inferência VAL (thr_ep calibration)...
+    [FIX-3] VAL probs salvas (seed=44)
+    → baseline_fixed
+      FR_skip=0.0%  cost=0.914ms/q
+    → baseline_hybrid
+      FR_skip=66.5%  cost=0.326ms/q
+    → aftkd_fixed
+      FR_skip=0.0%  cost=0.925ms/q
+    → aftkd_hybrid
+      FR_skip=46.1%  cost=0.517ms/q
+
+  [Inference] Seed 45
+    Gating params: tau_δ=0.0344, tau_H=0.05
+    [FIX-3] Inferência VAL (thr_ep calibration)...
+    [FIX-3] VAL probs salvas (seed=45)
+    → baseline_fixed
+      FR_skip=0.0%  cost=0.917ms/q
+    → baseline_hybrid
+      FR_skip=68.9%  cost=0.308ms/q
+    → aftkd_fixed
+      FR_skip=0.0%  cost=0.898ms/q
+    → aftkd_hybrid
+      FR_skip=59.6%  cost=0.398ms/q
+
+  [Inference] Seed 46
+    Gating params: tau_δ=0.0320, tau_H=0.08
+    [FIX-3] Inferência VAL (thr_ep calibration)...
+    [FIX-3] VAL probs salvas (seed=46)
+    → baseline_fixed
+      FR_skip=0.0%  cost=0.932ms/q
+    → baseline_hybrid
+      FR_skip=65.1%  cost=0.333ms/q
+    → aftkd_fixed
+      FR_skip=0.0%  cost=0.904ms/q
+    → aftkd_hybrid
+      FR_skip=46.7%  cost=0.517ms/q
+
+  [Inference] Seed 47
+    Gating params: tau_δ=0.0340, tau_H=0.12
+    [FIX-3] Inferência VAL (thr_ep calibration)...
+    [FIX-3] VAL probs salvas (seed=47)
+    → baseline_fixed
+      FR_skip=0.0%  cost=0.884ms/q
+    → baseline_hybrid
+      FR_skip=69.9%  cost=0.286ms/q
+    → aftkd_fixed
+      FR_skip=0.0%  cost=0.942ms/q
+    → aftkd_hybrid
+      FR_skip=52.5%  cost=0.452ms/q
+
+  [Inference] Seed 48
+    Gating params: tau_δ=0.0340, tau_H=0.05
+    [FIX-3] Inferência VAL (thr_ep calibration)...
+    [FIX-3] VAL probs salvas (seed=48)
+    → baseline_fixed
+      FR_skip=0.0%  cost=0.902ms/q
+    → baseline_hybrid
+      FR_skip=64.2%  cost=0.345ms/q
+    → aftkd_fixed
+      FR_skip=0.0%  cost=0.813ms/q
+    → aftkd_hybrid
+      FR_skip=52.3%  cost=0.184ms/q
+
+  [Inference] Seed 49
+    Gating params: tau_δ=0.0321, tau_H=0.05
+    [FIX-3] Inferência VAL (thr_ep calibration)...
+    [FIX-3] VAL probs salvas (seed=49)
+    → baseline_fixed
+      FR_skip=0.0%  cost=0.372ms/q
+    → baseline_hybrid
+      FR_skip=63.9%  cost=0.145ms/q
+    → aftkd_fixed
+      FR_skip=0.0%  cost=0.367ms/q
+    → aftkd_hybrid
+      FR_skip=48.5%  cost=0.206ms/q
+
+  [Inference] Seed 50
+    Gating params: tau_δ=0.0295, tau_H=0.10
+    [FIX-3] Inferência VAL (thr_ep calibration)...
+    [FIX-3] VAL probs salvas (seed=50)
+    → baseline_fixed
+      FR_skip=0.0%  cost=0.377ms/q
+    → baseline_hybrid
+      FR_skip=60.4%  cost=0.154ms/q
+    → aftkd_fixed
+      FR_skip=0.0%  cost=0.370ms/q
+    → aftkd_hybrid
+      FR_skip=51.3%  cost=0.194ms/q
+
+  [Inference] Seed 51
+    Gating params: tau_δ=0.0176, tau_H=0.70
+    [FIX-3] Inferência VAL (thr_ep calibration)...
+    [FIX-3] VAL probs salvas (seed=51)
+    → baseline_fixed
+      FR_skip=0.0%  cost=0.338ms/q
+    → baseline_hybrid
+      FR_skip=51.9%  cost=0.177ms/q
+    → aftkd_fixed
+      FR_skip=0.0%  cost=0.337ms/q
+    → aftkd_hybrid
+      FR_skip=45.1%  cost=0.204ms/q
+
+  [Inference] Seed 52
+    Gating params: tau_δ=0.0152, tau_H=0.70
+    [FIX-3] Inferência VAL (thr_ep calibration)...
+    [FIX-3] VAL probs salvas (seed=52)
+    → baseline_fixed
+      FR_skip=0.0%  cost=0.363ms/q
+    → baseline_hybrid
+      FR_skip=46.8%  cost=0.203ms/q
+    → aftkd_fixed
+      FR_skip=0.0%  cost=0.347ms/q
+    → aftkd_hybrid
+      FR_skip=45.0%  cost=0.207ms/q
+
+  [Inference] Seed 53
+    Gating params: tau_δ=0.0273, tau_H=0.08
+    [FIX-3] Inferência VAL (thr_ep calibration)...
+    [FIX-3] VAL probs salvas (seed=53)
+    → baseline_fixed
+      FR_skip=0.0%  cost=0.358ms/q
+    → baseline_hybrid
+      FR_skip=64.1%  cost=0.137ms/q
+    → aftkd_fixed
+      FR_skip=0.0%  cost=0.372ms/q
+    → aftkd_hybrid
+      FR_skip=41.5%  cost=0.219ms/q
+2026-08-27 14:36:17 [INFO]   ✓ Inferência concluída (842s)
+2026-08-27 14:36:17 [INFO] 
+[Stage 5/8] EVALUATION
+  Avaliando seed=42, config=baseline_fixed...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=42, role=baseline)
+  Avaliando seed=42, config=baseline_hybrid...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=42, role=baseline)
+  Avaliando seed=42, config=aftkd_fixed...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=42, role=student)
+  Avaliando seed=42, config=aftkd_hybrid...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=42, role=student)
+  Avaliando seed=43, config=baseline_fixed...
+    [FIX-3] thr_ep calibrado: 0.150 (seed=43, role=baseline)
+  Avaliando seed=43, config=baseline_hybrid...
+    [FIX-3] thr_ep calibrado: 0.150 (seed=43, role=baseline)
+  Avaliando seed=43, config=aftkd_fixed...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=43, role=student)
+  Avaliando seed=43, config=aftkd_hybrid...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=43, role=student)
+  Avaliando seed=44, config=baseline_fixed...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=44, role=baseline)
+  Avaliando seed=44, config=baseline_hybrid...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=44, role=baseline)
+  Avaliando seed=44, config=aftkd_fixed...
+    [FIX-3] thr_ep calibrado: 0.300 (seed=44, role=student)
+  Avaliando seed=44, config=aftkd_hybrid...
+    [FIX-3] thr_ep calibrado: 0.300 (seed=44, role=student)
+  Avaliando seed=45, config=baseline_fixed...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=45, role=baseline)
+  Avaliando seed=45, config=baseline_hybrid...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=45, role=baseline)
+  Avaliando seed=45, config=aftkd_fixed...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=45, role=student)
+  Avaliando seed=45, config=aftkd_hybrid...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=45, role=student)
+  Avaliando seed=46, config=baseline_fixed...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=46, role=baseline)
+  Avaliando seed=46, config=baseline_hybrid...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=46, role=baseline)
+  Avaliando seed=46, config=aftkd_fixed...
+    [FIX-3] thr_ep calibrado: 0.100 (seed=46, role=student)
+  Avaliando seed=46, config=aftkd_hybrid...
+    [FIX-3] thr_ep calibrado: 0.100 (seed=46, role=student)
+  Avaliando seed=47, config=baseline_fixed...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=47, role=baseline)
+  Avaliando seed=47, config=baseline_hybrid...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=47, role=baseline)
+  Avaliando seed=47, config=aftkd_fixed...
+    [FIX-3] thr_ep calibrado: 0.150 (seed=47, role=student)
+  Avaliando seed=47, config=aftkd_hybrid...
+    [FIX-3] thr_ep calibrado: 0.150 (seed=47, role=student)
+  Avaliando seed=48, config=baseline_fixed...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=48, role=baseline)
+  Avaliando seed=48, config=baseline_hybrid...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=48, role=baseline)
+  Avaliando seed=48, config=aftkd_fixed...
+    [FIX-3] thr_ep calibrado: 0.075 (seed=48, role=student)
+  Avaliando seed=48, config=aftkd_hybrid...
+    [FIX-3] thr_ep calibrado: 0.075 (seed=48, role=student)
+  Avaliando seed=49, config=baseline_fixed...
+    [FIX-3] thr_ep calibrado: 0.100 (seed=49, role=baseline)
+  Avaliando seed=49, config=baseline_hybrid...
+    [FIX-3] thr_ep calibrado: 0.100 (seed=49, role=baseline)
+  Avaliando seed=49, config=aftkd_fixed...
+    [FIX-3] thr_ep calibrado: 0.300 (seed=49, role=student)
+  Avaliando seed=49, config=aftkd_hybrid...
+    [FIX-3] thr_ep calibrado: 0.300 (seed=49, role=student)
+  Avaliando seed=50, config=baseline_fixed...
+    [FIX-3] thr_ep calibrado: 0.225 (seed=50, role=baseline)
+  Avaliando seed=50, config=baseline_hybrid...
+    [FIX-3] thr_ep calibrado: 0.225 (seed=50, role=baseline)
+  Avaliando seed=50, config=aftkd_fixed...
+    [FIX-3] thr_ep calibrado: 0.300 (seed=50, role=student)
+  Avaliando seed=50, config=aftkd_hybrid...
+    [FIX-3] thr_ep calibrado: 0.300 (seed=50, role=student)
+  Avaliando seed=51, config=baseline_fixed...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=51, role=baseline)
+  Avaliando seed=51, config=baseline_hybrid...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=51, role=baseline)
+  Avaliando seed=51, config=aftkd_fixed...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=51, role=student)
+  Avaliando seed=51, config=aftkd_hybrid...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=51, role=student)
+  Avaliando seed=52, config=baseline_fixed...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=52, role=baseline)
+  Avaliando seed=52, config=baseline_hybrid...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=52, role=baseline)
+  Avaliando seed=52, config=aftkd_fixed...
+    [FIX-3] thr_ep calibrado: 0.150 (seed=52, role=student)
+  Avaliando seed=52, config=aftkd_hybrid...
+    [FIX-3] thr_ep calibrado: 0.150 (seed=52, role=student)
+  Avaliando seed=53, config=baseline_fixed...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=53, role=baseline)
+  Avaliando seed=53, config=baseline_hybrid...
+    [FIX-3] thr_ep calibrado: 0.050 (seed=53, role=baseline)
+  Avaliando seed=53, config=aftkd_fixed...
+    [FIX-3] thr_ep calibrado: 0.175 (seed=53, role=student)
+  Avaliando seed=53, config=aftkd_hybrid...
+    [FIX-3] thr_ep calibrado: 0.175 (seed=53, role=student)
+
+  ✓ results_all_seeds.csv salvo: results\exp_seed12_round1\metrics\results_all_seeds.csv
+
+========================================================================
+  RESULTADOS AGREGADOS (média ± desvio, 4 seeds)
+========================================================================
+  aftkd_fixed          n=12 ⚠️ 12/4 seeds
+    F1=0.846  FR=0.001  TTDef=0.083s  Cost=0.665ms/q  Skip=0.0%
+  aftkd_hybrid         n=12 ⚠️ 12/4 seeds
+    F1=0.846  FR=0.001  TTDef=0.099s  Cost=0.340ms/q  Skip=48.1%
+  baseline_fixed       n=12 ⚠️ 12/4 seeds
+    F1=0.366  FR=0.033  TTDef=0.500s  Cost=0.677ms/q  Skip=0.0%
+  baseline_hybrid      n=12 ⚠️ 12/4 seeds
+    F1=0.369  FR=0.035  TTDef=0.570s  Cost=0.255ms/q  Skip=61.0%
+2026-08-27 14:36:19 [INFO]   ✓ Avaliação concluída (2s)
+2026-08-27 14:36:19 [INFO] 
+[Stage 6/8] FRAME LOGGING
+2026-08-27 14:36:19 [INFO]   [Frame logs] seed_viz=42 (apenas figuras)
+    [FrameLog] seed=42
+    ✓ episode_frame_logs.csv → results\exp_seed12_round1\logs\episode_frame_logs.csv (60,288 linhas)
+    ✓ borderline_frame_logs.csv → results\exp_seed12_round1\logs\borderline_frame_logs.csv (30,144 linhas)
+2026-08-27 14:36:55 [INFO]   ✓ Frame logs concluídos (36s)
+2026-08-27 14:36:55 [INFO] 
+[Stage 7/8] FIGURES
+    → temporal_trace
+      ✓ fig_temporal_trace.pdf
+    → entropy_dist
+      ✓ fig_entropy_dist.pdf
+    → gating_heatmap
+      ✓ fig_gating_heatmap.pdf
+    → tradeoff
+      ✓ fig_tradeoff.pdf
+    → multiseed
+      ✓ fig_multiseed.pdf
+    → prob_dist
+      ✓ fig_prob_dist.pdf
+2026-08-27 14:37:01 [INFO]   ✓ Figuras geradas (6s)
+2026-08-27 14:37:01 [INFO] 
+[Stage 8/8] EXPORT
+  ✓ summary_by_config.csv (4 configs)
+  ✓ integrity_report.txt → OK
+  ✓ derived_metrics.json
+      CostReduction=49.8%  SkipRate=48.1%  TTDef improvement=80.2%
+  ✓ Export concluído → results\exp_seed12_round1\metrics
+  ✓ Macros LaTeX → results\exp_seed12_round1\latex\paper_metrics_macros.tex
+  ✓ Tabela 2 LaTeX → results\exp_seed12_round1\latex\paper_table2_rows.tex
+  ✓ Tabela estratificada LaTeX → results\exp_seed12_round1\latex\paper_table_stratified_rows.tex
+  ✓ Tabela cobertura seeds → results\exp_seed12_round1\latex\paper_table_seed_coverage.tex
+2026-08-27 14:37:01 [INFO]   ✓ Export concluído (0s)
+C:\Users\Angela\Documents\DATALAKE-ANGELA\MLProject\TreinamentoNovo\tera-adhoc-artifact\1-pipeline-tera\run_experiment.py:150: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "timestamp":        datetime.utcnow().isoformat() + "Z",
+2026-08-27 14:37:01 [INFO] 
+========================================================================
+2026-08-27 14:37:01 [INFO]   TERA Pipeline concluído  |  exp_seed12_round1
+2026-08-27 14:37:01 [INFO]   Estágios: ['dataset', 'training', 'calibration', 'inference', 'evaluation', 'logging', 'figures', 'export']
+2026-08-27 14:37:01 [INFO]   Tempo total: 11879s (198.0min)
+2026-08-27 14:37:01 [INFO]   Resultados: results\exp_seed12_round1\metrics\results_all_seeds.csv
+2026-08-27 14:37:01 [INFO]   Macros:     results\exp_seed12_round1\latex\paper_metrics_macros.tex
+2026-08-27 14:37:01 [INFO]   Manifesto:  results\exp_seed12_round1\manifest.json
+2026-08-27 14:37:01 [INFO] ========================================================================
+[seed-expansion-tera] hashes OK (gen=65bbec4a23050639, cfg=d5327a24d1d2f7f9)
+[seed-expansion-tera] SEEDS = [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53] (protocolo congelado)
+[seed-expansion-tera] exp-id = exp_seed12_round1
+[seed-expansion-tera] resultados em: C:\Users\Angela\Documents\DATALAKE-ANGELA\MLProject\TreinamentoNovo\tera-adhoc-artifact\1-pipeline-tera\results\exp_seed12_round1
+[seed-expansion-tera] executando: C:\Users\Angela\Documents\DATALAKE-ANGELA\MLProject\TreinamentoNovo\venv\Scripts\python.exe run_experiment.py --seeds 42,43,44,45,46,47,48,49,50,51,52,53 --exp-id exp_seed12_round1
+
+[seed-expansion-tera] concluido.
+Proximos passos (nesta pasta):
+  1. python check_reproduction_42_45.py   # valida 42-45 vs Table 8
+  2. python stats_12seeds.py              # relatorio 12 seeds (sem tocar no artigo)

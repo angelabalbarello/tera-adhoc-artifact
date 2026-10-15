@@ -1,0 +1,13 @@
+Method,Scenario,Target cost,Observed cost,Cost match error %,Coverage↑,Miss rate↓,TTDef↓,FS near onset↓,Is cost-matched?
+MHEG_hybrid,balanced_onsets,0.217,0.217,0.0,100.0,0.0,3.61,0.0,yes
+NC1_random_budget_matched,balanced_onsets,0.217,0.218,0.5,99.7,0.3,7.5,23.9,yes
+NC2_entropy_unstructured_aggressive,balanced_onsets,0.217,0.218,0.5,100.0,0.0,6.89,20.3,yes
+NC6_cost_matched_unstructured,balanced_onsets,0.217,0.218,0.5,100.0,0.0,6.89,20.3,yes
+MHEG_hybrid,abrupt_onset_dominant,0.193,0.193,0.0,100.0,0.0,1.06,0.0,yes
+NC1_random_budget_matched,abrupt_onset_dominant,0.193,0.195,1.0,99.7,0.3,5.56,43.9,yes
+NC2_entropy_unstructured_aggressive,abrupt_onset_dominant,0.193,0.196,1.2,99.7,0.3,4.92,41.6,yes
+NC6_cost_matched_unstructured,abrupt_onset_dominant,0.193,0.196,1.2,99.7,0.3,4.92,41.6,yes
+MHEG_hybrid,rare_abrupt_critical_events,0.066,0.066,0.0,100.0,0.0,0.0,0.0,yes
+NC1_random_budget_matched,rare_abrupt_critical_events,0.066,0.066,0.2,21.9,78.1,47.19,86.2,yes
+NC2_entropy_unstructured_aggressive,rare_abrupt_critical_events,0.066,0.067,0.3,24.4,75.6,45.74,85.1,yes
+NC6_cost_matched_unstructured,rare_abrupt_critical_events,0.066,0.067,0.3,24.4,75.6,45.74,85.1,yes

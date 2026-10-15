@@ -1,0 +1,10 @@
+{
+  "CostReduction_pct": 53.4,
+  "SkipRate_pct": 48.7,
+  "TTDef_improvement_pct": 83.2,
+  "ECE_reduction_pct": 27.8,
+  "Cost_baseline_ms": 1.0151,
+  "Cost_aftkd_hybrid_ms": 0.4733,
+  "TTDef_baseline_s": 0.6021,
+  "TTDef_aftkd_hybrid_s": 0.1014
+}

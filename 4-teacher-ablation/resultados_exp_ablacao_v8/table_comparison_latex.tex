@@ -1,0 +1,16 @@
+% Teacher Ablation Study v8 — gerador v7, protocolo alinhado ao run_v29
+% θ_TTD calibrado POR MODELO (FailRate ≤ FAIL_BUDGET=0.05 por arquitetura)
+% TTDef     = TTD_bruto + FR × T_EP  → ALINHADO run_v29, comparável às macros do artigo
+% TTD       = penalizado via (window-t0)*dt — análise interna
+% TTD_bruto = somente episódios detectados (sem penalidade) — análise auxiliar
+\begin{tabular}{lllcccccc}
+\toprule
+Student & Método & Teacher & F1 & FailRate & TTDef & TTD$_{efetivo}$ & TTD$_{bruto}$ & ECE \\
+\midrule
+LSTM & Baseline & None & 0.8617\,{\tiny$\pm$0.0151} & 0.0667\,{\tiny$\pm$0.0842} & 0.674\,{\tiny$\pm$0.845} & 0.008\,{\tiny$\pm$0.005} & 0.008\,{\tiny$\pm$0.005} & 0.4771\,{\tiny$\pm$0.0105} \\
+LSTM & AF-KD & BiLSTM & 0.8930\,{\tiny$\pm$0.0299} & 0.0333\,{\tiny$\pm$0.0612} & 0.333\,{\tiny$\pm$0.612} & 0.000\,{\tiny$\pm$0.000} & 0.000\,{\tiny$\pm$0.000} & 0.3436\,{\tiny$\pm$0.0217} \\
+LSTM & TransKD & Transformer & 0.8829\,{\tiny$\pm$0.0096} & 0.0042\,{\tiny$\pm$0.0048} & 0.042\,{\tiny$\pm$0.048} & 0.000\,{\tiny$\pm$0.000} & 0.000\,{\tiny$\pm$0.000} & 0.3302\,{\tiny$\pm$0.0138} \\
+Transformer & Baseline & None & 0.9030\,{\tiny$\pm$0.1121} & 0.1625\,{\tiny$\pm$0.1878} & 1.665\,{\tiny$\pm$1.905} & 0.040\,{\tiny$\pm$0.033} & 0.040\,{\tiny$\pm$0.033} & 0.5317\,{\tiny$\pm$0.0731} \\
+Transformer & AF-KD & BiLSTM & 1.0000\,{\tiny$\pm$0.0000} & 0.0000\,{\tiny$\pm$0.0000} & 0.000\,{\tiny$\pm$0.000} & 0.000\,{\tiny$\pm$0.000} & 0.000\,{\tiny$\pm$0.000} & 0.4722\,{\tiny$\pm$0.0211} \\
+\bottomrule
+\end{tabular}

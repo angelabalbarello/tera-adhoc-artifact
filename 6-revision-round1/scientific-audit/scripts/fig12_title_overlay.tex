@@ -1,0 +1,12 @@
+\documentclass[tikz]{standalone}
+\usepackage{graphicx,xcolor}
+\begin{document}
+\begin{tikzpicture}[x=1pt,y=1pt]
+\node[anchor=south west,inner sep=0] (img) at (0,0)
+  {\includegraphics[width=505.29pt]{fig_calibration_entropy_temporal.pdf}};
+\fill[white] (0,140.8) rectangle (505.29,193.069);
+\node[anchor=center,font=\footnotesize] at (126,150) {(a) Post-hoc calibration vs.\ Baseline};
+\node[anchor=center,font=\footnotesize] at (379,150) {(b) AF-TOI Fixed vs.\ Baseline};
+\node[anchor=center,font=\small\itshape] at (252.6,178) {Mean entropy trajectories $H(t)$ around onset (seed 42)};
+\end{tikzpicture}
+\end{document}

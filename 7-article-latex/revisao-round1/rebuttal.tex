@@ -1,0 +1,817 @@
+\documentclass[1p,12pt,authoryear]{elsarticle}
+
+\usepackage{epsfig}
+\usepackage{epstopdf}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage[utf8]{inputenc}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{booktabs}
+\usepackage{multirow}
+
+%Por causa de \sout{}
+\usepackage[normalem]{ulem}
+\usepackage{url}
+
+\usepackage[dvipsnames,table]{xcolor}
+
+\journal{Ad Hoc Networks}
+\geometry{a4paper,margin=2.3cm}
+\usepackage{tabularx}
+\usepackage{multirow}
+\providecommand{\revcolor}{blue}
+\providecommand{\TERAGen}{\mbox{TERA-Gen}}
+\providecommand{\AFTOI}{\mbox{AF-TOI}}
+\providecommand{\MHEG}{MHEG}
+
+\begin{document}
+
+%Identificação do primeiro autor
+\begin{flushright}
+\^Angela Br\'igida Albarello \\
+Department of Computer Science -- CiC \\
+University of Bras\'ilia -- UnB \\
+E-mail: angela.albarello@aluno.unb.br \\
+\today \\
+\end{flushright}
+
+%Identificação do Editor
+\noindent Prof.\ Salil Kanhere, Ph.D. \\
+\noindent Editor-in-Chief \\
+\noindent Ad Hoc Networks \\
+\noindent Elsevier \\
+
+~
+
+\noindent Dear Professor Kanhere,
+
+~
+
+\noindent Thank you for your email and the reviewers' comments on our manuscript:
+
+\begin{center}
+\textbf{Ref. ID ADHOC-D-26-02099}
+
+``Onset-Anchored Selective Computation for Resource-Constrained Vehicular Edge Networks''\\[2pt]
+{\normalsize\itshape (submitted as ``Trustworthy Selective Computation for Resource-Constrained Vehicular Edge Networks''; retitled in this revision, see R3.7)}
+\end{center}
+
+~
+
+\noindent The manuscript has been revised in accordance with the comments. For each issue, we numbered it and explained how it was addressed. In addition, all the changes in the manuscript have been highlighted in blue. For further information, please see the detailed responses below.
+
+~
+
+\noindent We appreciate your handling of our manuscript.
+
+~
+
+\noindent Looking forward to hearing from you.
+
+~
+
+\noindent Best Regards,\\
+\noindent \^Angela B. Albarello, Edna D. Canedo, Vin\'icius P. Gon\c{c}alves, Leandro A. Villas, Rodolfo I. Meneguette and Geraldo P. Rocha Filho
+
+\newpage
+
+\makeatletter
+\def\@xfootnote[#1]{%
+  \protected@xdef\@thefnmark{#1}%
+  \@footnotemark\@footnotetext}
+\makeatother
+
+\begin{center}
+\huge Response to Reviewers\footnote[*]{For the manuscript, Ref. ID ADHOC-D-26-02099, ``Onset-Anchored Selective Computation for Resource-Constrained Vehicular Edge Networks'' (submitted as ``Trustworthy Selective Computation for Resource-Constrained Vehicular Edge Networks'').}
+\end{center}
+
+~
+
+\noindent The authors thank the reviewers for the time spent assessing the manuscript. Each comment was numbered and answered individually, and, where text was added to or modified in the manuscript, the response reproduces the final text so that the change can be verified without leaving this document. All changes are highlighted in blue in the marked manuscript, with one exception: the abstract was rewritten in its entirety and should therefore be read as changed in full. Locations are given by section, paragraph, figure, table, or algorithm of the revised manuscript.
+
+\newpage
+
+%% =====================================================================
+%% REVIEWER 1
+%% =====================================================================
+
+\begin{large}
+\noindent \underline{Response to Reviewer \#1:}
+\end{large}
+
+\vspace{10pt}
+
+\noindent The authors thank the reviewer for the time spent assessing the manuscript. The responses to each comment follow.
+
+\vspace{0.5cm}
+\noindent \textbf{1. Comment:} Protocol of vehicular and ad hoc network is not same but in this work is not taking it that way.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. The final paragraph of Section~2.1 has been rewritten to distinguish vehicular communication technologies such as IEEE 802.11p/DSRC and C-V2X from the general-purpose mobile ad hoc network architecture, and to clarify that TERA operates at the computation layer of a single node, agnostic to the underlying communication protocol. The revised paragraph reads:
+
+~
+
+``A clarification on scope is warranted: vehicular networks (e.g., IEEE 802.11p/DSRC, C-V2X) and general-purpose mobile ad hoc networks differ in protocol stack, mobility model, and infrastructure assumptions, and we do not treat them as interchangeable. TERA operates at the computation layer of a single node -- deciding when to spend an inference step -- and is agnostic to the underlying communication protocol; the operational-risk state $\ell_t$ it emits is a compact payload for dissemination by the underlying network. Protocol-level concerns such as medium access, routing, and dissemination latency are outside the scope of this paper.''
+
+~
+
+\noindent \textbf{2. Comment:} What TERA-Gen means in this protocol.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. TERA-Gen is the \emph{TERA episode Generator}, the synthetic-data component of the TERA (Temporal Evaluation and Risk Assessment) ecosystem, producing the driving episodes, with a deterministic frame-precise risk onset, on which the models are trained and evaluated. Because the acronym first appears in the abstract, it has been expanded there (``TERA-Gen (the TERA episode Generator) generates episodes with deterministic, frame-precise onsets'') and defined again at its first mention, in the contributions paragraph of Section~1. The corresponding text reads:
+
+~
+
+``TERA-Gen (the \emph{TERA episode Generator}, the synthetic-data component of the ecosystem) generates synthetic episodes with a deterministic onset calibrated against SHRP2 odds ratios (...)''
+
+~
+
+\noindent Its full specification remains in Section~3.1.
+
+~
+
+\noindent \textbf{3. Comment:} Conceptual hypothesis investigated by TERA has not been explained well. The informative scheduling signal block is not justified with explanation.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. The hypothesis paragraph of Section~1 and the caption of Figure~1 have been revised to define the conceptual hypothesis and to explain the informative-scheduling-signal block: safe entropy-driven selective computation under the evaluated coverage constraint depends on the temporal organization of the model's predictive uncertainty, and the block of Figure~1 depicts the case in which that organization is present. The new definition reads:
+
+~
+
+``By an informative scheduling signal we mean an uncertainty trajectory whose level separates episode phases: low and stable during redundant intervals, rising ahead of and during risk transitions. This is the property depicted in the central block of Figure~1: without it, the entropic component cannot distinguish transition regions from stable intervals, and only the unconditional kinematic trigger remains protective; with it, thresholding entropy directs computation to the frames surrounding risk onset.'' (Section~1, eighth paragraph)
+
+~
+
+\noindent \textbf{4. Comment:} Sensor stream of Operational architecture of TERA need to be explained.
+
+\vspace{2mm}
+\noindent \textbf{Response:} The sensor stream of Figure~2 is the frame-synchronous concatenation of the four on-board modality groups specified in Section~3.1, plus two detector-reliability indicators, yielding the input vector $x_t \in \mathbb{R}^{31}$ at each frame. The second paragraph of Section~3 now includes the following text:
+
+~
+
+``The sensor stream at the input of Figure~2 is the frame-synchronous concatenation of the four on-board modality groups detailed in Section~3.1: behavioral-visual channels from the cabin-facing detector, kinematic channels (speed, longitudinal accelerations, gyroscope), driving-context channels (road type, precipitation, illumination, traffic density), and acoustic event channels, plus two detector-reliability indicators -- yielding $x_t \in \mathbb{R}^{31}$ per frame at $\approx$9.6\,fps.'' (Section~3, third paragraph)
+
+~
+
+\noindent \textbf{5. Comment:} Efficient inference cycle of the MHEG runtime computation scheduler algorithm need to be explained for its complexity.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree. A complexity analysis of Algorithm~1 was added in the paragraph following the algorithm in Section~3.4. In it, $\mathcal{K}$ denotes the set of monitored kinematic channels and $K = |\mathcal{K}| \le D$ its cardinality; this notation is defined at Eq.~10 and used consistently in Section~3.4, Algorithm~1, and Table~4, whose MHEG entry reads $\mathcal{O}(K)$/step. The core of the added analysis reads: ``One recurrent step of the two stacked layers costs $\mathcal{O}(4(DH{+}H^2)+8H^2)$ (the second layer's input has dimension $H$), i.e., ${\approx}57.2$\,K MACs for $D{=}31$, $H{=}64$. The window recomputation of line~5 runs $W{=}96$ such steps, so an executed update costs ${\approx}5.49$\,M MACs (...) the expected per-frame cost of Algorithm~1 is therefore $c_{\mathrm{gate}} + (1-s)\,W\,\mathcal{O}(4(DH{+}H^2)+8H^2)$ (...) The single-step formula without the $W$ factor, $c_{\mathrm{gate}} + (1-s)\,\mathcal{O}(4(DH{+}H^2)+8H^2)$, applies only to the non-validated persistent-state variant discussed below.'' (Section~3.4, first paragraph after Algorithm~1; the following paragraph details the evaluated windowed semantics and the non-equivalence measurement, see Additional changes, items~12--14).
+
+(Algorithm~1 is reproduced in full in the revised manuscript, Section~3.4.)
+
+
+
+~
+
+\noindent \textbf{6. Comment:} Frame-by-frame temporal evidence for seed 42 graph is not explained well.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. A frame-by-frame reading guide has been added to the paragraph following the first mention of Figure~5 in Section~4.2, identifying each visual element of the seed-42 examples. During revision verification we also found and corrected two problems in this figure, and we report them explicitly rather than silently: (a) the exemplar episodes of the submitted version were not selected by a stated criterion, and the abrupt exemplar was atypical (it belongs to a saturated minority of episodes whose entropy sits near the maximum throughout); the figure now uses, per regime, the episode with the \emph{median} pre/post-onset entropy contrast among seed-42 critical episodes with central onset, and the caption states the criterion; (b) the replay that produced the suppression shading applied the entropy threshold in the wrong logarithm base (natural log instead of the base-2 entropy of Eq.~11), so the entropic branch of the gate never fired in that log; the log was regenerated with the correct base, and the entropy axes of Figures~4--6 are now uniformly in bits, matching Eq.~11. The added text reads:
+
+~
+
+(The full frame-by-frame reading guide follows the first mention of Figure~5 in Section~4.2.) Its selection criterion reads: ``The exemplars are selected by a pre-declared neutral criterion: within each regime, the episode whose pre/post-onset entropy contrast is the \emph{median} among the critical episodes of seed~42 with a centrally located onset (progressive: episode~36, $t_0{=}5.42$\,s; abrupt: episode~148, $t_0{=}2.50$\,s).'' The guide also states that detection markers of single exemplars do not arbitrate latency (aggregate latencies are settled by Table~8) and that a minority of abrupt critical episodes (12 of 48 in seed~42) runs near maximal entropy throughout. The regenerated figure is reproduced below.
+
+\begin{figure*}[!tbp]
+\centering
+\includegraphics[width=\textwidth]{image/5-fig_temporal_trace_en.pdf}
+\caption{Frame-by-frame temporal evidence for seed~42. Columns show the
+Baseline and \mbox{AF-TOI}+MHEG configurations; rows show progressive and abrupt
+episodes. Solid curves denote $p_t$, dashed curves denote $H_t$ (bits), vertical
+lines mark \(t_{\text{onset}}\), markers $\triangledown$ indicate
+$t_{\text{det}}$, and gray regions indicate \mbox{MHEG} buffer reuse.
+{\color{\revcolor}Exemplars are the median pre/post-onset entropy-contrast
+episodes per regime among seed-42 critical episodes with central onset
+(progressive: episode~36, $t_0{=}5.42$\,s; abrupt: episode~148,
+$t_0{=}2.50$\,s); the selection criterion was fixed before inspection.}}
+
+\end{figure*}
+
+\newpage
+
+%% =====================================================================
+%% REVIEWER 2
+%% =====================================================================
+
+\begin{large}
+\noindent \underline{Response to Reviewer \#2:}
+\end{large}
+
+\vspace{10pt}
+
+\noindent The authors thank the reviewer for the time spent assessing the manuscript and for the recommendation of minor revision. The responses to each comment follow.
+
+\vspace{0.5cm}
+\noindent \textbf{1. Comment:} The abstract is well-structured but too long ($\sim$350 words versus the $\sim$200-word norm for this type of Paper), but the contributions are clearly stated within it.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. The abstract has been rewritten and reduced from approximately 350 to 220 words (word count on the compiled text) while preserving the problem statement, the three components, the negative-control result, and the main quantitative findings; the comparator of the cost figure is stated explicitly (the negative control is cheaper still, at the safety cost reported). The revised abstract reads:
+
+~
+
+``Vehicular edge nodes run monitoring models continuously on hardware shared with other always-on functions. Selective computation keeps such systems within budget, but for uncertainty-driven scheduling to preserve detection coverage, the uncertainty signal must become informative around critical transitions. Continuous driving streams do not guarantee this: a classification-trained model can stay confident up to a transition, and the scheduler then suppresses the frames detection depends on. We argue that what makes uncertainty usable for scheduling is its \emph{temporal organization} rather than calibration. We study this through the TERA ecosystem: TERA-Gen (the TERA episode Generator) generates episodes with deterministic, frame-precise onsets; AF-TOI, unlike temporal distillation, which aligns teacher predictions, shapes a compact causal model's uncertainty trajectory around the risk onset; and MHEG exploits the resulting entropy stratification at runtime. In a controlled synthetic, single-node $2\times2$ factorial over twelve seeds, scheduling unorganized trajectories is cheapest but does not improve coverage and worsens effective detection delay ($\mathrm{TTD}_{\mathrm{ef}}$, measured with retrospective detection markers) by 13.9\% ($p=0.001$); AF-TOI+MHEG reduces per-frame cost by 49.8\% relative to Baseline Fixed (0.340 vs.\ 0.677\,ms/frame) with $\mathrm{TTD}_{\mathrm{ef}}$ 0.099\,s versus 0.570\,s under Baseline+MHEG. A post-hoc calibration control shows calibration and temporal organization to be empirically dissociable under this protocol. The pipeline emits a discrete operational-risk state $\ell_t$, a candidate input for vehicular edge coordination.''
+
+~
+
+\noindent \textbf{2. Comment:} The introduction is clear and presents the three components and the hypothesis, but it lacks an explicit paragraph outlining the paper's structure.
+
+\vspace{2mm}
+\noindent \textbf{Response:} An organization paragraph was added as the final paragraph of Section~1:
+
+~
+
+``The remainder of this paper is organized as follows. Section~2 reviews related work and positions our contribution. Section~3 presents the TERA framework: deterministic temporal anchoring (TERA-Gen), temporal organization induction (AF-TOI), and the runtime scheduler (MHEG). Section~4 reports the experimental evaluation, including the factorial study, the robustness controls, and the post-hoc calibration control. Section~5 discusses implications and limitations, Section~6 outlines architectural implications for vehicular edge computing, and Section~7 concludes.''
+
+~
+
+\noindent \textbf{3. Comment:} The related work is unusually complete: six subsections and a gap-matrix table that positions the paper explicitly and identifies the limitations of each prior line of work.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We thank the reviewer for the comment.
+
+~
+
+\noindent \textbf{4. Comment:} For me, the structure is clear, and the problem is well defined. Framing is heavy but navigable.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We thank the reviewer for the comment.
+
+~
+
+\noindent \textbf{5. Comment:} The concepts are sound and internally well-demonstrated. The results are not fully proven. For example, all evaluations rely on synthetic data with n=4 seeds, and the minimum Wilcoxon p-value is 0.0625, so no result meets conventional statistical significance. However, the authors acknowledge and defer real data and hardware validation to future work.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. To address the limited inferential resolution of the four-seed campaign, the factorial study reported in Section~4.4 was expanded to twelve seeds (42--53) under the same frozen experimental pipeline, with the expansion protocol fixed before analyzing the additional results. With $n=12$, the exact paired Wilcoxon test resolves conventional significance on F1, ECE, and $\mathrm{TTD}_{\mathrm{ef}}$; the remaining exception (FR in the fixed contrast, where only five nonzero pairs contribute) and the external-validity limitation are stated where the results are reported. The Statistical analysis paragraph of Section~4.4 and the third limitation of Section~5 have been rewritten accordingly and now read:
+
+~
+
+``To address the limited inferential resolution of the initial four-seed campaign, the factorial study covers twelve seeds (42--53): an initial four-seed campaign (42--45) extended by eight further seeds. The eight additional seeds were fixed before inspecting their outcomes and before recomputing any inferential statistics for the expanded twelve-seed campaign; the sample size was not adjusted as a function of the additional-seed results, and all twelve are reported regardless of outcome; the expansion was executed with the same frozen pipeline (identical configuration and generator hashes), and the four initial seeds were verified to reproduce their four-seed campaign exactly before integration. (...) With $n=12$ the exact paired Wilcoxon test resolves conventional significance: AF-TOI dominates the Baseline on F1 and ECE ($p=0.0005$) and on $\mathrm{TTD}_{\mathrm{ef}}$ ($p=0.021$), with AF-TOI attaining higher F1 in twelve of twelve paired seeds. For FR in the fixed contrast the test yields $p=0.0625$: seven of the twelve Baseline seeds also have $\mathrm{FR}=0$ and the exact two-sided signed-rank test discards zero differences, leaving five informative pairs, all favoring AF-TOI; only these five nonzero pairs contribute, and the contrast is not significant at the 0.05 level; in the scheduled contrast (Baseline+MHEG vs.\ AF-TOI+MHEG) FR reaches $p=0.0156$. (...)'' (Statistical analysis paragraph, Section~4.4; the omitted remainder reports the significant negative control, $p=0.001$ and $p=0.0005$, the agreement of the fixed-contrast means with the four-seed pattern, and the $n{=}4$ scope of the complementary campaigns.)
+
+~
+
+``Third, the factorial analysis uses twelve seeds (42--53) under a prespecified protocol: the eight seeds beyond the initial four (42--45) were fixed before inspecting their outcomes, and all twelve are reported; with $n=12$ the exact paired Wilcoxon test reaches conventional significance on F1, ECE, and $\mathrm{TTD}_{\mathrm{ef}}$ (Section~4.4). The remaining statistical caveat is narrower: FR in the fixed contrast is at a ceiling (most seeds have zero misses in both configurations), and inter-seed replication under a single synthetic generator quantifies sensitivity to initialization, not external validity -- significance here does not substitute for naturalistic validation. The mechanistic anchor remains the negative control, where MHEG on unorganized trajectories worsens $\mathrm{TTD}_{\mathrm{ef}}$ while the same scheduler on organized trajectories preserves coverage and cuts computation.'' (Section~5, second paragraph of the limitations discussion)
+
+~
+
+\noindent \textbf{6. Comment:} The figures are high quality and informative, but several are dense and text-heavy and would benefit from larger fonts.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. The dense multi-panel figures were regenerated with substantially larger fonts for axis labels, tick labels, legends, and in-figure annotations, preserving the underlying data. This covers the entropy-stratification and reliability panels of Figure~4, the frame-level temporal traces of Figure~5, the gating heatmaps of Figure~6, the coverage and efficiency trade-off of Figure~7, the $\mathrm{TTD}_{\mathrm{ef}}$ distributions and cumulative curves of Figures~8 and~9, the per-seed panel of Figure~10, and the borderline probability distributions of Figure~11. Figures~7 to~10 additionally reflect the expanded twelve-seed campaign described in our response to Comment~5. During revision verification the calibration figures were also treated: Figure~13 was regenerated with larger fonts and a corrected title (a leaked LaTeX escape rendered as ``95\textbackslash\%'' in the submitted version), from a versioned script that rebuilds it out of the released calibration macros and per-seed campaign outputs; the per-seed stratification-score figure of the submitted version (old Figure~14) was removed together with the score it displayed (see Additional changes, item~7e); Figure~12 is regenerated by the released calibration-experiment script.
+
+~
+\noindent \textbf{Recommendation:} My recommendation: Minor Revision. The core contribution is sound, the negative-control design is convincing, and the scope is presented honestly. The main weakness is a synthetic-only evaluation, with n=4 seeds and no statistical significance. So it limits the reach of the claims without invalidating them. I recommend shortening the abstract, adding a paragraph outlining the paper's structure, and moderating the statistical language.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We sincerely thank the reviewer for the recommendation and for the fair characterization of the strengths and limitations of the study. The three requested adjustments have been implemented concretely. The abstract was shortened from approximately 350 to 220 words (Comment~1). A structure paragraph closes Section~1 (Comment~2). The statistical language was moderated independently of the sample-size expansion: ``The experiments bear the hypothesis out'' became ``The controlled experiments provide evidence consistent with this hypothesis under the evaluated synthetic conditions'' (Section~1); ``rules out the obvious alternative explanation'' became ``addresses the obvious alternative explanation (...) under this protocol'' (Section~1); ``The decisive result'' became ``The most informative result of this campaign (...) under its stress protocol'' (Section~4.10); the remaining occurrences of ``confirming''/``confirms'' in Sections~4.4, 4.8, and 4.10 were replaced by ``showing''/``indicating''/``consistent with''; and ``the single-node, entropy-gated mechanism this paper establishes'' became ``characterizes'' (Section~6). Inferential statements are restricted to the twelve-seed campaigns (the factorial study and the retrained mechanism-removal ablation of Table~11); the complementary campaigns ($n=4$) are reported descriptively, and the per-duration contrasts of Section~4.12 are exploratory. In addition, the limited inferential resolution of the original four-seed campaign, identified by the reviewer, was addressed by expanding the factorial study to twelve seeds under the prespecified protocol described in our response to Comment~5, and the main contrasts now reach conventional significance.
+\newpage
+
+%% =====================================================================
+%% REVIEWER 3
+%% =====================================================================
+
+\begin{large}
+\noindent \underline{Response to Reviewer \#3:}
+\end{large}
+
+\vspace{10pt}
+
+\noindent The authors thank the reviewer for the time spent assessing the manuscript. The responses to each comment follow.
+
+\vspace{2mm}
+\noindent \textbf{General comment:} This manuscript presented a framework for trustworthy selective computation in resource-constrained vehicular edge inference, the topic looks interesting, but I do have quite a few major and minor concerns. My comments are as follows:
+
+\vspace{2mm}
+\noindent \textbf{Response:} Each concern is addressed individually below.
+
+\vspace{0.5cm}
+\noindent \textbf{1. Comment:} In the abstract and introduction sections, the background, motivation, and novelty are not clear. For instance, the main methodological contribution is AF-TOI, which transfers temporal structural information from a non-causal reference model to a causal deployment model, with the objective of organizing the predictive uncertainty around risk transitions. The motivation is interesting, but the methodological distinction from existing methods to temporal knowledge distillation, sequence-level knowledge transfer, temporal representation learning, uncertainty-aware inference, and adaptive/selective computation is not sufficiently clear. The authors should provide a much more explicit discussion of what is fundamentally new in AF-TOI.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. To make the methodological distinction explicit from the first presentation of the method, the abstract and the paragraph introducing AF-TOI in Section~1 have been revised, while Section~2.6 provides the detailed comparison with related approaches. The abstract now describes AF-TOI as follows: ``AF-TOI, unlike temporal distillation, which aligns teacher predictions, shapes a compact causal model's uncertainty trajectory around the risk onset''; the contributions paragraph of Section~1 states the same distinction at the first mention of AF-TOI; and the closing paragraph of Section~2.6, rewritten to clarify the distinction relative to temporal knowledge distillation, sequence-level transfer, temporal representation learning, uncertainty-aware inference, and adaptive/selective computation, reads:
+
+~
+
+``The methodological distinction of AF-TOI relative to these families can be stated explicitly. (...) To the best of our knowledge, using onset-anchored structural alignment to \emph{create} the scheduling signal that a selective-computation gate later consumes is the specific contribution of AF-TOI.'' (Section~2.6, closing paragraph.)
+
+~
+
+\noindent \textbf{2. Comment:} In the related work section, more your own comments on state-of-the-art methods are suggested, which would facilitate the problem formulation.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. The closing paragraph of Section~2.6 has been rewritten to turn our critical reading of prior work into the problem formulation; it is reproduced in our response to Comment~1. Critical commentary also appears at the close of each subsection of Section~2 (for example, the reliance of exit and skip criteria on instantaneous confidence in Section~2.4, and the marginal character of probabilistic calibration in Section~2.5), and Table~1 consolidates it by marking, for each work, which required properties are present, partial, or absent.
+
+~
+
+\noindent \textbf{3. Comment:} The main experimental conclusions are obtained using TERA-Gen, where the risk onset is deterministically defined at frame level. This design is useful for isolating the proposed mechanism and for avoiding annotation ambiguity, but it also creates a highly controlled experimental environment that may favor the proposed onset-oriented training strategy. The authors do not establish whether the observed temporal organization of uncertainty and the resulting scheduling benefits persist under realistic driving conditions, where risk transitions may be noisy, gradual, abrupt, ambiguous, or inconsistently annotated.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. The limitations paragraph of Section~5 has been rewritten to distinguish the robustness tests performed in the controlled synthetic setting (the progressive/abrupt regime mix, the unseen recipe families of Movement~6, and the stress campaign of Section~4.10) from generalization to naturalistic driving, which remains an open limitation; the paragraph now also incorporates the temporal-scale evaluation of Section~4.12. The revised paragraph reads:
+
+~
+
+``A related caveat is that a controlled environment could, in principle, favor an onset-oriented training strategy. Three design elements mitigate, without eliminating, this risk: episodes mix progressive and abrupt regimes in fixed proportion (Section~3.1); Movement~6 evaluates recipe families never seen in training; and the stress campaign of Section~4.10 spans nine onset/noise scenarios, including degraded entropy, lagged entropy, missing kinematic channels, and false onsets. Temporal-scale generalization is evaluated explicitly under shape-preserving synthetic warps with frozen models and thresholds (Section~4.12): AF-TOI maintains the duration-wise mean FR within the operational bound across risk-transition durations of $0.21$--$5.21$\,s (with seed-level exceedances in 7 of 108 cells), but this controlled temporal OOD test does not establish generalization to naturalistic distribution shift, to transition-shape families beyond those generated by TERA-Gen, or to unseen sensing statistics. Generalization across risk-trajectory families beyond these, and under real distribution shift, remains to be established on naturalistic data.'' (Section~5, fourth paragraph of the limitations discussion)
+
+
+~
+
+\noindent \textbf{4. Comment:} A central claim of the study is that temporal organization of uncertainty is important for safe selective computation, but the current experiments appear to be strongly tied to the risk-transition patterns defined by the experimental setup. The authors should investigate whether AF-TOI generalizes to unseen temporal risk trajectories, different onset durations, abrupt versus gradual transitions, intermediate-risk conditions, changes in the distribution of input features, or distribution shifts between training and testing conditions.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. To address the question of generalization across different transition durations, a new temporal-scale experiment has been added in Section~4.12, together with Figure~14 and Table~21. The experiment varies the risk-transition duration independently through a shape-preserving temporal warp while keeping $t_0$, the normalized transition shape, the episode context, the model weights, and the scheduler thresholds fixed. The limitations paragraph of Section~5 was also revised to distinguish this controlled temporal train--test shift from broader naturalistic distribution shift. The six aspects raised in the comment are addressed as follows.
+
+(i) \emph{Unseen temporal risk trajectories} are evaluated through the borderline recipe families of Movement~6 (A01--A03, L01--L03), generated independently and never used in training.
+
+(ii) \emph{Different onset/transition durations} are evaluated by the new experiment of Section~4.12, across nine durations from 0.21 to 5.21\,s, including interpolation and extrapolation outside the training support.
+
+(iii) \emph{Abrupt versus gradual transitions} are reported separately in Table~10, where the miss-rate benefit concentrates in the abrupt regime.
+
+(iv) \emph{Intermediate-risk conditions} are the object of Movement~6.
+
+(v) \emph{Input-feature degradation} is evaluated in Section~4.10 (high-noise, missing-kinematics, and false-onset scenarios).
+
+(vi) The new Section~4.12 introduces a controlled temporal train--test shift; broader shifts, in sensing statistics, in naturalistic driving conditions, and in unseen trajectory-shape families, remain unestablished, as stated in the limitations of Section~5.
+
+\vspace{2mm}
+\noindent The new Section~4.12 (Figure~14, Table~21) reads:
+
+~
+
+(The full design paragraph -- shape-preserving temporal warp, measured duration $d$, frozen weights and thresholds of the twelve seeds, nine durations from $0.21$ to $5.21$\,s with in-distribution anchors, an interpolation gap, and extrapolation extremes, and the zero-error reproduction anchor at the native duration -- opens Section~4.12.) Its closing scale note reads: ``The $\mathrm{TTD}_{\mathrm{ef}}$ magnitudes below are on this campaign's own scale -- frame-level detection from the label onset on warped episodes -- and are not comparable to the $\mathrm{TTD}_{\mathrm{ef}}$ of Table~8, which uses the original episodes and the main-campaign pipeline (Table~23); the zero-error anchor concerns reproduction of the campaign artifacts, not a shared metric scale.''
+
+~
+
+``Figure~14a--b and Table~21 report the frozen operating points. AF-TOI maintains mean FR below $0.05$ at every evaluated duration (maximum duration-wise mean $0.026$), and $\mathrm{TTD}_{\mathrm{ef}}$ stays within approximately $0.40$--$0.66$\,s. The Baseline crosses mean $\mathrm{FR}=0.05$ at both extrapolation extremes (mean FR $0.097$ at $0.21$\,s and $0.085$ at $5.21$\,s for the fixed policy), and its $\mathrm{TTD}_{\mathrm{ef}}$ follows a U-shaped profile that reaches $2.12$\,s at the fast extreme. At the level of individual seed$\times$duration cells, AF-TOI exceeds $\mathrm{FR}=0.05$ in 7 of 108 cells (all at $d\ge3.23$\,s, maximum $0.108$), against 22 of 108 for the fixed Baseline (maximum $0.250$) and 32 of 108 for Baseline+MHEG (maximum $0.333$). Frame-level F1 remained seed-sensitive under the warp, a pattern consistent with checkpoint-level variability rather than with an effect of the warp itself. Accordingly, the result is restricted to aggregate coverage and effective delay and does not constitute a per-seed guarantee: AF-TOI shows aggregate temporal-scale robustness across the evaluated synthetic range of unseen risk-transition durations.'' (Section~4.12, second paragraph)
+
+~
+
+``Because the two frozen gates suppress different fractions of frames, we added a post-hoc matched-budget diagnostic: for each seed$\times$duration cell, the entropy threshold of Baseline+MHEG was adjusted by bisection (...) until its computation rate (fraction of executed window updates; both arms share the recompute semantics of Section~3.4) matched that of AF-TOI+MHEG on the same cell (all 108 cells matched within $1.9\%$, tolerance $2\%$; Figure~14d). (...) At matched computation cost, no systematic FS@onset advantage remains (...). Under Holm correction within each endpoint family, only the $\mathrm{TTD}_{\mathrm{ef}}$ difference at $0.21$\,s remains significant ($p=0.031$), so these per-duration matched-cost contrasts should be read as exploratory. The matched-budget diagnostic supports a temporal-scale coverage-and-timeliness advantage, not a universal improvement in near-onset suppression placement.'' (Section~4.12, third paragraph)
+
+\noindent The new figure and table are reproduced below.
+
+\begin{figure*}[!tbp]
+\color{\revcolor}
+\centering
+\includegraphics[width=\textwidth]{image/fig_temporal_scale_v2.pdf}
+\caption{Temporal-scale generalization under shape-preserving
+risk-transition warps (twelve seeds; mean $\pm$ standard error). Shaded
+bands mark the temporal support represented in training
+($0.42$--$1.04$\,s abrupt, $2.50$--$4.06$\,s progressive); durations
+between and outside the bands are out-of-distribution. (a,\,b)~FR and
+$\mathrm{TTD}_{\mathrm{ef}}$ at the frozen operating points. (c)~Near-onset
+false suppression at matched computation cost; no systematic \mbox{AF-TOI}
+advantage is observed. (d)~Computation rates after budget matching (solid,
+left axis) and the corresponding FR (dotted, right axis).}
+
+\end{figure*}
+
+\begin{table*}[!tbp]
+\color{\revcolor}
+\centering
+\caption{Temporal-scale generalization across risk-transition durations
+$d$ (mean $\pm$ sd, twelve seeds). FR and $\mathrm{TTD}_{\mathrm{ef}}$ (s)
+use the frozen operating points (fixed policy); FS@onset uses the post-hoc
+matched-budget diagnostic (Baseline+MHEG matched to the computation rate of
+\mbox{AF-TOI}+MHEG within $2\%$). Regime: ID = within training support;
+interp.\ = interpolation gap; extrap.\ = extrapolation.}
+
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.15}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{cc cc cc cc}
+\toprule
+& & \multicolumn{2}{c}{\textbf{FR} (frozen)}
+  & \multicolumn{2}{c}{\textbf{TTD$_{\mathrm{ef}}$} (s, frozen)}
+  & \multicolumn{2}{c}{\textbf{FS@onset} (matched budget)} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+$d$ (s) & regime & Baseline & \mbox{AF-TOI} & Baseline & \mbox{AF-TOI}
+        & Baseline+MHEG & \mbox{AF-TOI}+MHEG \\
+\midrule
+0.21 & extrap. & 0.097$\pm$0.086 & 0.000$\pm$0.000 & 2.121$\pm$1.266 & 0.519$\pm$0.308 & 0.069$\pm$0.031 & 0.098$\pm$0.045 \\
+0.62 & ID      & 0.041$\pm$0.063 & 0.001$\pm$0.002 & 1.326$\pm$0.924 & 0.543$\pm$0.294 & 0.040$\pm$0.056 & 0.075$\pm$0.092 \\
+1.04 & ID      & 0.010$\pm$0.026 & 0.000$\pm$0.000 & 0.890$\pm$0.417 & 0.546$\pm$0.259 & 0.075$\pm$0.089 & 0.113$\pm$0.129 \\
+1.46 & interp. & 0.006$\pm$0.014 & 0.001$\pm$0.002 & 0.643$\pm$0.297 & 0.544$\pm$0.193 & 0.111$\pm$0.100 & 0.143$\pm$0.138 \\
+1.88 & interp. & 0.004$\pm$0.014 & 0.001$\pm$0.005 & 0.537$\pm$0.273 & 0.513$\pm$0.183 & 0.117$\pm$0.091 & 0.135$\pm$0.138 \\
+2.29 & interp. & 0.006$\pm$0.014 & 0.001$\pm$0.002 & 0.476$\pm$0.277 & 0.431$\pm$0.135 & 0.123$\pm$0.094 & 0.136$\pm$0.135 \\
+3.23 & ID      & 0.011$\pm$0.012 & 0.010$\pm$0.021 & 0.436$\pm$0.269 & 0.395$\pm$0.244 & 0.125$\pm$0.099 & 0.119$\pm$0.107 \\
+4.38 & extrap. & 0.036$\pm$0.044 & 0.024$\pm$0.043 & 0.718$\pm$0.544 & 0.450$\pm$0.457 & 0.114$\pm$0.076 & 0.096$\pm$0.065 \\
+5.21 & extrap. & 0.085$\pm$0.073 & 0.024$\pm$0.043 & 1.239$\pm$0.770 & 0.414$\pm$0.470 & 0.096$\pm$0.074 & 0.076$\pm$0.058 \\
+\bottomrule
+\multicolumn{8}{p{0.9\textwidth}}{\footnotesize Exact paired Wilcoxon
+($n{=}12$) on FS@onset at matched budget: $p=0.027$ at $0.21$\,s (favoring
+the matched Baseline, which exhibits mean FR $0.111$ at this duration);
+$p\ge0.21$ at all other durations.}
+\end{tabular}}
+\end{table*}
+
+~
+
+\noindent \textbf{5. Comment:} The experiments are not sufficient to support the proposed method. The study should include stronger baseline comparisons, particularly with representative methods based on confidence-based selective inference, entropy-based scheduling without AF-TOI, temporal smoothing or temporal filtering, adaptive computation/early-exit mechanisms where applicable, and existing uncertainty-aware resource allocation strategies.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. To strengthen the baseline comparison, Section~4.11 and Table~19 have been added, evaluating a confidence-threshold gate and a smoothed-entropy gate at a safety-constrained operating point and at a matched-suppression operating point. The existing Baseline+MHEG configuration of Table~8 provides the entropy-based scheduler without AF-TOI, and Section~4.10 contains the lagged and cost-matched allocation controls. Section~2.4 positions depth-wise early-exit methods and explains why they are not directly applicable to the recurrent time-axis scheduler evaluated here. In addition, Skip-RNN (Campos et al., 2018) was implemented and trained on the same data as a published adaptive temporal-computation baseline and compared to the frozen AF-TOI(+MHEG) models under a single harmonized protocol (new Table~20 in Section~4.11). The five requested groups are addressed as follows; the summary matrix
+states, for each family, the allocation axis, the compatibility with this
+paper's single-node causal RNN/LSTM/GRU timestep-level setting, and the
+treatment adopted.
+
+\begin{center}\footnotesize
+\begin{tabular}{p{3.3cm} p{2.5cm} p{2.3cm} p{4.8cm}}
+\hline
+\textbf{Requested family} & \textbf{Allocation axis} & \textbf{Compatible?} & \textbf{Treatment} \\
+\hline
+Confidence-based selective inference & time (skip step) & yes & implemented: confidence gate + periodic-refresh variant (Table~19, Section~4.11) \\
+Entropy-based scheduling without AF-TOI & time & yes & factorial negative control Baseline+MHEG (Table~8) \\
+Temporal smoothing / filtering & time & yes & smoothed-entropy gate (Table~19); lagged allocator (Section~4.10) \\
+Adaptive computation / early exit & depth (exit heads) or time & depth: no; time: yes & depth-wise not applicable to a 58K two-layer LSTM; time axis covered by Skip-RNN, trained end-to-end (Table~20) \\
+Uncertainty-aware resource allocation & feed-forward early exit, distributed or offloading settings, or SSM backbones & no like-for-like method identified & documented scope limit (item~v); closest instantiated proxies: calibrated-confidence controls (Section~4.8) and confidence gate (Section~4.11) \\
+\hline
+\end{tabular}
+\end{center}
+
+\vspace{2mm}
+\noindent \textbf{(i) Confidence-based selective inference.} A confidence-threshold gate, which updates only when the buffered confidence is low, was added and evaluated in Section~4.11 (Table~19), at a safety-constrained operating point and at a matched-suppression operating point. Because a purely buffered gate cannot re-arm itself once its input freezes (the deadlock reported in Table~19), we additionally evaluated a \emph{periodic-refresh} confidence gate (forced update every $R \in \{2,4,8\}$ frames), which is closer to how such schedulers are deployed. The refresh breaks the deadlock: on this in-distribution replay (seeds 42--45, oracle thresholds on the test partition, reported descriptively) it reaches up to $85.9\%$ suppression with $\mathrm{FR}=0$ on Baseline trajectories, and the revised Section~4.11 reports this candidly, noting that a blind cadence suffices for the replay endpoints while belonging, by construction, to the structure-free allocation family whose random and unstructured members degrade near onset at matched budget in the stress campaign of Section~4.10 (a family-level reading; the refresh gate itself was not rerun under that stress protocol). The post-hoc calibration study of Section~4.8 (Table~14) complements it with temperature-, Platt-, and isotonic-rescaled confidence combined with the scheduler; we also state directly in Section~4.8 that the isotonic variant combined with MHEG matches or exceeds AF-TOI+MHEG on the endpoints of that in-distribution replay, with the mechanistic reading and its untested-under-shift status spelled out. This remains a limitation.
+
+\vspace{2mm}
+\noindent \textbf{(ii) Entropy-based scheduling without AF-TOI.} This is the negative control of the factorial design: Baseline+MHEG (Table~8) applies the same entropy-plus-kinematics scheduler to trajectories without AF-TOI organization, without improving coverage (FR $0.033 \rightarrow 0.035$) and worsening $\mathrm{TTD}_{\mathrm{ef}}$ by 13.9\% ($p=0.001$, $n=12$).
+
+\vspace{2mm}
+\noindent \textbf{(iii) Temporal smoothing or filtering.} A smoothed-entropy gate (moving average over the buffered entropy, window $w{=}5$) was added and evaluated in Section~4.11 (Table~19). It inherits the coverage collapse of the raw confidence gate: averaging a frozen buffer does not restore an informative signal. The lagged allocator of the cost-matched campaign (Section~4.10, Table~17) and the entropy-lag study (Table~18) quantify the delay that low-pass filtering imposes on the scheduling signal.
+
+\vspace{2mm}
+\noindent \textbf{(iv) Adaptive computation / early exit.} Early-exit mechanisms act on the depth axis of a forward pass and presuppose a backbone with intermediate heads; the deployed model here is a two-layer recurrent network of $\approx$58K parameters whose scheduling decision acts on the time axis (whether to run the step at all). A depth-wise early-exit baseline is therefore not applicable without changing the model class. To cover the time axis with a published method, Skip-RNN (Campos et al., 2018) was implemented and trained end-to-end on the same data and partitions (seeds 42--45) as a learned adaptive temporal-computation baseline. It is compared to the frozen AF-TOI(+MHEG) models under a single harmonized protocol, together with the frozen temporal-scale grid of Section~4.12 and two alert-occupancy metrics; the added paragraph and Table~20 appear in Section~4.11 and are reproduced below. We note candidly that, on the detection endpoints of this synthetic campaign, Skip-RNN matches or exceeds AF-TOI+MHEG at the matched-suppression point. This exposed a limitation of $\mathrm{TTD}_{\mathrm{ef}}$, which does not penalize alerts raised before the onset; the revised text states this explicitly, reports pre-onset alert occupancy as a complementary signal-semantics endpoint, and restricts our claim to the temporal semantics of the emitted signal and to the explicit runtime safety mechanisms, rather than to detection performance.
+
+\vspace{2mm}
+\noindent \textbf{(v) Existing uncertainty-aware resource-allocation strategies.}\\ Our targeted literature search did not identify a published uncertainty-aware resource-allocation method that could be directly implemented under the same single-node causal RNN/LSTM/GRU constraints considered in our experimental campaign, and we state this explicitly. The closest instantiated comparisons are the calibrated-confidence controls of Section~4.8 and the confidence-threshold gate of Section~4.11; the random, unstructured, and lagged allocators of Section~4.10 are internal controls rather than published methods. Skip-RNN is reported under group (iv) and is not classified as uncertainty-aware, since its gate is learned and does not consume predictive uncertainty. Published uncertainty-driven methods identified in the literature operate on different architectural or allocation axes -- feed-forward depth-wise early exit, distributed/offloading settings, or newer state-space architectures -- rather than the causal RNN/LSTM/GRU timestep-level setting evaluated here. UR2M (Jia et al., 2024, IEEE PerCom), for example, uses evidential predictive uncertainty to control early exit on a microcontroller, but its backbone is a feed-forward convolutional cascade rather than an RNN/LSTM/GRU. Structural-Jump-LSTM (Hansen et al., 2019, ICLR) is a closer recurrent adaptive-computation method, but its skip/jump decisions are learned RL policies rather than predictive-uncertainty estimates; making it uncertainty-driven would require altering the published mechanism, so it would no longer be a faithful like-for-like implementation.
+
+\vspace{2mm}
+\noindent The two operating points and every cell value are given in Table~19 of the revised manuscript (Section~4.11); its caption and footnote state the harmonized markers, the oracle calibration on the test partition (which favors the baselines), and the deadlock/coincidence notes; the new table is reproduced below.
+
+\begin{table*}[!tbp]
+% Tabela nova desta revisao: o float sai do escopo do grupo de cor da
+% secao, entao a cor e declarada dentro do proprio float.
+\color{\revcolor}
+\centering
+\caption{Confidence-threshold and smoothed-entropy baselines under the replay
+protocol (mean $\pm$ sd, seeds 42--45). Safe point: maximum suppression
+subject to $\mathrm{FR}\le0.05$. Matched point: thresholds tuned to the
+suppression level of the entropy+kinematic gate on the same trajectories.
+Oracle calibration on the test partition favors the baselines. Latencies are
+measured from the label onset; the kinematic trigger uses the monitored
+channels of Eq.~10.}
+
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.2}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l l c c c c c}
+\toprule
+& & \multicolumn{2}{c}{\textbf{Safe point} ($\mathrm{FR}\le0.05$)}
+  & \multicolumn{3}{c}{\textbf{Matched-suppression point}} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-7}
+\textbf{Trajectories} & \textbf{Gate}
+  & \textbf{\%Sup}$\uparrow$ & \textbf{TTD$_{\mathrm{ef}}$~(s)}$\downarrow$
+  & \textbf{\%Sup} & \textbf{FR}$\downarrow$ & \textbf{TTD$_{\mathrm{ef}}$~(s)}$\downarrow$ \\
+\midrule
+\multirow{3}{*}{Baseline (unorg.)}
+ & Confidence-threshold        & $0.4 \pm 0.7$  & $0.01 \pm 0.01$ & $97.1 \pm 0.2$ & $0.990 \pm 0.004$ & $9.90 \pm 0.04$ \\
+ & Smoothed entropy ($w{=}5$)  & $2.1 \pm 3.6$  & $0.11 \pm 0.20$ & $96.7 \pm 0.5$ & $0.988 \pm 0.005$ & $9.88 \pm 0.05$ \\
+ & Entropy + kinematic         & $\mathbf{93.6 \pm 0.0}$ & $0.25 \pm 0.08$ & --- & $\mathbf{0.002 \pm 0.004}$ & --- \\
+\midrule
+\multirow{3}{*}{\mbox{AF-TOI} (org.)}
+ & Confidence-threshold        & $0.0 \pm 0.0$  & $0.04 \pm 0.04$ & $69.7 \pm 1.8$ & $0.594 \pm 0.128$ & $5.94 \pm 1.28$ \\
+ & Smoothed entropy ($w{=}5$)  & $0.0 \pm 0.0$  & $0.04 \pm 0.04$ & $69.7 \pm 1.8$ & $0.594 \pm 0.128$ & $5.94 \pm 1.28$ \\
+ & Entropy + kinematic         & $\mathbf{69.3 \pm 1.7}$ & $\mathbf{0.35 \pm 0.18}$ & --- & $\mathbf{0.010 \pm 0.008}$ & --- \\
+\bottomrule
+\multicolumn{7}{p{0.93\textwidth}}{\footnotesize The entropy+kinematic row is
+the reference gate under the same replay protocol; its matched point coincides
+with its safe point. Confidence and smoothed gates coincide at the matched
+point because smoothing a frozen buffer does not alter the deadlock. On
+\mbox{AF-TOI} trajectories both purely entropic gates reach zero suppression
+at the safe point, so their safe-point rows coincide as well.}
+\end{tabular}}
+\end{table*}
+
+The Skip-RNN comparison added to Section~4.11 (Table~20) reads:
+
+~
+
+(The definitional paragraph -- Skip-RNN trained end-to-end on the same data and partitions as a published adaptive temporal-computation control, all systems under the single harmonized protocol, PreOcc/NormOcc defined -- appears verbatim at the opening of the Skip-RNN passage in Section~4.11.)
+
+~
+
+``At matched suppression ($50.9\%$ vs.\ $48.7\%$), Skip-RNN matches or exceeds the frozen AF-TOI(+MHEG) models on the primary detection endpoints of this synthetic campaign (FR $0.000$ vs.\ $0.004$; $\mathrm{TTD}_{\mathrm{ef}}$ $0.000$ vs.\ $0.101$\,s; F1 tied at $0.998$), and at maximum suppression it reaches $93.6\%$, although at that operating point its detector fires on every episode (F1 $=0.866$, the fire-always value). The exact zero in $\mathrm{TTD}_{\mathrm{ef}}$ reflects pre-onset threshold activation: the Skip-RNN alert is already above $\theta$ before the onset in $21\%$ of pre-onset frames, so detection collapses onto $t_0$ itself. This comparison exposed a limitation of the evaluation design -- $\mathrm{TTD}_{\mathrm{ef}}$ measures delay from the onset and does not penalize alerts raised before it -- which is why the alert-occupancy metrics below were added. Under the frozen temporal-scale protocol of Section~4.12 (seeds 42--45), the frozen Skip-RNN also preserves the detection endpoints across the duration grid in that descriptive four-seed replay. We therefore do not rank the two designs on these endpoints; PreOcc and NormOcc are reported as \emph{complementary signal-semantics metrics}, not as substitutes for the primary endpoints. On those measurements the emitted signals differ sharply: the Skip-RNN alert occupies $21\%$ (matched) to $38\%$ (maximum suppression) of the pre-onset frames of critical episodes and, at maximum suppression, $10.9\%$ of the frames of normal episodes, whereas the AF-TOI signal remains silent on normal episodes ($0.0\%$) and in $93$--$95\%$ of the pre-onset phase, rising ${\approx}18\times$ at the transition ($0.033 \rightarrow 0.581$ mean probability). The AF-TOI trajectory is thus an interpretable, temporally organized risk signal -- the input the MHEG thresholds consume and the substance of the operational state $\ell_t$ -- and it comes with the explicit runtime safety mechanisms (unconditional kinematic trigger, recalibratable thresholds, coverage constraint) that a learned gate does not provide. These are properties of the signal and of the runtime contract, not a claim of superiority on the detection endpoints above.'' (Section~4.11, second paragraph of the Skip-RNN passage)
+
+~
+
+\noindent \textbf{6. Comment:} The authors argue that temporal organization is the key factor enabling effective scheduling, additional ablations are required to make the evidence considerably stronger.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. To strengthen the ablation evidence, the single-seed sensitivity analysis of Table~11 has been replaced by a mechanism-removal ablation with twelve seeds (42--53) and exact values; all five conditions (the ablated model and the $\alpha$ grid, retained as parameter sensitivity) were retrained from scratch under a single frozen replication protocol, and the table now states explicitly that its values are comparable within the table only, not against the main-campaign pipeline of Table~8. The new condition removes only the onset-anchored temporal terms of the AF-TOI loss, preserving the reference model, the alignment loss, the architecture, the data, and the calibration protocol. We report the result symmetrically rather than selectively: on the scheduled contrast -- the configuration the paper deploys -- removal is worse than \emph{every} evaluated $\alpha$ (${\approx}3.5\times$ the canonical $\mathrm{TTD}_{\mathrm{ef}}$, $p=0.005$; ${\approx}3\times$ the worst grid value, $p=0.003$), degrades episode-level ECE ($\mathrm{ECE}_{v29}$) against every grid point in twelve of twelve seeds ($p=0.0005$), and the ablated model suppresses \emph{more} ($59.0\%$ vs.\ $47.5\%$) while detecting later; on the fixed policy the contrast is significant against the canonical $\alpha$ (${\approx}5.7\times$, $p=0.016$) but not against the worst grid point ($p=0.91$), and the text now says so, together with the $0.043$--$0.161$\,s span of the $\alpha$ grid itself. The complementary ablations remain where they were (factorial in Table~8, miss penalty in Table~12, reference topology in Table~15, kinematic-channel removal and signal degradation in Section~4.10 and Tables~17--18). The paragraph accompanying the new Table~11 reads:
+
+~
+
+``All five conditions were retrained from scratch and evaluated under a single frozen replication protocol (the replay pipeline that also underlies Sections~4.10 and~4.11); because that protocol differs from the main-campaign pipeline of Table~8, the Full AF-TOI row serves as the within-table reference and its values are not numerically comparable to Table~8. (...) Removing temporal organization leaves F1 and raw coverage at their ceiling but is consistently worse on the scheduled contrast, which is the configuration this paper deploys: under MHEG, its $\mathrm{TTD}_{\mathrm{ef}}$ is ${\approx}3.5\times$ the canonical value ($0.180$ vs.\ $0.051$\,s; exact paired Wilcoxon $p=0.005$, matched-pairs rank-biserial $r_{\mathrm{rb}}=0.87$ against removal), ${\approx}3\times$ the \emph{worst} value in the $\alpha$ grid ($0.059$\,s at $\alpha=0.05$; $p=0.003$, $r_{\mathrm{rb}}=0.90$), and ${\approx}4.8\times$ the grid mean ($p=0.001$). Under the fixed policy the contrast is significant against the canonical $\alpha=0.15$ (${\approx}5.7\times$, $0.250$ vs.\ $0.043$\,s; $p=0.016$, $r_{\mathrm{rb}}=0.77$) but not against the worst grid point ($0.161$\,s at $\alpha=0.30$; $p=0.91$). (...)'' (Section~4.6, second to fourth paragraphs; the omitted remainder reports the episode-level ECE degradation in twelve of twelve seeds, the higher suppression of the ablated model, and the $\alpha$-sensitivity reading, where the fixed-policy $\mathrm{TTD}_{\mathrm{ef}}$ spans $0.043$--$0.161$\,s across the grid.)
+
+\noindent The completed Table~11 (Fixed and MHEG blocks) is reproduced below.
+
+\begin{table*}[!tbp]
+\color{\revcolor}
+\centering
+\caption{Mechanism-removal ablation and $\alpha$ sensitivity (twelve seeds
+42--53, mean $\pm$ sd). All five conditions were retrained and evaluated
+under the same frozen replication protocol (the replay pipeline of
+Sections~4.10 and~4.11), which differs from the main-campaign
+pipeline of Table~8; values are comparable
+within this table only. F1 and ECE use the fixed policy. The no-temporal condition zeroes only the
+onset-anchored loss terms. Pairwise contrasts in the text are exact two-sided
+paired Wilcoxon tests over the twelve seeds with matched-pairs rank-biserial
+effect sizes, uncorrected for multiplicity and classified as secondary under
+the taxonomy of Section~4.1.}
+
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.2}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l c c cc ccc}
+\toprule
+& & & \multicolumn{2}{c}{\textbf{Fixed policy}}
+  & \multicolumn{3}{c}{\textbf{\MHEG policy}} \\
+\cmidrule(lr){4-5}\cmidrule(lr){6-8}
+\textbf{Condition} & \textbf{F1}$\uparrow$ & \textbf{ECE}$\downarrow$
+  & \textbf{FR}$\downarrow$ & \textbf{TTD$_{\mathrm{ef}}$~(s)}$\downarrow$
+  & \textbf{FR}$\downarrow$ & \textbf{TTD$_{\mathrm{ef}}$~(s)}$\downarrow$
+  & \textbf{\%Sup}$\uparrow$ \\
+\midrule
+No temporal organization & $0.884 \pm 0.022$ & $0.642 \pm 0.012$
+  & $0.013 \pm 0.046$ & $0.250 \pm 0.458$
+  & $0.001 \pm 0.002$ & $0.180 \pm 0.104$ & $59.0 \pm 9.3$ \\
+$\alpha=0.05$ & $0.902 \pm 0.034$ & $0.528 \pm 0.019$
+  & $0.008 \pm 0.016$ & $0.112 \pm 0.160$
+  & $0.000 \pm 0.000$ & $0.059 \pm 0.091$ & $50.1 \pm 9.5$ \\
+\rowcolor{gray!8}
+Full \mbox{AF-TOI} ($\alpha=0.15$) & $0.895 \pm 0.032$ & $0.531 \pm 0.017$
+  & $0.002 \pm 0.007$ & $\mathbf{0.043 \pm 0.082}$
+  & $0.000 \pm 0.000$ & $0.051 \pm 0.097$ & $47.5 \pm 10.0$ \\
+$\alpha=0.30$ & $0.885 \pm 0.017$ & $0.533 \pm 0.016$
+  & $0.015 \pm 0.025$ & $0.161 \pm 0.257$
+  & $0.001 \pm 0.005$ & $0.030 \pm 0.060$ & $48.6 \pm 9.3$ \\
+$\alpha=0.50$ & $0.892 \pm 0.024$ & $0.535 \pm 0.019$
+  & $0.008 \pm 0.017$ & $0.079 \pm 0.172$
+  & $0.001 \pm 0.002$ & $0.009 \pm 0.027$ & $50.0 \pm 7.2$ \\
+\bottomrule
+\end{tabular}}
+\end{table*}
+
+~
+
+\noindent \textbf{7. Comment:} The authors uses the term `trustworthy' relatively broadly, but the current experiments mainly demonstrate improvements in computational efficiency and detection delay under a controlled experimental setting.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree. The term is now used in a restricted, operational sense, defined in the opening paragraph of Section~2.2. During revision verification we noticed that an aggregate-only budget ($\mathrm{FR}\le 0.05$ on average) would also be satisfied by the negative control (Baseline+MHEG, mean FR $0.035$), contradicting the way the paper reads that configuration; because an aggregate failure rate can conceal unsafe behavior in individual replications, the definition evaluates the coverage budget \emph{in every evaluated seed}; under this criterion Baseline+MHEG violates the bound in three of the twelve seeds (FR up to $0.158$) and AF-TOI+MHEG remains within it in all twelve (max $0.017$). The definition reads:
+
+~
+
+``Throughout this paper, `trustworthy' is used in a restricted, operational sense: a selective-computation policy is trustworthy when it preserves critical-episode coverage in every evaluated seed ($\mathrm{FR} \le 0.05$ per seed, not merely on average) while suppressing computation, under the controlled conditions evaluated here. Because an aggregate failure rate can conceal unsafe behavior in individual replications, the coverage constraint is evaluated at the seed level rather than only on the pooled mean. Under this criterion, Baseline+MHEG satisfies the aggregate budget ($\mathrm{FR}=0.035$ on average) but violates the bound in three of the twelve seeds (up to $0.158$), whereas AF-TOI+MHEG remains within it in all twelve ($\max 0.017$). We make no claim regarding broader dimensions of trustworthiness (security, privacy, adversarial robustness), which are out of scope (Section~5).''
+
+~
+
+~
+
+\noindent \textbf{8. Comment:} The study reports an attractive model size and recurrent memory footprint, and estimates compatibility with several embedded/automotive platforms, but these results are based on parameter counts, memory requirements, and computational complexity rather than actual execution on physical embedded hardware.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. Section~4.13 was revised to state explicitly, at the point of use, that the embedded-viability figures are analytical estimates or reference-GPU measurements rather than measurements on physical automotive hardware; this is also the fourth limitation of Section~5. The added text reads:
+
+~
+
+``All embedded-viability figures in this subsection are analytical (parameter counts, memory footprints, FLOP counts) or measured on a reference GPU; none derives from execution on physical automotive hardware.'' (Section~4.13, first paragraph)
+
+~
+
+\noindent \textbf{9. Comment:} The authors discuss vehicular edge networks, but the actual evaluation is primarily performed at the single-node inference level. The study does not experimentally investigate multi-node coordination, communication overhead, offloading, or network-level resource allocation.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. The opening paragraph of Section~6 was rewritten to make explicit that the experimental campaign is single-node, with no coordination, offloading, communication latency, bandwidth, or network-level resource allocation evaluated, and that Section~6 offers an architectural interpretation rather than a validated distributed system. The paragraph now reads:
+
+~
+
+``This section offers an architectural interpretation, not an evaluated distributed system. The campaign in Section~4 ran in a single-node configuration under a fixed budget (reference-GPU execution; Section~4.13): no networked coordination, offloading, communication latency, or bandwidth analysis was evaluated. The validated contribution remains single-node selective computation, evaluated in a single-node configuration on a reference GPU; embedded-platform viability is estimated analytically (Section~4.13), and no execution on physical automotive hardware was performed. Here we explain only how the node-level operational state signal $\ell_t$, validated in that setting, could inform future VEC and MEC architectures.''
+
+~
+
+\noindent \textbf{10. Comment:} The authors acknowledge that the current study is limited to a controlled synthetic setting and a single embedded node, and that naturalistic data, physical automotive hardware, distributional robustness, sensor faults, adversarial perturbations, and multi-node studies remain future work. These limitations are important and should be reflected consistently throughout the study.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. The claims are now bounded to the controlled synthetic, single-node setting at every point where they are made: the abstract, the operational definition of Section~2.2 (reproduced in our response to Comment~7), the statistical paragraph of Section~4.4 (reproduced in our response to Reviewer~2, Comment~5), the deployment statement of Section~4.13 (reproduced in our response to Comment~8), and the limitations of Section~5 (reproduced in our response to Comment~3). {\color{\revcolor}In the restricted final revision, two further scope statements were aligned for consistency: Section~6 (opening paragraph) and the Conclusion now state that the evaluation ran in a single-node configuration on a reference GPU, with embedded-platform viability estimated analytically and no execution on physical automotive hardware (embedded deployment remains the intended application).}
+
+~
+
+\noindent \textbf{11. Comment:} The authors should comprehensively discuss both the limitations of the proposed method and future directions. For instance, how to further enhance the performance by integrating other learning paradigms. Some related papers are recommended and should be included: leveraging online learning for domain-adaptation in wi-fi-based device-free localization, and online spatiotemporal modeling for robust and lightweight device-free localization in nonstationary environments.
+
+\vspace{2mm}
+\noindent \textbf{Response:} We agree with the reviewer. The Future directions paragraph of Section~5 was expanded to include the two recommended works as methodological examples of online/domain adaptation from a related sensing domain, and to discuss their possible relation to future causal adaptation of the MHEG thresholds under the coverage constraint. The added text reads:
+
+~
+
+``Methodological precedents from another sensing domain provide useful design references for this direction. In device-free Wi-Fi localization, online learning has been used to adapt models across domains without full retraining (Zhang et al., 2025), and online spatiotemporal modeling has kept lightweight models robust in nonstationary environments (Zhang et al., 2023). Whether such incremental schemes transfer to onset-anchored selective computation remains open, since any adaptation of the MHEG gate must stay causal and must continue to honor the coverage constraint $\mathrm{FR}\le0.05$.''
+
+~
+
+\noindent (Both recommended works are cited in the bibliography of the revised manuscript; citations are rendered here in author--year form.)
+
+\newpage
+
+%% =====================================================================
+%% ADDITIONAL CHANGES
+%% =====================================================================
+
+\begin{large}
+\noindent \underline{Additional changes:}
+\end{large}
+
+\vspace{10pt}
+
+\noindent Beyond the changes requested by the reviewers, the revision includes the following adjustments.
+
+\vspace{2mm}
+\noindent \textbf{1.} The Normal and Critical distributions of Figure~11 had been drawn from a different evaluation protocol than the one used for Table~13. The figure was regenerated using the same main-test-set data as the table, and the following sentence was added to its caption:
+
+~
+
+``The Normal and Critical distributions are drawn from the same main-test-set data as Table~13, ensuring figure--table consistency.''
+
+~
+
+\noindent \textbf{2.} Because ECE values appear in four analyses under different protocols, they are now named and mapped in a protocol table (new Table~23), and the following note was added to the calibration subsection (Section~4.8):
+
+~
+
+``A note on scale: ECE values in this paper are protocol-specific and are therefore named: $\mathrm{ECE}_{\mathrm{pipe}}$ (the factorial evaluation of Table~8; episode-level -- episode scores against episode labels -- under the main-campaign pipeline), $\mathrm{ECE}_{\mathrm{replay}}$ (the frame-level reliability diagram of Figure~4, replay logs of seed~42), $\mathrm{ECE}_{\mathrm{cal}}$ (this subsection), and $\mathrm{ECE}_{\mathrm{v29}}$ (the mechanism-removal ablation of Table~11; episode-level, replication protocol). Each computes ECE over a different probability stream, partition, and binning; magnitudes are comparable within, but not across, these analyses (Table~23).'' (Section~4.8, third paragraph)
+
+\noindent The new protocol map (Table~23 of the manuscript) is reproduced below.
+
+\begin{table*}[!tbp]
+\color{\revcolor}
+\centering
+\caption{Experimental protocol map. ``Frozen'' means weights and thresholds
+fixed before the experiment; the replication protocol is the replay pipeline
+of Sections~4.10 and~4.11,
+distinct from the main-campaign pipeline. Values are comparable within a row
+only.}
+
+\scriptsize
+\setlength{\tabcolsep}{2.8pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.7cm}
+  c >{\raggedright\arraybackslash}p{3.0cm} >{\raggedright\arraybackslash}X
+  >{\raggedright\arraybackslash}p{2.4cm}}
+\toprule
+\textbf{Experiment (location)} & \textbf{Seeds} & \textbf{Models}
+  & \textbf{Protocol, decision rule, primary metrics}
+  & \textbf{Budget / ECE} \\
+\midrule
+Main factorial (\S4.4--4.6;
+Tabs.~8--10,
+12) & 42--53 & trained per seed, frozen TERA pipeline
+  & episode rule: mean of last $k{=}6$ frames vs.\ validation-calibrated
+    threshold; $\mathrm{TTD}$ at $\theta{=}0.10$, $m{=}3$; FR,
+    $\mathrm{TTD}_{\mathrm{ef}}$, \%Sup, F1
+  & --- / $\mathrm{ECE}_{\mathrm{pipe}}$ \\
+Borderline, Movement~6 (Tab.~13,
+Fig.~11) & 42 & frozen factorial models
+  & held-out borderline recipes; $\bar{p}_{\max}$ descriptor and activation
+    fractions at $\theta{=}0.10$ & --- \\
+Post-hoc calibration (\S4.8,
+Tab.~14) & 42--45 & frozen Baseline + fitted
+  calibrators & pipeline trajectories; \MHEG thresholds recalibrated per
+  variant; FR, $\mathrm{TTD}_{\mathrm{ef}}$, \%Sup
+  & --- / $\mathrm{ECE}_{\mathrm{cal}}$ \\
+Teacher ablation (\S4.9,
+Tab.~15) & 42--45 & retrained, simplified protocol
+  & simplified training (60 epochs, no scheduler); not comparable to the main
+    study & --- \\
+Mechanism ablation (\S4.6,
+Tab.~11) & 42--53 & all five arms retrained under the
+  replication protocol & fixed policy and \MHEG contrasts; F1, FR,
+  $\mathrm{TTD}_{\mathrm{ef}}$, \%Sup & --- / $\mathrm{ECE}_{\mathrm{v29}}$ \\
+Stress campaign (\S4.10,
+Tabs.~16--18) & 42--45 & frozen replication-protocol trajectories
+  & replay over nine scenarios; FS@onset, coverage, miss
+  & compute-rate matched $\pm2\%$ \\
+Gating baselines (\S4.11,
+Tab.~19) & 42--45 & frozen replication-protocol
+  trajectories & replay; oracle thresholds on test; detection from label
+  onset, $\theta{=}0.10$, $m{=}3$ & matched suppression \\
+Skip-RNN (\S4.11, Tab.~20) & 42--45
+  & Skip-RNN trained end-to-end; \mbox{AF-TOI}(+\MHEG) frozen
+  & harmonized protocol; label onset, $\theta{=}0.10$, $m{=}3$; PreOcc,
+    NormOcc & matched suppression \\
+Temporal warp (\S4.12, Tab.~21,
+Fig.~14) & 42--53 & frozen twelve-seed models and thresholds
+  & warped \TERAGen episodes; label-onset detection; FR,
+    $\mathrm{TTD}_{\mathrm{ef}}$, FS@onset & bisection-matched compute \\
+Deployment (\S4.13, Tab.~22) & ---
+  & deployed causal model & analytical counts + reference-GPU latency & --- \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+~
+
+\noindent \textbf{3.} The generative AI disclosure was reformatted to the section title and template sentence required by the journal's Guide for Authors, placed before the references. The disclosure reads:
+
+~
+
+``During the preparation of this work the authors used Claude (Anthropic) in order to improve the language and readability of the manuscript. After using this tool/service, the authors reviewed and edited the content as needed and take full responsibility for the content of the published article.''
+
+~
+
+\noindent \textbf{4.} Because the twelve-seed expansion regenerates every quantity derived from the factorial campaign, the miss-penalty sensitivity values of Table~12 and the latency and suppression entries of the deployment table were recomputed; per-frame latency is wall-clock time measured within the new campaign, homogeneous across the twelve seeds but not directly comparable in absolute terms to the four-seed measurement of the submitted version. The following note was added to the caption of Table~8:
+
+~
+
+``Twelve-seed campaign executed with the same frozen pipeline as the initial four-seed campaign; ms/f is measured wall-clock time and is homogeneous within this campaign.''
+
+~
+
+\noindent \textbf{5.} The complexity notation of the scheduler was made uniform: the kinematic gate is $\mathcal{O}(K)$ over the $K$ monitored kinematic channels, the mapping from $p_t$ to the discrete level $\ell_t$ is $O(1)$, and statements that previously attributed $O(1)$ to the full scheduler cycle were reworded accordingly in the abstract, Section~5, Section~6, and the Conclusion. The corresponding statement of Section~5 reads:
+
+~
+
+``MHEG's own overhead per timestep is $\mathcal{O}(K)$ for the kinematic gate plus $\mathcal{O}(1)$ for the entropy and level thresholds, negligible beside the recurrent update it gates.''
+
+~
+
+\noindent \textbf{6.} The Data Availability statement was rewritten following the journal data guidelines. It now reads:
+
+~
+
+``The source code of the frozen TERA pipeline, the synthetic data generator, the configuration files, the twelve-seed campaign outputs, and the evaluation and figure scripts are publicly available at \url{https://github.com/angelabalbarello/tera-adhoc-artifact}. The synthetic datasets are fully reproducible from the released generator and configuration hashes.''
+
+~
+
+\noindent \textbf{7.} Before resubmission we ran an internal verification pass that re-derived every headline number of the revision from the archived logs and code. It found, and we corrected, the following (all corrections are in blue in the manuscript; where a claim was not supported it was removed rather than reworded; items (a)--(f) do not change any conclusion, while the corrections of items~10--11 below change specific readings and are flagged there): (a) the tie count in the FR contrast of Section~4.4 and Table~9 read ``nine of twelve''; the logs give \emph{seven} of twelve Baseline seeds with $\mathrm{FR}=0$ (five informative pairs, all favoring AF-TOI), which is exactly what produces $p=0.0625$ under the exact test that discards zero differences; the test variant is now stated. (b) The per-timestep cost in Section~3.4 and Table~22 covered only one LSTM layer (``$\approx$28\,KFLOPs''); recomputed from the released checkpoints, the two-layer model costs $\approx$57.2\,K MACs ($\approx$115\,KFLOPs at 1\,MAC${}={}$2\,FLOPs, the convention now stated), and a verification script accompanies the artifact. (c) The entropy unit was unified to bits (the base of Eq.~11 and of the deployed thresholds) across all figures; the replay that generated the frame logs behind Figures~4--6 applied the entropy threshold in natural-log units, which silently disabled the entropic branch in that log (the published tables were unaffected -- their pipelines already used base~2); the log and the figures were regenerated. (d) The exemplar episodes of Figure~5 are now selected by a pre-declared median-contrast criterion stated in the caption (see our response to Reviewer~1, Comment~6). (e) A per-seed entropy-stratification-score figure and the associated claim were removed: recomputed under a single procedure, the score proved sensitive to the probability scale rather than to temporal organization and could not support the claim in either direction; the calibration control now rests on the trajectory morphology, the operational locus, and Table~14, and Section~4.8 states the removal. (f) The missing $\mathrm{TTD}_b$ entry of Table~8 (Baseline+MHEG) was filled with the campaign value ($0.223 \pm 0.145$\,s), which Table~12 already used; the abrupt-regime latency column of Table~10 was relabeled $\mathrm{TTD}_a$ to avoid reusing the $\mathrm{TTD}_b$ symbol.
+
+\vspace{2mm}
+\noindent \textbf{8.} The loss function of Section~3.2 is now stated in full as implemented (Eqs.~5--9): the teacher enters through a single probability-space alignment term, and the temporal organization is imposed by onset-anchored shaping penalties on the student's own trajectory, with every term of the mechanism-removal ablation and every hyperparameter of Table~6 now having an explicit counterpart in the equations; the three-phase schedule constants were corrected to the implemented values (warm-up 12 epochs, ramp-up 16, $\beta_{\max}=0.35$, supervised-weight floor $0.50$).
+
+\vspace{2mm}
+\noindent \textbf{9.} A protocol map (new Table~23) lists, for every campaign, the seeds, model provenance, decision rule, budget matching, and ECE variant, making explicit which numbers are comparable; residual editorial markers of the revision process were removed from the manuscript body.
+
+\vspace{2mm}
+\noindent \textbf{10.} A final metric-disambiguation pass resolved an ambiguity inherited from the submitted version: the progressive-regime column of Tables~8 and~10, previously labeled $\mathrm{TTD}_p$ and read as a latency, is computed in the released evaluation code as \emph{mean pre-onset anticipation} (stable-detection search from frame~0; $\max(0, t_0 - t_{\mathrm{det}})\cdot\Delta t$; undetected episodes count as zero). It was relabeled $A_p$ (higher is better), its definition now appears in both table notes, and the Regime-asymmetry paragraph of Section~4.4 was corrected accordingly: the value $1.200$\,s for AF-TOI Fixed is anticipation, not delay, and -- because an episode still above threshold at the onset enters the global $\mathrm{TTD}_b$ with zero post-onset delay, while an early activation that fades before the onset re-enters with its own delay (both occur in the data) -- the per-regime and global columns are different quantities on different temporal references, which the text now states explicitly. In the same pass: the FR definition of Table~2 was corrected to the stable-detection rule actually implemented ($p_t \ge \theta_{\mathrm{TTD}}$ for $m{=}3$ consecutive frames from the onset, also used by the threshold calibration), with the final-$k{=}6$ episode score assigned to the F1 classification rule only, and Table~23 updated accordingly; the claim that monotonic recalibration ``cannot reorganize'' the temporal entropy structure was corrected in Sections~2.5 and~4.8 -- a monotonic map preserves the ordering of probabilities but not, in general, of binary entropies, so the absence of reorganization is now reported as a measured outcome for the calibrators evaluated; the ECE note of Section~4.8 states the binning of all four variants (ten equal-width bins; the replay variant discards bins with fewer than ten frames); the negative-control narrative replaced ``leaves the miss rate unchanged'' by the measured values (FR $0.033 \rightarrow 0.035$; 47 vs.\ 50 misses), with the abstract adjusted to ``does not improve coverage'' (220 words after items~13--14); the periodic-refresh discussion of Section~4.11 now states that the stress-campaign reading is family-level (the refresh gate itself was not rerun under that protocol); the scheduled-contrast $\mathrm{TTD}_{\mathrm{ef}}$ values were added to the caption of Table~11; and the inferential-scope sentence of Section~4.1 now names both twelve-seed campaigns (factorial and retrained mechanism ablation).
+
+\vspace{2mm}
+\noindent \textbf{11.} A final episode-level reconciliation of Table~13 and Figure~11 against the FR definition exposed a generation bug in the auxiliary logger that produced their Normal and Critical rows: it ran the frozen models \emph{statelessly} (each frame forwarded as an isolated length-one sequence), unlike the prefix-window streaming protocol used by every published metric (Section~4.1). Under that invalid stream, only $70.8\%$ of seed-42 critical episodes reached $\bar{p}_{\max} \ge \theta$, which is arithmetically incompatible with the published $\mathrm{FR}=0$ of the same seed -- an inconsistency correctly flagged during verification. The log was regenerated under the prefix-window protocol with the same frozen checkpoints and test partition; the recomputed stream reproduces the published per-seed values exactly ($\mathrm{FR}=0.000$ for both configurations; $\mathrm{TTD}_b = 0.0825$/$0.0156$\,s; $A_p = 0.583$/$0.857$\,s), and a per-episode reconciliation CSV accompanies the artifact together with a semantic check ($\mathrm{FR} \ge$ fraction of episodes with $p_{\max} < \theta$ on a shared stream). Table~13 and Figure~11 were regenerated from the corrected stream: Normal $\bar{p}_{\max} = 0.000 \pm 0.000$ ($0.0\%$) and Critical $0.940 \pm 0.083$ ($100.0\%$, $120$ episodes). This changes one reading in Section~4.7 (second paragraph): the four severity levels are now ordered monotonically in both $\bar{p}_{\max}$ and activation fraction, with the caution -- stated in the table note -- that the Attention and Alert rows come from the replication-protocol model, so the cross-level comparison is qualitative. In the same pass, Table~11 now reports the complete Fixed and MHEG blocks (FR, $\mathrm{TTD}_{\mathrm{ef}}$, and suppression per condition, mean $\pm$ sd over the twelve seeds) rather than pointing to the prose; Algorithm~1 states the first-update condition explicitly ($t{=}1$ disjunct, as implemented); the entropy convention $0\log 0 \equiv 0$ and the symbol-reuse notes ($T$, $\mathcal{K}$ vs.\ $K$, $\alpha$) were added; Figure~13 was regenerated with a neutral title and the surrounding text now describes measured points rather than an operational frontier; and the single-node scope statements of Sections~5 and~6 state the reference-GPU execution explicitly. The corrected Table~13 is reproduced below.
+
+\begin{table}[!tbp]
+\centering
+\caption{Probabilistic response in borderline episodes
+(seed~42, \mbox{AF-TOI} Fixed configuration).}
+
+\footnotesize
+\renewcommand{\arraystretch}{1.22}
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\columnwidth}{l X c c}
+\toprule
+\textbf{Risk Level} & \textbf{Behavior}
+  & \textbf{$\bar{p}_{\max}$} & \textbf{Fraction} \\
+\midrule
+Normal    & Stable baseline driving
+  & {\color{\revcolor}$0.000 \pm 0.000$} & $0.0$\% \\
+\rowcolor{gray!8}
+Attention & Environmental perturbation
+  & $0.048 \pm 0.195$ & $5.8$\% \\
+Alert     & Mild distraction at low speed
+  & $0.380 \pm 0.416$ & $48.8$\% \\
+\rowcolor{gray!8}
+Critical  & Severe distraction with imminent risk
+  & {\color{\revcolor}$0.940 \pm 0.083$} & {\color{\revcolor}$100.0$\%} \\
+\bottomrule
+\multicolumn{4}{p{0.96\columnwidth}}{\scriptsize
+Fraction: proportion of episodes with $\bar{p}_{\max} \ge \theta = 0.10$.
+{\color{\revcolor}Normal and Critical rows: factorial test partition of
+seed~42 under the prefix-window inference protocol of
+Section~4.1 (the same probability stream behind
+Table~8); Attention and Alert rows:
+independently generated borderline recipes evaluated under the
+replication-protocol model (Section~4.10
+pipeline), so the cross-level comparison is qualitative.}}
+\end{tabularx}
+\end{table}
+
+
+\vspace{2mm}
+\noindent \textbf{12.} A final execution-semantics verification, prompted by the question of whether Algorithm~1 ($\mathrm{LSTM}(x_t, h_{t-1})$, one step per update) matches the evaluation protocol (prefix-window recomputation; Section~4.1), showed that the two are \emph{not} equivalent under suppression: with the same frozen seed-42 checkpoints and calibrated thresholds, the evaluated recompute-on-update semantics gives $\mathrm{TTD}_{\mathrm{ef}} = 0.023$\,s at $44.7\%$ suppression (reproducing the published per-seed value exactly), whereas literal single-step skipping gives $0.170$\,s at $44.4\%$; under the fixed policy the two agree on FR and differ by $6$\,ms in $\mathrm{TTD}_b$. A new paragraph in Section~3.4 (after the complexity paragraph) states this distinction explicitly, assigns the published scheduled results and ms/frame measurements to the recompute-on-update semantics with per-frame compute $c_{\mathrm{gate}} + (1-s)\,W\,\mathcal{O}(\cdot)$, and marks the calibration and evaluation of the cheaper single-step variant as not performed; the latency-protocol sentence of Section~4.1 says the same at the point of measurement. The verification script and its per-variant CSV accompany the artifact. In the same pass: Figure~13 was split into two panels because its previous single axis mixed $\mathrm{ECE}_{\mathrm{cal}}$ (calibration family) with $\mathrm{ECE}_{\mathrm{pipe}}$ (reference configurations), two protocol-specific variants the paper itself declares non-comparable -- the accompanying text no longer claims jointly low ECE for AF-TOI on a shared axis (Section~4.8, Figure~13 paragraph and caption); the residual over-reaches on calibration were replaced by measured statements (``the temporal entropy profile around onset is unchanged'' in the measured trajectories; distinct operating points ``in the configurations measured here'', untested under shift); the Section~4.7 reading now states that the joint severity ordering spans two evaluation pipelines and is not a single-model measurement; the retrospective $m{=}3$ detection marker is now distinguished from causal confirmation ($(m{-}1)\Delta t \approx 0.21$\,s later) in Section~4.1; and the abstract-style phrases flagged in review (``epistemologically'', ``semantic grounding'', ``organizationally grounded'') were replaced by concrete statements, with Section~4.8 retitled ``Post-hoc Calibration Control''. A bug-scope trace confirmed that the stateless logger of item~11 fed only Table~13 and Figure~11: Figures~4--6 come from the GPU-regenerated prefix-window log whose skip rates match the replication campaign, Figures~7--10 from the per-seed evaluation CSVs, and the borderline macros produced by the old logger are defined but not used in the manuscript.
+
+\vspace{2mm}
+\noindent \textbf{13.} The consequences of the execution-semantics finding of item~12 were propagated through the manuscript. Algorithm~1 now states the \emph{evaluated} semantics as the primary algorithm (line~5 recomputes the causal $W$-frame prefix window; the REQUIRE line declares $W{=}96$ and the padding; suppression reuses only the emitted probability), and the persistent-state single-step variant is presented as a cheaper deployment alternative that is not validated here. Costs are now reported at three levels wherever they appear (Tables~4 and~22, Sections~3.4, 4.13, 5, and~6): ${\approx}57.2$\,K~MACs per recurrent step, ${\approx}5.49$\,M~MACs per executed update under the evaluated semantics ($W{=}96$), and expected per-frame compute $c_{\mathrm{gate}}+(1-s)\,W\,\mathcal{O}(\cdot)$; the $1{,}024$~bytes are identified as the recurrent state only, and the evaluated implementation's explicit input-window buffer (${\approx}11.9$\,KB for $96\times31$ FP32, an estimate rather than measured peak RAM) is stated alongside. During the same pass a definition error was found by code inspection and corrected in both documents: $\mathrm{ECE}_{\mathrm{pipe}}$ and $\mathrm{ECE}_{\mathrm{v29}}$ are \emph{episode-level} quantities in the released evaluation code (episode scores against episode labels), not frame-level as the Section~4.8 note previously said, and the Table~11 discussion now reads ``episode-level ECE'' accordingly ($\mathrm{ECE}_{\mathrm{replay}}$ and $\mathrm{ECE}_{\mathrm{cal}}$ remain frame-level). Residual ``frontier'' phrasings in Section~4.8 were replaced by panel-specific statements about measured points. The abstract now qualifies $\mathrm{TTD}_{\mathrm{ef}}$ as measured with retrospective detection markers (the causal-confirmation note of Section~4.1 gives the $(m{-}1)\Delta t$ offset). The Skip-RNN matched-suppression point is now explicitly an equalization of executed-update fractions, not of compute, since an executed Skip-RNN update costs one recurrent step while an executed update of the frozen AF-TOI replay recomputes a $W$-frame window; the budget matching of Section~4.12 is unaffected because both arms share the recompute semantics, which the text now states. A leftover editing error (``Reaching it $\mathrm{TTD}_{\mathrm{ef}}$ through'') was fixed, and the cross-severity reading of the evaluation synthesis is qualified as descriptive under a second evaluation protocol.
+
+\vspace{2mm}
+\noindent \textbf{14.} Final synchronization pass. The first complexity paragraph after Algorithm~1 -- which still attributed ${\approx}57.2$\,K~MACs to an executed update and called the main algorithm persistent-state -- was replaced by the windowed analysis quoted in our response to Reviewer~1, Comment~5 (the single-step formula without the $W$ factor is now reserved to the non-validated variant), and that response now reproduces the corrected text. The caption of Figure~2 and the recurrent-state row of Table~4 were aligned with the evaluated semantics (suppression reuses the emitted probability; the state is reinitialized at each window recomputation; persistence applies only to the non-validated single-step variant), and the REQUIRE line of Algorithm~1 defines $h{=}\mathbf{0}$ as the initialization of each recomputed window. Figure~13 is now typeset at double-column width for legibility, and the panel titles of Figure~12 were repaired by a vector overlay on the existing PDF (the plotted curves are untouched; the overlay source accompanies the artifact) with a neutral supertitle. The abstract was tightened to 220 words while keeping the retrospective-marker qualification, and the automated checker's acceptance range was restored to 195--230 words.
+
+\end{document}

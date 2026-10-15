@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this artifact, please cite the paper under review and this repository."
+title: "TERA ad hoc artifact — Onset-Anchored Selective Computation for Resource-Constrained Vehicular Edge Networks"
+authors:
+  - family-names: Albarello
+    given-names: "Ângela Brígida"
+    orcid: "https://orcid.org/0009-0002-9455-0144"
+repository-code: "https://github.com/angelabalbarello/tera-adhoc-artifact"
+version: v9.2-resubmission
+date-released: 2026-10-13
+license: MIT
