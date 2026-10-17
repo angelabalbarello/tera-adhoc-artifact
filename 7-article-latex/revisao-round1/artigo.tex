@@ -443,7 +443,10 @@ replications, the coverage constraint is evaluated at the seed level rather
 than only on the pooled mean. Under this criterion, Baseline+MHEG satisfies
 the aggregate budget ($\mathrm{FR}=0.035$ on average) but violates the bound
 in three of the twelve seeds (up to $0.158$), whereas \mbox{AF-TOI}+MHEG
-remains within it in all twelve ($\max 0.017$). We make no claim
+remains within it in all twelve ($\max 0.017$). This coverage statement refers
+to the main campaign under the conditions evaluated there, with the kinematic
+change cue available to the gate; the loss of that cue is a specific
+operational limitation described in Section~\ref{sec:limitations}. We make no claim
 regarding broader dimensions of trustworthiness (security, privacy, adversarial
 robustness), which are out of scope (Section~\ref{sec:limitations}).}
 
@@ -2925,7 +2928,7 @@ makes the hypothesis testable at the required granularity. Generalization to
 naturalistic data is the primary direction for future validation (Limitation~1).
 \paragraph{Threats to validity and deployment limitations}
 \label{sec:limitations}
-Four limitations bound the claims. First, evaluation relies on \TERAGen
+{\color{\revcolor}Five} limitations bound the claims. First, evaluation relies on \TERAGen
 synthetic data, designed to isolate the causal relationship between temporal
 organization and trustworthy selective computation under controlled onset;
 confirmation on naturalistic datasets such as DMD~\cite{ortega2020dmd} and
@@ -2952,6 +2955,23 @@ Fourth, deployment feasibility is assessed through profiling and
 analytical estimation rather than execution on physical automotive hardware, so
 latency, energy, thermal behavior, and sensor-noise robustness remain to be
 characterized on STM32H7-, Cortex-M55-, and SA8155P-class platforms.
+
+{\color{\revcolor}Fifth, the coverage demonstrated here refers to the
+main-campaign conditions, with the kinematic change cue available to the
+gate. In an exploratory post-hoc diagnostic with frozen weights and
+thresholds (twelve seeds, both gated configurations), zeroing the kinematic
+cue delivered to the gate from the second gating decision onward --- with the
+LSTM inputs left intact --- produced persistent suppression and
+$\mathrm{FR}=1.0$ in all evaluated configurations: once updates stop, the
+emitted probability, and hence the entropy consumed by the gate, remain
+frozen, and the current implementation has no reactivation mechanism
+independent of that cue. The diagnostic protocol, code, per-seed results,
+per-episode and per-decision logs, and a SHA-256 manifest are archived with
+the paper's research artifact, together with the frozen checkpoints and test
+arrays required to re-run it. This result does not characterize sensor failures in
+general; it identifies an operational limitation of the current gate
+implementation, whose mitigation (e.g., a mandatory periodic update) would
+modify the method and is left as future work.}
 
 {\color{\revcolor}A related caveat is that a controlled environment could, in
 principle, favor an onset-oriented training strategy. Three design elements

@@ -75,7 +75,7 @@ poder estatístico (R2.5); **não** substitui a questão de generalização temp
 Os resultados n=12 não autorizam conclusões sobre direção naturalística — a
 limitação de validade externa permanece.
 
-## 2b. Rodadas de auditoria da revisão (v5–v9.2) e diagnóstico pós-hoc
+## 2b. Rodadas de auditoria da revisão (v5–v9.4) e diagnóstico pós-hoc
 
 Após a integração inicial da revisão, o manuscrito passou por rodadas de auditoria
 científica dirigida (v5–v9.2). Material público correspondente:
@@ -83,7 +83,10 @@ científica dirigida (v5–v9.2). Material público correspondente:
 | Pasta/arquivo | Conteúdo |
 | --- | --- |
 | `6-revision-round1/scientific-audit/` | scripts de verificação (leitor de checkpoint sem torch, reprodução seed 42, semântica de inferência), testes-trava do manuscrito (21 testes), CSVs de reconciliação (Tab. 13/FR), proveniência de figuras |
-| `7-article-latex/revisao-round1/` | fontes LaTeX finais da revisão (v9.2): `artigo.tex`, `rebuttal.tex`, `robustness_section.tex`, macros/linhas de tabela, figuras (incl. `image/fig3_mheg_componentes.tex` e `image/2-fig_tera_pipeline_final_v2.png`, corrigidas para a semântica avaliada) e PDFs de referência (`artigo_v9_3.pdf`, `rebuttal_v9_3.pdf`) |
+| `6-revision-round1/incremental-campaign/diagnostic-windowed-S2/` | **diagnóstico exploratório citado na §5 (quinta limitação) e na §4.10 do artigo v9.4**: perda do aviso cinemático no gate da implementação por janelas (protocolo pré-registrado, código numpy sem torch, resultados por seed, 96 logs, README_REPO.md e manifesto sha256) |
+| `6-revision-round1/incremental-campaign/evidence_diagnostic_windowed_S2.zip` | pacote do diagnóstico para o suplemento da submissão (manifesto sha256 verificado 101/101; os insumos — checkpoints, arrays de teste e calibração — estão neste repositório em `1-pipeline-tera/results/exp_seed12_round1/`) |
+| `1-pipeline-tera/results/exp_seed12_round1/data/` | arrays de teste `{X,y_fr,y_ep}_te_seed{42..53}.npy` (insumos do diagnóstico; ~23 MB) |
+| `7-article-latex/revisao-round1/` | fontes LaTeX finais da revisão (v9.4): `artigo.tex`, `rebuttal.tex`, `robustness_section.tex`, macros/linhas de tabela, figuras (incl. `image/fig3_mheg_componentes.tex` e `image/2-fig_tera_pipeline_final_v2.png`, corrigidas para a semântica avaliada) e PDFs de referência (`artigo_v9_4.pdf`, `rebuttal_v9_4.pdf`; anteriores `artigo_v9_3.pdf`, `rebuttal_v9_3.pdf` preservados) |
 | `7-article-latex/revisao-round1/audit-trail/` | trilha de auditoria: matrizes v6–v9, diffs entre versões, relatórios de verificação (inclui `VERIFICACAO_CODIGO_SEMANTICA.md`, que amarra código↔resultados↔texto) |
 | `7-article-latex/revisao-round1/_superseded/` | builds e fontes intermediários preservados para histórico (não usar) |
 
