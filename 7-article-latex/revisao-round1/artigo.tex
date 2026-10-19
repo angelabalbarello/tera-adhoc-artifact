@@ -975,13 +975,13 @@ transitions across the whole window. \AFTOI transfers this structure to the
 causal target through offline alignment, so the target reproduces temporally
 organized dynamics while staying causal at deployment. The induction stays in
 the development environment, and only the resulting causal model is exported.
-\paragraph{Onset-Oriented Temporal Loss Function}
-{\color{\revcolor}Two training objectives appear in this paper, and we state
-both because a reader of the released artifact will find both. The
-\emph{main-campaign objective}, implemented in the frozen pipeline that
-trained every model of the factorial study
-(\texttt{tera\_pipeline/training/tera\_train.py}; Tables~\ref{tab:resultados_principais}--\ref{tab:estratificado}
-and~\ref{tab:tep_sensitivity}), is the two-term composite
+\paragraph{Onset-Oriented Training Objectives}
+{\color{\revcolor}The main factorial campaign and the complementary
+replication experiments use two onset-oriented training objectives. The
+\emph{main-campaign objective}
+(Tables~\ref{tab:resultados_principais}--\ref{tab:estratificado}
+and~\ref{tab:tep_sensitivity}) combines episode-level supervision with
+temporally weighted alignment to the reference model,
 \begin{equation}
   \mathcal{L}_{\text{pipe}} =
     \bigl(1-\lambda_{\mathrm{KD}}(e)\bigr)\,\mathcal{L}_{\text{ep}}
@@ -1001,8 +1001,8 @@ $T{=}96$), and $\mathrm{CE}(q \Vert p) = -[\,q\log p + (1-q)\log(1-p)\,]$ the
 frame-wise binary cross-entropy with the tempered \emph{reference} probability
 as target -- as a function of the causal target it equals
 $\mathrm{KL}(q \Vert p)$ up to the reference-entropy constant. The per-episode
-weights $w_i(t)$ carry all the temporal organization, and follow the released
-code exactly: on non-critical episodes the raw weights are $1$ at every frame
+weights $w_i(t)$ are defined as follows: on non-critical episodes the raw
+weights are $1$ at every frame
 and are used \emph{unnormalized}, so such an episode contributes the sum of
 its $T$ frame terms; on critical episodes the raw weights -- $e^{-\alpha(t-t_0)}$
 after the onset with $\alpha{=}0.15$, additionally multiplied by
@@ -1020,18 +1020,12 @@ remaining epochs of the $80$-epoch run -- so the final phase optimizes the
 weighted alignment alone, with the episode head providing the hard
 supervision of the earlier phases.
 
-The \emph{replication-protocol objective} -- the richer composite of the
-original \texttt{run\_v29} implementation, which trained the replay models of
-Sections~\ref{sec:robustness_controls}--\ref{sec:gating_baselines} and all
-arms of the mechanism-removal ablation of Table~\ref{tab:ablacao_alpha} --
-extends the alignment with explicit onset-anchored trajectory-shaping terms.
-The evidence attributing each objective to the models it trained (code
-equivalence, checkpoint hashes, and behavioral signatures -- the campaign
-manifests pin the configuration and data generator, not a hash of the
-training code) is documented, with its limits, in the research artifact.
-We state it in full because the mechanism-removal ablation of
-Section~\ref{sec:mov5_robustez} zeroes specific
-terms of it:
+The replication experiments of
+Sections~\ref{sec:robustness_controls}--\ref{sec:gating_baselines} and the
+mechanism-removal ablation of Table~\ref{tab:ablacao_alpha} use the
+\emph{replication-protocol objective}, which extends the alignment with
+explicit onset-anchored trajectory penalties. We state it in full because the
+ablation zeroes specific terms of it:
 \begin{equation}
 \begin{aligned}
   \mathcal{L}_{\mathrm{AF\text{-}TOI}} ={}& \alpha(e)\,\mathcal{L}_{\text{hard}}
@@ -1129,9 +1123,10 @@ imposed by onset-anchored shaping of the student's own trajectory,
 Eqs.~\ref{eq:ponderacao_aftoi} and the associated penalties -- the closest
 published relatives being exponentially weighted anticipation losses for
 maneuver prediction rather than distillation objectives.}
-\paragraph{Three-Phase Structural Alignment Scheduler}
-{\color{\revcolor}Direct coupling to the reference signal in early epochs can
-cause gradient instability, so the loss weights follow a three-phase schedule
+\paragraph{Three-Phase Structural Alignment Scheduler (replication objective)}
+{\color{\revcolor}In the replication objective, direct coupling to the
+reference signal in early epochs can
+cause gradient instability, so its loss weights follow a three-phase schedule
 (warm-up $E_{\text{warm}}{=}12$ epochs, ramp-up until
 $E_{\text{ramp}}{=}28$, refinement until $E_{\text{total}}{=}80$): the
 alignment weight rises as
@@ -1148,7 +1143,11 @@ E_{\text{warm}}}, & E_{\text{warm}} < e \leq E_{\text{ramp}} \\[10pt]
 while the supervised weight $\alpha(e)$ decays from $1.0$ to a floor of
 $0.50$ (supervision is never switched off) and the onset-shaping weight
 $\delta(e)$ grows from $0.30$ to $2.80$, shifting emphasis from label fidelity
-to temporal organization as training progresses.}
+to temporal organization as training progresses. The main-campaign objective
+follows its own three-phase schedule -- $\lambda_{\mathrm{KD}}(e)$ over
+$10/17/80$ epochs (Eq.~\ref{eq:perda_pipeline}) -- whose final phase
+optimizes the weighted alignment alone; the two schedules are not
+interchangeable.}
 
 The scheduler is a \textbf{constitutive} part of \AFTOI; removing it compromises
 coupling stability and the quality of the induced differentiation, as the
@@ -2352,11 +2351,11 @@ The two routes to low $\mathrm{TTD}_{\mathrm{ef}}$ differ in mechanism. Reaching
 probability scale differs from reaching it through induced temporal
 differentiation. In the former, the gain is contingent on the calibrator's
 particular distribution, since the gate threshold has no
-fixed relation to the transition dynamics it must protect{\color{\revcolor} --
-a dependence we initially conjectured might not survive distributional shift;
-tested on the frozen temporal-warp protocol of
-Section~\ref{sec:temporal_scale}, however, the isotonic configuration does
-survive that controlled temporal-scale shift (see the paragraph there)}. In the latter, the
+fixed relation to the transition dynamics it must protect{\color{\revcolor};
+under the frozen temporal-warp protocol of
+Section~\ref{sec:temporal_scale}, however, this dependence does not translate
+into failure -- the isotonic configuration withstands that controlled
+temporal-scale shift (see the paragraph there)}. In the latter, the
 scheduler exploits a structural trajectory property deliberately induced during
 training and tied to the causal dynamics of the process. {\color{\revcolor}The
 trajectory morphology of Figure~\ref{fig:calibracao_entropia_temporal} and the
@@ -2567,10 +2566,10 @@ reaches $93.6\%$, although at that operating point its detector fires on
 every episode (F1 $=0.866$, the fire-always value). The exact zero in
 $\mathrm{TTD}_{\mathrm{ef}}$ reflects pre-onset threshold activation: the
 Skip-RNN alert is already above $\theta$ before the onset in $21\%$ of
-pre-onset frames, so detection collapses onto $t_0$ itself. This comparison
-exposed a limitation of the evaluation design -- $\mathrm{TTD}_{\mathrm{ef}}$
-measures delay from the onset and does not penalize alerts raised before it
--- which is why the alert-occupancy metrics below were added. The cost column
+pre-onset frames, so detection collapses onto $t_0$ itself.
+$\mathrm{TTD}_{\mathrm{ef}}$ measures delay from the onset and does not
+penalize alerts raised before it; the alert-occupancy metrics below report
+that dimension. The cost column
 of Table~\ref{tab:skiprnn} makes the second asymmetry explicit: under its
 native single-step persistent execution, the suppressed Skip-RNN runs at
 ${\approx}28$\,K MACs/frame, roughly $100\times$ below the
@@ -2730,7 +2729,7 @@ matched-cost contrasts should be read as exploratory. The matched-budget
 diagnostic supports a temporal-scale coverage-and-timeliness
 advantage, not a universal improvement in near-onset suppression placement.
 
-{\color{\revcolor}Prompted by review, the Baseline+IC+MHEG configuration of
+{\color{\revcolor}The Baseline+IC+MHEG configuration of
 Section~\ref{sec:controle_calibracao} was also evaluated, frozen, on this
 warp protocol (per-seed isotonic maps refit deterministically from the
 archived validation probabilities and the recalibrated thresholds of that
@@ -2745,12 +2744,11 @@ $12$ of $36$ cells above zero), with lower $\mathrm{TTD}_{\mathrm{ef}}$ than
 nine durations -- markedly at the longest,
 where \mbox{AF-TOI}+\MHEG\ accumulates its own exceedances ($0.10$--$0.28$ vs.\
 $0.72$--$1.00$\,s at $3.2$--$5.2$\,s) -- and higher at the two shortest
-($0.77$ vs.\ $0.50$\,s at $0.21$\,s). The earlier conjecture that the
-isotonic gain might not survive distributional shift therefore does not hold
-for this controlled temporal-scale shift (Section~\ref{sec:controle_calibracao}
-is updated accordingly): on these endpoints and under the shifts evaluated
-here, the data support a mechanistic distinction between the two routes, not
-an endpoint advantage of \mbox{AF-TOI} over the recalibrated isotonic
+($0.77$ vs.\ $0.50$\,s at $0.21$\,s). The isotonic gain therefore persists
+under this controlled temporal-scale shift: on these endpoints and under the
+shifts evaluated here, the data support a mechanistic distinction between the
+two routes (which signal the gate consumes and how it is obtained), not an
+endpoint advantage of \mbox{AF-TOI} over the recalibrated isotonic
 configuration.}
 
 \begin{figure*}[!tbp]
@@ -2873,7 +2871,7 @@ only.}
 \midrule
 Main factorial (\S\ref{sec:mov3_consequencia}--\ref{sec:mov5_robustez};
 Tabs.~\ref{tab:resultados_principais}--\ref{tab:estratificado},
-\ref{tab:tep_sensitivity}) & 42--53 & trained per seed, frozen TERA pipeline
+\ref{tab:tep_sensitivity}) & 42--53 & trained per seed, frozen TERA pipeline (\texttt{tera\_train.py})
   & F1 episode rule: mean of last $k{=}6$ frames vs.\ validation-calibrated
     threshold; FR and $\mathrm{TTD}$ from the stable-detection rule
     ($\theta{=}0.10$, $m{=}3$, from onset); $\mathrm{TTD}_{\mathrm{ef}}$, \%Sup
@@ -2893,7 +2891,7 @@ Tab.~\ref{tab:teacher_ablation}) & 42--45 & retrained, simplified protocol
     study & --- \\
 Mechanism ablation (\S\ref{sec:mov5_robustez},
 Tab.~\ref{tab:ablacao_alpha}) & 42--53 & four modified arms retrained; the
-  canonical arm reuses the original replication-protocol training & fixed policy and \MHEG contrasts; F1, FR,
+  canonical arm reuses the original replication-protocol training (\texttt{run\_v29}) & fixed policy and \MHEG contrasts; F1, FR,
   $\mathrm{TTD}_{\mathrm{ef}}$, \%Sup & --- / $\mathrm{ECE}_{\mathrm{v29}}$ \\
 Stress campaign (\S\ref{sec:robustness_controls},
 Tabs.~16--18) & 42--45 & frozen replication-protocol trajectories
@@ -2969,8 +2967,9 @@ likewise matched or exceeded \mbox{AF-TOI}+MHEG on the conventional
 detection endpoints at matched suppression
 (Section~\ref{sec:gating_baselines}). We therefore do not claim superiority
 over learned adaptive computation on detection performance; its
-substantially higher pre-onset alert occupancy is what exposed a limitation
-of onset-delay metrics and motivated the signal-semantics analysis. What
+substantially higher pre-onset alert occupancy lies outside what onset-delay
+metrics measure, and the signal-semantics analysis reports that dimension
+separately. What
 none of these alternatives provides is the interpretable, onset-anchored
 signal semantics. Their behavior under the controlled shifts of
 Sections~\ref{sec:robustness_controls} and~\ref{sec:temporal_scale} is
@@ -3349,7 +3348,9 @@ figure scripts are publicly available at
 \url{https://github.com/angelabalbarello/tera-adhoc-artifact/tree/resubmission-round1}
 (the exact version corresponding to this manuscript). The synthetic
 datasets are fully reproducible from the released generator and configuration
-hashes.}
+hashes. Provenance records attributing each training objective of
+Section~\ref{sec:aftoi} to the models it trained, together with their
+limitations, accompany the artifact.}
 \section*{Funding}
 This research received no specific funding from public or private agencies.
 \section*{Acknowledgments}
