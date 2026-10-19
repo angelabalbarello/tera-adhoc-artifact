@@ -9,8 +9,10 @@ Todo RNG e sorteado ANTES do warp e nao depende de d -> contrafactuais pareados.
 Unica divergencia de pareamento (documentada): regime R2 pre-sorteia bl p/ todos
 os frames (o original sorteia condicionalmente a r>0.55).
 """
-import sys, numpy as np
-sys.path.insert(0, '/sessions/relaxed-lucid-thompson/mnt/TreinamentoNovo/FGCS/Inferencia')
+import os, sys, numpy as np
+# [portabilidade 20/10/2026] gerador congelado do proprio repositorio
+_ART = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
+sys.path.insert(0, os.path.join(_ART, '1-pipeline-tera'))
 import synthetic_driver_risk_v7 as g
 
 T = 96

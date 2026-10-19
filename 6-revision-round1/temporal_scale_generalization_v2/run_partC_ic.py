@@ -27,13 +27,8 @@ ART = os.path.abspath(os.path.join(HERE, '..', '..'))
 sys.path.insert(0, os.path.join(ART, '3-calibration-posthoc'))
 sys.path.insert(0, os.path.join(ART, '1-pipeline-tera'))
 
-# indices EXATOS da campanha p/ seeds 42-45 (mesma convencao do run_partA)
-if not os.path.exists('/tmp/tera-repo'):
-    os.symlink(ART, '/tmp/tera-repo')
-
 from common import (SEEDS, KIN, DT, FRAME_THR, CAL, load_model, gate_replay,
                     ttd_metrics_binary, fs_onset_original, f1_episode, ece_frame)
-sys.path.insert(0, '/sessions/zealous-lucid-ride/mnt/TreinamentoNovo/Experimentos-Artigo1-AdHoc/temporal_scale_generalization')
 from np_model import fixed_policy_probs
 from gen_warped import build_test_set
 from tera_posthoc_calibration_experiment import (

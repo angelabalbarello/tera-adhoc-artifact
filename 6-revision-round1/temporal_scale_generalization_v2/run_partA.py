@@ -7,7 +7,7 @@ import numpy as np
 sys.path.insert(0,'.')
 from common import (load_model, CAL, KIN, DT, FRAME_THR, binary_entropy,
                     ttd_metrics_binary, gate_replay, fs_onset_original, ece_frame, f1_episode)
-sys.path.insert(0,'../temporal_scale_generalization')
+# [portabilidade 20/10/2026] np_model agora e vendido neste diretorio
 from np_model import fixed_policy_probs
 from gen_warped import build_test_set
 

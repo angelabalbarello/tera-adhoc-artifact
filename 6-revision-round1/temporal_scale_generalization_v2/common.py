@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
 """Infra comum v2: modelos congelados, splits da campanha, convencoes de metrica."""
-import sys, csv, json
+import os, sys, csv, json
 import numpy as np
-sys.path.insert(0, '../temporal_scale_generalization')
+# [portabilidade 20/10/2026] np_model e vendido neste diretorio; caminhos
+# resolvidos a partir da raiz do repositorio (sem dependencias externas).
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_ART  = os.path.abspath(os.path.join(_HERE, '..', '..'))
+sys.path.insert(0, _HERE)
 from np_model import load_state_dict, NpLSTM, fixed_policy_probs, sha256
 from sklearn.model_selection import train_test_split
 
-MODELS_DIR = '../temporal_scale_generalization/frozen_models'
-DATA_DIR   = 'data_campaign'
+# modelos/calibracao congelados = os da campanha exp_seed12_round1 deste
+# repositorio (conteudo identico ao frozen_models original; hashes conferidos)
+MODELS_DIR = os.path.join(_ART, '1-pipeline-tera', 'results', 'exp_seed12_round1', 'models')
+CAL_CSV    = os.path.join(_ART, '1-pipeline-tera', 'results', 'exp_seed12_round1', 'calibration', 'calibration_summary.csv')
+DATA_DIR   = os.path.join(_HERE, 'data_campaign')
 SEEDS = list(range(42,54))
 KIN = [12,13,14]; DT = 10.0/96; FRAME_THR = 0.35; M_CONSEC = 3
 CAL = {int(r['seed']): (float(r['theta_ttd']), float(r['tau_delta']), float(r['tau_h']))
-       for r in csv.DictReader(open(f'{MODELS_DIR}/calibration_summary.csv'))}
+       for r in csv.DictReader(open(CAL_CSV))}
 
 def binary_entropy(p):
     p = np.clip(p, 1e-7, 1-1e-7)
@@ -21,7 +28,7 @@ def load_model(seed, tag):
     fn = f'{MODELS_DIR}/{"baseline" if tag=="base" else "student"}_seed{seed}.pt'
     return NpLSTM(load_state_dict(fn))
 
-PUB_IDX = '/tmp/tera-repo/2-campaign-exp_20260519_055950/data'
+PUB_IDX = os.path.join(_ART, '2-campaign-exp_20260519_055950', 'data')
 
 def campaign_test_split(seed):
     """Reproduz _make_splits do tera_pipeline (70/15/15 estratificado, random_state=seed)."""
@@ -32,7 +39,6 @@ def campaign_test_split(seed):
     y_ep = (cat == 'Critico').astype(np.int64)
     y_fr = ((ycont > FRAME_THR).astype(np.int64) * y_ep[:,None]).astype(np.int64)
     strat = np.where(cat=='Critico', np.array([r['recipe_id'] for r in rows]), cat)
-    import os
     pub = f'{PUB_IDX}/indices_te_seed{seed}.npy'
     if os.path.exists(pub):
         te = np.load(pub)          # indices EXATOS da campanha (seeds 42-45)
