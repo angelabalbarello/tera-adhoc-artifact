@@ -95,10 +95,23 @@
 \newif\ifTERAthumbs
 \IfFileExists{thumbnails/cas-email.jpeg}{\TERAthumbstrue}{\TERAthumbsfalse}
 \ifTERAthumbs\else
+  % Icones decorativos da classe CAS (thumbnails/*) podem faltar e sao
+  % pulados em silencio; QUALQUER outra figura ausente gera ERRO de
+  % compilacao (nenhuma figura cientifica pode ser omitida sem aviso).
   \let\TERAorigincludegraphics\includegraphics
+  \makeatletter
+  \def\TERA@thumbword{thumbnails}
+  \def\TERA@firstseg#1/#2\@nil{\def\TERA@seg{#1}}
   \renewcommand{\includegraphics}[2][]{%
     \IfFileExists{#2}{\TERAorigincludegraphics[#1]{#2}}{%
-      \IfFileExists{image/#2}{\TERAorigincludegraphics[#1]{#2}}{}}}%
+      \IfFileExists{image/#2}{\TERAorigincludegraphics[#1]{#2}}{%
+        \TERA@firstseg#2/\@nil
+        \ifx\TERA@seg\TERA@thumbword\else
+          \GenericError{}{Missing scientific figure: #2}{}{A figure file
+            referenced by the manuscript was not found. Add it to the
+            project (root or image/) before compiling.}%
+        \fi}}}%
+  \makeatother
 \fi
 \usepackage{bm}
 \usepackage{pgfplots}
@@ -999,8 +1012,8 @@ $\theta_{\text{late}}{=}0.15$, the fixed pre-onset push weight $3.0$ on the
 $N_{\text{pre}}{=}8$ frames before $t_0$, and $1$ elsewhere -- are normalized
 to sum to one over the episode, so a critical episode contributes a weighted
 mean (and, consequently, a non-critical episode carries roughly $T$ times the
-aggregate alignment mass of a critical one, a property of the implementation
-we state rather than smooth over). The schedule
+aggregate alignment mass of a critical one; this weighting asymmetry is
+retained in the evaluated implementation). The schedule
 $\lambda_{\mathrm{KD}}(e)$ is $0$ for the first $10$ epochs, ramps linearly
 from $0.20$ to $1.00$ over the next $17$, and stays at $1.00$ for the
 remaining epochs of the $80$-epoch run -- so the final phase optimizes the
@@ -2269,7 +2282,7 @@ the temporal differentiation reliable scheduling needs. For the reason given
 above, no per-seed stratification-score figure is reported.}
 \begin{table*}
 \centering
-\caption{Epistemological control via post-hoc calibration applied to
+\caption{Post-hoc calibration applied to
 Baseline with and without MHEG. MHEG thresholds are re-calibrated
 per seed for each variant. ECE~(cal): post-calibration ECE;
 $\Delta$ECE: improvement vs.\ uncalibrated Baseline ($\approx 0.035$).
@@ -2343,9 +2356,7 @@ fixed relation to the transition dynamics it must protect{\color{\revcolor} --
 a dependence we initially conjectured might not survive distributional shift;
 tested on the frozen temporal-warp protocol of
 Section~\ref{sec:temporal_scale}, however, the isotonic configuration does
-survive that controlled temporal-scale shift (see the paragraph there), so
-the distinction supported by the data is mechanistic, not an endpoint
-advantage of \mbox{AF-TOI} under the shifts evaluated in this paper}. In the latter, the
+survive that controlled temporal-scale shift (see the paragraph there)}. In the latter, the
 scheduler exploits a structural trajectory property deliberately induced during
 training and tied to the causal dynamics of the process. {\color{\revcolor}The
 trajectory morphology of Figure~\ref{fig:calibracao_entropia_temporal} and the
