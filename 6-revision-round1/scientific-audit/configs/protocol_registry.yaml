@@ -2,7 +2,7 @@
 # Editar AQUI e regenerar a tabela; nao editar a tabela a mao.
 experiments:
   main_factorial:   {tables: [7,8,9,10,12], seeds: 42-53, models: frozen TERA pipeline per seed, decision: "episode = mean last k=6 frames vs thr_ep(VAL, F1 max s.t. FR<=0.05); TTD theta=0.10 m=3", budget: none, ece: ECE_pipe}
-  borderline_mov6:  {tables: [13], seeds: [42], models: frozen factorial, decision: "p_bar_max descriptor @ theta=0.10", budget: none, ece: null}
+  borderline_mov6:  {tables: [13], seeds: [42], models: "Normal/Critical: frozen factorial (exp_20260519_055950); Attention/Alert: separate seed-42 checkpoint from TERA pipeline run exp_20260517_184912 (sha256/16 3be34ff08dec0240; training config not archived)", decision: "p_bar_max descriptor @ theta=0.10", generator: "synthetic_driver_risk_v7 65bbec4a23050639", budget: none, ece: null}
   posthoc_calibration: {tables: [14], seeds: 42-45, models: frozen Baseline + calibrators fitted on VAL, decision: pipeline rules; MHEG thresholds recalibrated per variant, budget: none, ece: ECE_cal}
   teacher_ablation: {tables: [15], seeds: 42-45, models: retrained simplified (60 ep, no scheduler), decision: internal only, budget: none, ece: null, comparable_to_main: false}
   mechanism_ablation: {tables: [11], seeds: 42-53, models: all 5 arms retrained under run_v29, decision: run_v29 rules (tau_H=0.95 bits), budget: none, ece: ECE_v29, comparable_to_main: false}

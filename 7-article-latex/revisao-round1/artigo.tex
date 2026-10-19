@@ -2103,9 +2103,12 @@ Fraction: proportion of episodes with $\bar{p}_{\max} \ge \theta = 0.10$.
 seed~42 under the prefix-window inference protocol of
 Section~\ref{sec:protocolo} (the same probability stream behind
 Table~\ref{tab:resultados_principais}); Attention and Alert rows:
-independently generated borderline recipes evaluated under the
-replication-protocol model (Section~\ref{sec:robustness_controls}
-pipeline), so the cross-level comparison is qualitative.}}
+independently generated borderline recipes evaluated with a separate
+seed-42 checkpoint from an earlier run of the same TERA pipeline (run
+identifier and SHA-256 in the artifact; its training configuration was
+not archived), distinct from the factorial checkpoints, so the
+cross-level comparison is qualitative. All rows use generator version
+v7 (SHA-256/16 \texttt{65bbec4a}).}}
 \end{tabularx}
 \end{table}
 \begin{figure*}
@@ -2877,7 +2880,7 @@ Tabs.~\ref{tab:resultados_principais}--\ref{tab:estratificado},
     ($\theta{=}0.10$, $m{=}3$, from onset); $\mathrm{TTD}_{\mathrm{ef}}$, \%Sup
   & --- / $\mathrm{ECE}_{\mathrm{pipe}}$ \\
 Borderline, Movement~6 (Tab.~\ref{tab:borderline},
-Fig.~\ref{fig:prob_dist}) & 42 & frozen factorial models
+Fig.~\ref{fig:prob_dist}) & 42 & {\color{\revcolor}frozen factorial models (Normal, Critical); earlier TERA-pipeline checkpoint (Attention, Alert; Tab.~\ref{tab:borderline} note)}
   & held-out borderline recipes; $\bar{p}_{\max}$ descriptor and activation
     fractions at $\theta{=}0.10$ & --- \\
 Post-hoc calibration (\S\ref{sec:controle_calibracao},
