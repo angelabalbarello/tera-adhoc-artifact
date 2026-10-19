@@ -411,7 +411,7 @@ def main() -> None:
                         "t":             t,
                         "time_s":        round(t * dt, 4),
                         "p_t":           round(p_t, 6),
-                        "H_t":           round(H_t, 6),
+                        "H_t":           round(H_t, 6),   # NOTA: coluna em NATS (ln); gate opera em BITS; figuras convertem /ln2
                         "is_suppressed": is_supp,
                         "y_frame_clean": round(float(yfc[t]), 6),
                         "phase":         phase,

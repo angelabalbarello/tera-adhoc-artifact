@@ -17,5 +17,16 @@ def test_coefficients_in_code():
 def test_manifest_values():
     assert MAN["coefficients"]["gamma_ep"]==0.25 and MAN["coefficients"]["lambda_late"]==2.0
     assert MAN["alignment"]["T"]==2.0 and MAN["schedules"]["alpha_floor"]==0.50
+
+def test_pipeline_objective_lineage():
+    """v9.5: a campanha principal foi treinada pela perda SIMPLIFICADA do pipeline."""
+    tt=(ROOT/"1-pipeline-tera/tera_pipeline/training/tera_train.py").read_text(errors="replace")
+    for c in ["def aftkd_loss","pre_onset_push_weight","lambda_late","theta_late",
+              "w_ep = w_ep / (w_ep.sum()"]:
+        assert c in tt, c
+    assert "early_track" not in tt and "early_floor" not in tt  # sem termos de shaping
+    y=(ROOT/"1-pipeline-tera/configs/experiment_config.yaml").read_text(errors="replace")
+    assert "lambda_late: 3.5" in y and "theta_late: 0.15" in y and "warmup_epochs: 10" in y
+
 if __name__ == "__main__":
-    test_coefficients_in_code(); test_manifest_values(); print("aftoi loss manifest OK")
+    test_coefficients_in_code(); test_manifest_values(); test_pipeline_objective_lineage(); print("aftoi loss manifest OK")

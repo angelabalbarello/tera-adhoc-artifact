@@ -414,7 +414,7 @@ def main():
     ap.add_argument("--outdir", required=True)
     args = ap.parse_args()
     out = Path(args.outdir)
-    df = pd.read_csv(LOGS / "episode_frame_logs.csv")
+    df = pd.read_csv(LOGS / "episode_frame_logs_v2.csv")  # FIX 19/10: CSV canonico (FIGURE_PROVENANCE)
     fig_entropy_dist(df, out);   print("ok 4-fig_entropy_dist_en")
     fig_temporal_trace(df, out); print("ok 5-fig_temporal_trace_en")
     fig_gating_heatmap(df, out); print("ok 6-fig_gating_heatmap_en")
