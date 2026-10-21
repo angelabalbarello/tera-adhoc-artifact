@@ -1090,7 +1090,7 @@ def fig_entropy_temporal_curves(
                    label=r"$t_0$ (onset)")
     ax_cal.set_xlabel(r"Time relative to onset (s)")
     ax_cal.set_ylabel(r"$H(t)$ (bits)")
-    ax_cal.set_title("(a) Post-hoc calibration vs. Baseline")
+    ax_cal.set_title("(a) Post-hoc calibration vs. Baseline", fontsize=10)
     ax_cal.legend(loc="upper left", framealpha=0.7, ncol=1)
 
     # Painel (b)
@@ -1110,7 +1110,7 @@ def fig_entropy_temporal_curves(
     ax_aftkd.axvline(0, color="#cc0000", lw=0.9, ls=":", alpha=0.7,
                      label=r"$t_0$ (onset)")
     ax_aftkd.set_xlabel(r"Time relative to onset (s)")
-    ax_aftkd.set_title("(b) AF-TOI Fixed vs. Baseline (reference)")
+    ax_aftkd.set_title("(b) AF-TOI Fixed vs. Baseline", fontsize=10)
     ax_aftkd.legend(loc="upper left", framealpha=0.7)
 
     for ax in axes:
@@ -1119,7 +1119,7 @@ def fig_entropy_temporal_curves(
         ax.grid(axis="y", lw=0.4, alpha=0.4)
 
     fig.suptitle(
-        "Post-hoc calibration does not restructure temporal entropy dynamics",
+        "Mean entropy trajectories H(t) around onset (seed 42)",  # titulo neutro (corrigido)
         fontsize=9, y=1.01, style="italic"
     )
     fig.tight_layout()

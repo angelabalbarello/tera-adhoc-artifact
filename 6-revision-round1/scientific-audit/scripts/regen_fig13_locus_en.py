@@ -66,7 +66,7 @@ def main(out_path):
     axp.set_xlabel("ECE$_{\\mathrm{pipe}}$ (episode-level, factorial pipeline)  $\\downarrow$")
     axp.set_title("(b) Reference configurations")
     axp.grid(alpha=0.25, ls="--"); axp.legend(loc="upper right", framealpha=0.95, fontsize=9)
-    fig.suptitle("TTD$_{\\mathrm{ef}}$ vs.\\ protocol-specific ECE (95% CI, seeds 42\u201345); "
+    fig.suptitle("Effective detection delay and protocol-specific ECE (95% CI, seeds 42–45); "
                  "the two ECE variants are not comparable and are therefore shown on separate axes",
                  fontsize=11)
     fig.tight_layout(rect=(0, 0, 1, 0.94))

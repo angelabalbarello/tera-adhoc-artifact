@@ -556,8 +556,9 @@ techniques -- temperature scaling~\cite{guo2017calibration}, Platt
 scaling~\cite{platt1999probabilistic}, isotonic
 calibration~\cite{zadrozny2002isotonic} -- rescale the output probabilities without
 touching the weights, and therefore without touching the internal trajectory that a
-causal scheduler reads. {\color{\revcolor}A monotonic rescaling preserves the ordering of the
-probabilities, but not, in general, the ordering of the binary entropies,
+causal scheduler reads. {\color{\revcolor}A strictly increasing rescaling preserves the ordering of
+the probabilities (a non-decreasing fit such as isotonic regression may
+introduce ties), but not, in general, the ordering of the binary entropies,
 since $H(p)$ rises up to $p=0.5$ and falls beyond it; whether a given
 calibrator reorganizes the temporal entropy profile is therefore an
 empirical question rather than a mathematical impossibility.} We are
@@ -573,10 +574,14 @@ sequence-level transfer optimize agreement with a teacher's
 \emph{predictions}, spreading the alignment signal uniformly over time; their
 objective is accuracy or compression. \mbox{AF-TOI} instead optimizes the
 \emph{shape of the uncertainty trajectory} around a deterministic onset: the
-teacher contributes only a probability-space alignment term
-(Eq.~\ref{eq:perda_soft_aftoi}), while onset-anchored shaping penalties,
-concentrated by the exponential focus of Eq.~\ref{eq:ponderacao_aftoi}
-anchored to $t_0$, act on the student's own trajectory. The training target is
+teacher contributes only a probability-space alignment term (a tempered
+cross-entropy in the main-campaign objective, Eq.~\ref{eq:align_pipeline};
+a tempered squared difference in the replication objective,
+Eq.~\ref{eq:perda_soft_aftoi}), while onset-anchored temporal structure --
+the critical-episode weighting of Eq.~\ref{eq:align_pipeline} and, in the
+replication objective, explicit shaping penalties concentrated by the
+exponential focus of Eq.~\ref{eq:ponderacao_aftoi} anchored to $t_0$ --
+acts on the student's own trajectory. The training target is
 entropy stratification across episode phases, not fidelity to teacher
 outputs. Uncertainty-aware inference methods consume
 uncertainty at runtime but do not reshape its temporal structure during
@@ -1309,14 +1314,11 @@ A cheaper \emph{persistent-state single-step} variant -- one recurrent step
 (${\approx}57.2$\,K MACs) per executed update, suppressed frames never
 processed, per-frame cost $c_{\mathrm{gate}} +
 (1-s)\,\mathcal{O}(4(DH{+}H^2)+8H^2)$ -- is the natural deployment target
-but is \emph{not validated here}: with the same frozen seed-42 checkpoints
-and thresholds it agrees with the evaluated semantics on FR under the fixed
-policy ($\mathrm{TTD}_b$ differs by $6$\,ms, a padding warm-up effect) but
-is not equivalent under suppression ($\mathrm{TTD}_{\mathrm{ef}} =
-0.170$\,s at $44.4\%$ suppression, against $0.023$\,s at $44.7\%$ for the
-evaluated semantics), so it would require its own threshold calibration and
-evaluation. A verification script reproducing this comparison accompanies
-the artifact.}
+but is \emph{not validated here}: under suppression it is not equivalent to
+the evaluated recompute-on-update semantics, so it would require its own
+threshold calibration and evaluation before any result reported here could
+be attributed to it (the measured comparison is archived with the
+artifact).}
 \subsection{Computational Complexity and Edge Deployment}
 \label{sec:complexidade}
 This subsection checks whether the ecosystem is compatible with resource-constrained deployment under strict offline--online separation.
@@ -1336,8 +1338,7 @@ with expected compatibility with STM32H7, Cortex-M55 with Helium, Jetson Nano,
 and Qualcomm SA8155P. {\color{\revcolor}Because every weight is used once per
 timestep, one recurrent step costs $\approx$57.2\,K multiply--accumulate
 operations (MACs), i.e., $\approx$115\,KFLOPs under the 1\,MAC${}={}$2\,FLOPs
-convention adopted throughout; a verification script that recomputes these
-counts from the released checkpoints accompanies the artifact.}
+convention adopted throughout.}
 \begin{table*}[!t]
 \centering
 \caption{Computational complexity profile of TERA ecosystem components.}
@@ -1432,9 +1433,8 @@ Table~\ref{tab:receitas} summarizes the full recipe taxonomy.
 \end{table}
 
 The dataset consolidates {\color{\revcolor}12,480 episodes across twelve seeds
-(42--53); the four initial seeds (42--45) of the factorial study were
-verified to reproduce their four-seed campaign exactly before the
-extension to twelve. Each seed follows} the
+(42--53), the four initial seeds (42--45) of the factorial study extended by
+eight further seeds under the same frozen generator. Each seed follows} the
 70/15/15\% split. Each sequence has $T=96$ timesteps at $\approx$9.6\,fps,
 $D=31$, and deterministic onset $t_0$ at frame-level precision. That onset makes
 the induced organization verifiable, since it fixes the reference against which
@@ -1792,11 +1792,10 @@ The eight additional seeds were fixed before inspecting their outcomes and
 before recomputing any inferential statistics for the expanded twelve-seed
 campaign; the sample size was not adjusted as a function of the
 additional-seed results, and all twelve are reported regardless of outcome; the expansion
-was executed with the same frozen pipeline (identical configuration and
-generator hashes), and the four initial seeds were verified to reproduce
-their four-seed campaign exactly before integration.
-{\color{\revcolor}The twelve-seed campaign covers the factorial study and the
-temporal-scale generalization analysis. The secondary analyses run on the
+was executed with the same frozen pipeline and configuration.
+{\color{\revcolor}Twelve seeds (42--53) are used in the factorial study, the
+mechanism-removal ablation of Table~\ref{tab:ablacao_alpha} (under its own
+replication protocol), and the temporal-scale generalization analysis. The secondary analyses run on the
 initial four seeds (42--45), for two distinct reasons: the confidence-threshold
 and smoothed-entropy gates and the calibration diagnostics \emph{replay} stored
 per-frame trajectories, which were persisted only for those seeds, whereas the
@@ -1948,7 +1947,7 @@ requires the enabling property to be present consistently.
 twelve seeds of the factorial campaign and with exact values. The four
 modified conditions were retrained from scratch under the replication
 protocol; the canonical $\alpha{=}0.15$ arm reuses the original training of
-that same protocol (bit-identical checkpoints), and all five are evaluated
+that same protocol, and all five are evaluated
 under a single frozen replication protocol (the replay pipeline that also underlies
 Sections~\ref{sec:robustness_controls} and~\ref{sec:gating_baselines}); because that
 protocol differs from the main-campaign pipeline of
@@ -2108,7 +2107,7 @@ seed-42 checkpoint from an earlier run of the same TERA pipeline (run
 identifier and SHA-256 in the artifact; its training configuration was
 not archived), distinct from the factorial checkpoints, so the
 cross-level comparison is qualitative. All rows use generator version
-v7 (SHA-256/16 \texttt{65bbec4a}).}}
+v7 (hash in the artifact).}}
 \end{tabularx}
 \end{table}
 \begin{figure*}
@@ -2132,21 +2131,19 @@ explicit severity objective during training.
 
 {\color{\revcolor}Both summaries order the four levels monotonically
 ($\bar{p}_{\max}$: $0.000 < 0.048 < 0.380 < 0.940$; activation fraction:
-$0.0 < 5.8 < 48.8 < 100.0\%$). Two cautions bound this reading: the Attention
-and Alert rows come from a different checkpoint and protocol than the Normal
-and Critical rows (Table~\ref{tab:borderline} note), so the cross-level
-ordering is qualitative rather than a single-model measurement; and the large
+$0.0 < 5.8 < 48.8 < 100.0\%$). The Attention and Alert rows were evaluated with a different checkpoint
+from the Normal and Critical rows (Table~\ref{tab:borderline} note);
+Table~\ref{tab:borderline} therefore describes responses from two
+evaluations and does not establish an ordinal severity scale learned by a
+single model. In addition, the large
 variance within Attention and Alert (episodes split between near-zero and
 high-response trajectories) makes the activation fraction the more stable
 summary within those levels.}
 
 The evidence therefore does not support the claim that \AFTOI learned a
-severity scale{\color{\revcolor}, and -- because the four levels are not all
-measured under one checkpoint and protocol -- the joint ordering is a
-description across two evaluation pipelines, not a single-model measurement.
-Within that limit, the observed pattern is a progressively higher activation
-fraction at higher severity, including for intermediate-risk conditions
-unseen in training}. Whether this holds on
+severity scale{\color{\revcolor}. Within that limit, the observed pattern is
+a progressively higher activation fraction at higher severity, including for
+intermediate-risk conditions unseen in training}. Whether this holds on
 naturalistic data, and whether full ordinal separation can emerge under broader
 conditions, remain open (Section~\ref{sec:limitations}).
 \subsection{Post-hoc Calibration Control}
@@ -2187,8 +2184,9 @@ under \MHEG ($\CalibPSHybrTTDef$\,s and $\CalibICHybrTTDef$\,s), which needs a
 precise mechanistic reading to avoid misinterpretation.
 
 {\color{\revcolor}Post-hoc calibration is a monotonic transformation of the
-output probabilities: it preserves their ordering along time, though not
-necessarily the ordering of the binary entropies. Whether the temporal
+output probabilities: a strictly increasing map preserves their ordering
+along time (isotonic regression, being non-decreasing, may introduce ties),
+though not necessarily the ordering of the binary entropies. Whether the temporal
 structure of $H(t)$ changes under a given calibrator is therefore measured
 here rather than assumed.}
 Figure~\ref{fig:calibracao_entropia_temporal} is consistent with this. In
@@ -2212,14 +2210,7 @@ morphology of panel~(b): $H(t)$ is elevated around the onset and suppressed in
 stable phases, a differentiation that tracks onset proximity and is absent
 from every calibrated variant in panel~(a).
 
-{\color{\revcolor}A scalar summary, the entropy-stratification score
-$H_{\mathrm{strat}} = (H_{\mathrm{post}}-H_{\mathrm{stable}})/H_{\max}$, is
-not reported: under a single unified procedure on the stored trajectories it
-is sensitive to the probability scale rather
-than to temporal organization (the calibrated variants score $0.63$--$0.82$, above
-both the uncalibrated Baseline, $0.39 \pm 0.06$, and \AFTOI,
-$0.34 \pm 0.03$), so it cannot support -- in either direction -- claims about
-organization. The evidence for this control therefore rests on the trajectory
+{\color{\revcolor}The evidence for this control rests on the trajectory
 morphology (Figure~\ref{fig:calibracao_entropia_temporal}), the operational
 locus (Figure~\ref{fig:curva_operacional}), and
 Table~\ref{tab:calibracao_posthoc}.}
@@ -2280,8 +2271,7 @@ protocol-specific and not comparable, hence the separate axes
 {\color{\revcolor}Probability-scale
 correction does not modify the internal representation or how it responds to
 risk proximity; it rescales declared confidence at the output without inducing
-the temporal differentiation reliable scheduling needs. For the reason given
-above, no per-seed stratification-score figure is reported.}
+the temporal differentiation reliable scheduling needs.}
 \begin{table*}
 \centering
 \caption{Post-hoc calibration applied to
@@ -2345,8 +2335,7 @@ $\Delta$ECE: positive indicates improvement.
 Lower TTD$_{\mathrm{ef}}$ for PS and IC variants reflects threshold
 recalibration to the redistributed probability scale, not temporal
 trajectory reorganization{\color{\revcolor}\ (see the entropy trajectories of
-Figure~\ref{fig:calibracao_entropia_temporal}; no scalar stratification
-score is reported, see text)}.}
+Figure~\ref{fig:calibracao_entropia_temporal})}.}
 \end{tabular}
 \end{table*}
 
@@ -2460,7 +2449,7 @@ $99\%$ of critical episodes on unorganized trajectories and $59\%$ on
 organized ones, whereas the entropy+kinematic gate sustains mean
 $\mathrm{FR} \le 0.010$ at $93.6\%$ and $69.3\%$ suppression. This table
 therefore isolates one claim: the unconditional kinematic trigger is a
-structural necessity for any buffered entropy gate (Section~3.3). On this
+structural necessity for any buffered entropy gate that lacks an independent reactivation source, such as the one evaluated here (Section~3.3). On this
 in-distribution replay the kinematic trigger alone keeps both trajectory
 types safe, so the specific contribution of temporal organization is not
 visible here; it is isolated by the mechanism-removal ablation of
@@ -2684,9 +2673,13 @@ of the campaign artifacts, not a shared metric scale.}
 
 Figure~\ref{fig:temporal_scale}a--b and Table~\ref{tab:temporal_scale}
 report the frozen operating points. \mbox{AF-TOI} maintains mean FR below
-$0.05$ at every evaluated duration (maximum duration-wise mean $0.026$),
-and $\mathrm{TTD}_{\mathrm{ef}}$ stays within
-approximately $0.40$--$0.66$\,s. The Baseline crosses mean
+$0.05$ at every evaluated duration under both policies: for the fixed policy
+(Table~\ref{tab:temporal_scale}) the maximum duration-wise mean FR is
+$0.024$ with $\mathrm{TTD}_{\mathrm{ef}}$ within approximately
+$0.40$--$0.55$\,s, and for \mbox{AF-TOI}+\MHEG\
+(Figure~\ref{fig:temporal_scale}a--b; per-duration values in the artifact) the
+maximum duration-wise mean FR is $0.026$ with $\mathrm{TTD}_{\mathrm{ef}}$
+within approximately $0.46$--$0.66$\,s. The Baseline crosses mean
 $\mathrm{FR}=0.05$ at both extrapolation extremes (mean FR $0.097$ at $0.21$\,s and $0.085$ at
 $5.21$\,s for the fixed policy), and its $\mathrm{TTD}_{\mathrm{ef}}$
 follows a U-shaped profile that reaches $2.12$\,s at the fast extreme. At
@@ -2961,12 +2954,12 @@ comparison of Section~\ref{sec:gating_baselines} adds the complementary
 nuance: a learned gate can still reach the in-distribution detection
 endpoints, at the pre-onset alert occupancy reported there. In summary, the effectiveness of the runtime allocator depends on a property the model must already possess, namely temporal differentiation in its trajectories.
 
-{\color{\revcolor}Two in-distribution caveats bound this reading: isotonic
+{\color{\revcolor}The baseline comparisons qualify this reading: isotonic
 recalibration combined with \MHEG matches or exceeds \mbox{AF-TOI}+MHEG on
-the replay endpoints of Section~\ref{sec:controle_calibracao}, and a
+the replay endpoints of Section~\ref{sec:controle_calibracao}, a
 periodic-refresh confidence gate suffices for the replay endpoints of
-Section~\ref{sec:gating_baselines}; a published learned gate, Skip-RNN,
-likewise matched or exceeded \mbox{AF-TOI}+MHEG on the conventional
+Section~\ref{sec:gating_baselines}, and a published learned gate, Skip-RNN,
+matched or exceeded \mbox{AF-TOI}+MHEG on the conventional
 detection endpoints at matched suppression
 (Section~\ref{sec:gating_baselines}). We therefore do not claim superiority
 over learned adaptive computation on detection performance; its
@@ -2977,8 +2970,12 @@ none of these alternatives provides is the interpretable, onset-anchored
 signal semantics. Their behavior under the controlled shifts of
 Sections~\ref{sec:robustness_controls} and~\ref{sec:temporal_scale} is
 unequally characterized: Skip-RNN was run under the temporal-scale warp
-(descriptively, preserving its detection endpoints), while the isotonic and
-periodic-refresh alternatives were not tested under shift. A
+(descriptively, preserving its detection endpoints) and the isotonic
+configuration kept the duration-wise mean FR within the reported criterion
+under that same warp (Section~\ref{sec:temporal_scale}), while the
+periodic-refresh gate was evaluated under neither that shift nor the stress
+protocol of Section~\ref{sec:robustness_controls}; naturalistic shift
+remains untested for all of them. A
 limitation of $\mathrm{TTD}_{\mathrm{ef}}$ itself follows from the Skip-RNN
 result: the metric captures missed-event and post-onset delay costs
 (Eq.~\ref{eq:ttd_efetivo}) but does not penalize persistent pre-onset
@@ -3006,8 +3003,12 @@ $\mathrm{TTD}_{\mathrm{ef}}$ under \MHEG, {\color{\revcolor}the unchanged
 entropy-trajectory morphology} attributes the gain to threshold recalibration on
 the redistributed scale rather than to organizational restructuring. {\color{\revcolor}In the configurations measured here, temporal induction
 and probability-scale adjustment produced distinct operating points
-(Figure~\ref{fig:curva_operacional}); whether that separation persists under
-distribution shift was not tested.}
+(Figure~\ref{fig:curva_operacional}); the isotonic configuration retained
+coverage under the controlled temporal warp of
+Section~\ref{sec:temporal_scale}, so this study does not establish a general
+detection advantage of \mbox{AF-TOI} over isotonic recalibration, and
+generalization to naturalistic distribution shift remains untested for both
+approaches.}
 Marginal calibration and temporally conditioned operational reliability are
 empirically dissociable under this protocol, with distinct mechanistic origins.
 \paragraph{Effective coverage versus gross delay}
@@ -3120,10 +3121,8 @@ LSTM inputs left intact --- produced persistent suppression and
 $\mathrm{FR}=1.0$ in all evaluated configurations: once updates stop, the
 emitted probability, and hence the entropy consumed by the gate, remain
 frozen, and the current implementation has no reactivation mechanism
-independent of that cue. The diagnostic protocol, code, per-seed results,
-per-episode and per-decision logs, and a SHA-256 manifest are archived with
-the paper's research artifact, together with the frozen checkpoints and test
-arrays required to re-run it. This result does not characterize sensor failures in
+independent of that cue. The diagnostic protocol and everything required to
+re-run it are archived with the paper's research artifact. This result does not characterize sensor failures in
 general; it identifies an operational limitation of the current gate
 implementation, whose mitigation (e.g., a mandatory periodic update) would
 modify the method and is left as future work.}
