@@ -1,37 +1,10 @@
-%% ====================================================================
-%% Trustworthy Selective Computation -- CAS (cas-dc) layout for Ad Hoc Networks
-%% FINAL SAFE VERSION: only verified references kept; Table 1 reduced;
-%% \mbox restricted to TERA-Gen / AF-TOI / MHEG / TTD_ef / TTD_det.
-%% Compile: pdflatex, bibtex, pdflatex, pdflatex.
-%% ====================================================================
-% Force numeric, square-bracket citations. cas-dc loads natbib itself (in its
-% author-date default), so re-loading natbib here would clash and be ignored,
-% leaving citations as "Author et al. (Year)". Passing the options *before*
-% \documentclass reaches natbib at the class's own \RequirePackage, so the
-% numeric style takes effect without any clash.
 \PassOptionsToPackage{numbers,square,sort&compress}{natbib}
-% Cor das alteracoes da revisao (round 1): "red" na versao marcada;
-% o driver artigo_limpo.tex redefine para "black" (versao limpa).
 \providecommand{\revcolor}{blue}
-% xcolor is first loaded (without options) by tikz/pgf below; passing the
-% [table] option here avoids an option clash at \usepackage{xcolor}.
 \PassOptionsToPackage{table}{xcolor}
 \documentclass[a4paper,fleqn]{cas-dc}
-% Encoding and font handling
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-% FONT POLICY (Option A): use the cas-dc / Computer Modern defaults only.
-% Do NOT load lmodern or any additional math font package here: mixing
-% Latin Modern math fonts with the CAS class produced corrupted math
-% glyphs (e.g. \times rendered as a text glyph) on some installations.
-% Optional monospace font: loaded when available (e.g., Overleaf / full
-% TeX Live); skipped silently on minimal installations. Text-mono only;
-% does not affect math fonts.
 \IfFileExists{inconsolata.sty}{\usepackage{inconsolata}}{}
-% Bibliography / Elsevier CAS. cas-dc normally loads natbib itself, and the
-% options passed above make that load numeric+square. The guard below loads
-% natbib only if the class did NOT -- so there is never a double load nor an
-% option clash, and \setcitestyle is always defined.
 \makeatletter
 \@ifpackageloaded{natbib}{}{\usepackage{natbib}}
 \makeatother
@@ -41,13 +14,8 @@
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{amsthm}
 \newtheorem{remark}{Design Remark}
-% Graphics, algorithms and tables
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta}
-% algorithm/algorithmic: use the standard packages when present (Overleaf /
-% full TeX Live). On minimal installations, a small local fallback defines
-% the exact subset of commands used by Algorithm 1, so the same file
-% compiles everywhere without extra files.
 \newif\ifALGpkg
 \IfFileExists{algorithm.sty}{\ALGpkgtrue}{\ALGpkgfalse}
 \ifALGpkg
@@ -88,16 +56,9 @@
 \IfFileExists{fontawesome.sty}{\usepackage{fontawesome}}{}
 \usepackage{graphicx}
 \graphicspath{{image/}{./}}
-% The CAS class decorates e-mail addresses with icons from a thumbnails/
-% folder that is not shipped with this package. When those icons are
-% absent, skip them silently instead of raising a missing-file error.
-% All real figures resolve through ./ or image/ and are unaffected.
 \newif\ifTERAthumbs
 \IfFileExists{thumbnails/cas-email.jpeg}{\TERAthumbstrue}{\TERAthumbsfalse}
 \ifTERAthumbs\else
-  % Icones decorativos da classe CAS (thumbnails/*) podem faltar e sao
-  % pulados em silencio; QUALQUER outra figura ausente gera ERRO de
-  % compilacao (nenhuma figura cientifica pode ser omitida sem aviso).
   \let\TERAorigincludegraphics\includegraphics
   \makeatletter
   \def\TERA@thumbword{thumbnails}
@@ -119,24 +80,16 @@
 \usepgfplotslibrary{groupplots}
 \pgfplotsset{compat=1.18}
 \usepackage{booktabs,multirow,array,tabularx,makecell}
-\usepackage{xcolor}% [table] passed via \PassOptionsToPackage above
+\usepackage{xcolor}%
 \usepackage{colortbl}
 \IfFileExists{siunitx.sty}{\usepackage{siunitx}%
   \sisetup{output-decimal-marker={.}}}{}
 \usepackage{ragged2e,float}
-% microtype com expansao desativada: a expansao de fonte exige fontes
-% escalaveis (cm-super); em instalacoes com CM bitmap ela aborta a
-% compilacao. Protrusao continua ativa e o resultado no Overleaf e igual.
 \usepackage[expansion=false]{microtype}
 \usepackage[section]{placeins}
 \usepackage{enumitem,xspace,url}
 \usepackage[htt]{hyphenat}
-% CAS already loads hyperref; do not reload it.
 \hypersetup{hidelinks}
-% Float placement tuning to reduce figures/tables being pushed to the end.
-% Aplicado em \AtBeginDocument para prevalecer sobre qualquer redefinicao da
-% classe (versoes mais novas da cas-dc redefinem estes parametros depois do
-% preambulo, o que produzia paginas de float semivazias no Overleaf).
 \AtBeginDocument{%
 \renewcommand{\topfraction}{0.95}%
 \renewcommand{\bottomfraction}{0.95}%
@@ -149,14 +102,11 @@
 \setcounter{totalnumber}{8}%
 \setcounter{dbltopnumber}{5}%
 }
-% Compact display spacing and captions
 \setlength{\abovedisplayskip}{3pt}
 \setlength{\belowdisplayskip}{3pt}
 \captionsetup[figure]{font=small,labelfont=bf}
 \captionsetup[table]{font=small,labelfont=bf}
 \captionsetup[subfigure]{font=small,labelfont=bf,justification=centering,skip=2pt}
-% Frequently used constants and robust unbreakable technical names.
-% \mbox is used ONLY for TERA-Gen, AF-TOI, MHEG, TTD_ef and TTD_det.
 \newcommand{\onsetFrame}{37}
 \newcommand{\decisionThr}{0.10}
 \newcommand{\TERAGen}{\mbox{TERA-Gen}\xspace}
@@ -233,16 +183,12 @@ critical edge systems \sep
 runtime scheduling
 \end{keywords}
 \maketitle
-% Reaplicacao dos parametros de float apos o \maketitle: versoes novas da
-% classe redefinem estes valores tardiamente, o que produzia paginas de float
-% semivazias (fig/tabela orfas) no TeX Live recente.
 \renewcommand{\topfraction}{0.95}\renewcommand{\bottomfraction}{0.95}%
 \renewcommand{\dbltopfraction}{0.95}\renewcommand{\textfraction}{0.05}%
 \renewcommand{\floatpagefraction}{0.85}\renewcommand{\dblfloatpagefraction}{0.85}%
 \setcounter{topnumber}{5}\setcounter{bottomnumber}{5}%
 \setcounter{totalnumber}{8}\setcounter{dbltopnumber}{5}%
 \setlist{nosep}
-%%============================================================
 \section{Introduction}
 \label{sec:introducao}
 Consider a monitoring model running on a vehicle's on-board unit. It receives a
@@ -408,7 +354,6 @@ intervals and elevated near onset, which is the property the runtime gate
 thresholds.}}
 \label{fig:tera_hypothesis}
 \end{figure}
-%%============================================================
 \section{Related Work}
 \label{sec:relacionados}
 \subsection{Resource-Constrained Edge AI in Vehicular Edge Computing}
@@ -736,7 +681,6 @@ Transfer to naturalistic driving data is the
 primary direction for future validation (Section~\ref{sec:limitations}).
 \section{From Temporal Organization to Onset-Anchored Selective Computation}
 \label{sec:framework}
-%%============================================================
 Embedded risk detection processes signals sequentially without access to future
 observations, and this causal constraint governs TERA. The on-board model
 operates strictly causally at deployment, while coverage stability comes from
@@ -1386,10 +1330,8 @@ $D$: input dimensionality; $H$: LSTM hidden dimension;
 $L$: number of combinations evaluated in grid search;
 {\color{\revcolor}$^{\ddagger}$evaluated windowed semantics (Section~\ref{sec:runtime}): each executed update recomputes the causal $W$-frame window.}
 \end{table*}
-%%============================================================
 \section{Experimental Evaluation}
 \label{sec:avaliacao}
-%%============================================================
 Validation follows six movements that track the hypothesis, each answering one
 question and preparing the next. Movements~1 and~2 examine the mechanism:
 whether \AFTOI observably induces temporal organization in the causal target,
@@ -2486,8 +2428,6 @@ confidence gates, not as a claim that no confidence-based scheduler can
 work.}
 
 \begin{table*}[!tbp]
-% Tabela nova desta revisao: o float sai do escopo do grupo de cor da
-% secao, entao a cor e declarada dentro do proprio float.
 \color{\revcolor}
 \centering
 \caption{Confidence-threshold and smoothed-entropy baselines under the replay
@@ -2925,10 +2865,8 @@ two execution semantics is deployed.
 \paragraph{Artifact availability}
 Source code and \TERAGen synthetic datasets are publicly available as
 described in the Data Availability statement.
-%%============================================================
 \section{Discussion}
 \label{sec:discussao}
-%%============================================================
 \paragraph{Temporal organization as the enabling condition for edge resource allocation}
 The most informative result is the negative control, more than the full
 configuration. {\color{\revcolor}Baseline+MHEG buys computational
@@ -3359,8 +3297,6 @@ This research received no specific funding from public or private agencies.
 The authors thank the University of Bras\'ilia computing infrastructure
 for support of the experimental evaluations.
 \begin{sloppypar}
-% [REVISAO R1] Titulo e frase-modelo exigidos pelo Guide for Authors da
-% Elsevier (antes das referencias).
 \section*{Declaration of generative AI and AI-assisted technologies in the
 manuscript preparation process}
 {\color{\revcolor}During the preparation of this work the authors used Claude

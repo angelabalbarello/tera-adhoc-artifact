@@ -13,7 +13,6 @@
 \usepackage{booktabs}
 \usepackage{multirow}
 
-%Por causa de \sout{}
 \usepackage[normalem]{ulem}
 \usepackage{url}
 
@@ -32,7 +31,6 @@
 
 \begin{document}
 
-%Identificação do primeiro autor
 \begin{flushright}
 \^Angela Br\'igida Albarello \\
 Department of Computer Science -- CiC \\
@@ -41,7 +39,6 @@ E-mail: angela.albarello@aluno.unb.br \\
 \today \\
 \end{flushright}
 
-%Identificação do Editor
 \noindent Prof.\ Salil Kanhere, Ph.D. \\
 \noindent Editor-in-Chief \\
 \noindent Ad Hoc Networks \\
@@ -97,9 +94,6 @@ E-mail: angela.albarello@aluno.unb.br \\
 
 \newpage
 
-%% =====================================================================
-%% REVIEWER 1
-%% =====================================================================
 
 \begin{large}
 \noindent \underline{Response to Reviewer \#1:}
@@ -179,7 +173,7 @@ E-mail: angela.albarello@aluno.unb.br \\
 (The full frame-by-frame reading guide follows the first mention of Figure~5 in Section~4.2.) Its selection criterion reads: ``The exemplars are selected by a pre-declared neutral criterion: within each regime, the episode whose pre/post-onset entropy contrast is the \emph{median} among the critical episodes of seed~42 with a centrally located onset (progressive: episode~36, $t_0{=}5.42$\,s; abrupt: episode~148, $t_0{=}2.50$\,s).'' The guide also states that detection markers of single exemplars do not arbitrate latency (aggregate latencies are settled by Table~8) and that a minority of abrupt critical episodes (12 of 48 in seed~42) runs near maximal entropy throughout. The regenerated figure is reproduced below.
 
 \begin{figure*}[!tbp]
-\setcounter{figure}{4}% numeracao do manuscrito
+\setcounter{figure}{4}%
 \centering
 \includegraphics[width=\textwidth]{image/5-fig_temporal_trace_en.pdf}
 \caption{(Manuscript Figure~5.) Frame-by-frame temporal evidence for seed~42. Columns show the
@@ -196,9 +190,6 @@ $t_0{=}2.50$\,s); the selection criterion was fixed before inspection.}}
 
 \newpage
 
-%% =====================================================================
-%% REVIEWER 2
-%% =====================================================================
 
 \begin{large}
 \noindent \underline{Response to Reviewer \#2:}
@@ -272,9 +263,6 @@ $t_0{=}2.50$\,s); the selection criterion was fixed before inspection.}}
 \noindent \textbf{Response:} We sincerely thank the reviewer for the recommendation and for the fair characterization of the strengths and limitations of the study. The three requested adjustments have been implemented concretely. The abstract was shortened from approximately 350 to 220 words (Comment~1). A structure paragraph closes Section~1 (Comment~2). The statistical language was moderated independently of the sample-size expansion: ``The experiments bear the hypothesis out'' became ``The controlled experiments provide evidence consistent with this hypothesis under the evaluated synthetic conditions'' (Section~1); ``rules out the obvious alternative explanation'' became ``addresses the obvious alternative explanation (...) under this protocol'' (Section~1); ``The decisive result'' became ``The most informative result of this campaign (...) under its stress protocol'' (Section~4.10); the remaining occurrences of ``confirming''/``confirms'' in Sections~4.4, 4.8, and 4.10 were replaced by ``showing''/``indicating''/``consistent with''; and ``the single-node, entropy-gated mechanism this paper establishes'' became ``characterizes'' (Section~6). Inferential statements are restricted to the twelve-seed campaigns (the factorial study and the retrained mechanism-removal ablation of Table~11); the complementary campaigns ($n=4$) are reported descriptively, and the per-duration contrasts of Section~4.12 are exploratory. In addition, the limited inferential resolution of the original four-seed campaign, identified by the reviewer, was addressed by expanding the factorial study to twelve seeds under the prespecified protocol described in our response to Comment~5, and the main contrasts now reach conventional significance.
 \newpage
 
-%% =====================================================================
-%% REVIEWER 3
-%% =====================================================================
 
 \begin{large}
 \noindent \underline{Response to Reviewer \#3:}
@@ -359,7 +347,7 @@ $t_0{=}2.50$\,s); the selection criterion was fixed before inspection.}}
 \color{\revcolor}
 \centering
 \includegraphics[width=\textwidth]{image/fig_temporal_scale_v2.pdf}
-\setcounter{figure}{13}% numeracao do manuscrito
+\setcounter{figure}{13}%
 \caption{(Manuscript Figure~14.) Temporal-scale generalization under shape-preserving
 risk-transition warps (twelve seeds; mean $\pm$ standard error). Shaded
 bands mark the temporal support represented in training
@@ -375,7 +363,7 @@ left axis) and the corresponding FR (dotted, right axis).}
 \begin{table*}[!tbp]
 \color{\revcolor}
 \centering
-\setcounter{table}{20}% numeracao do manuscrito
+\setcounter{table}{20}%
 \caption{(Manuscript Table~21.) Temporal-scale generalization across risk-transition durations
 $d$ (mean $\pm$ sd, twelve seeds). FR and $\mathrm{TTD}_{\mathrm{ef}}$ (s)
 use the frozen operating points (fixed policy); FS@onset uses the post-hoc
@@ -456,11 +444,9 @@ Uncertainty-aware resource allocation & feed-forward early exit, distributed or 
 \noindent The two operating points and every cell value are given in Table~19 of the revised manuscript (Section~4.11); its caption and footnote state the harmonized markers, the oracle calibration on the test partition (which favors the baselines), and the deadlock/coincidence notes; the new table is reproduced below.
 
 \begin{table*}[!tbp]
-% Tabela nova desta revisao: o float sai do escopo do grupo de cor da
-% secao, entao a cor e declarada dentro do proprio float.
 \color{\revcolor}
 \centering
-\setcounter{table}{18}% numeracao do manuscrito
+\setcounter{table}{18}%
 \caption{(Manuscript Table~19.) Confidence-threshold and smoothed-entropy baselines under the replay
 protocol (mean $\pm$ sd, seeds 42--45). Safe point: maximum suppression
 subject to $\mathrm{FR}\le0.05$. Matched point: thresholds tuned to the
@@ -527,7 +513,7 @@ The Skip-RNN comparison added to Section~4.11 (Table~20) reads:
 \begin{table*}[!tbp]
 \color{\revcolor}
 \centering
-\setcounter{table}{10}% numeracao do manuscrito
+\setcounter{table}{10}%
 \caption{(Manuscript Table~11.) Mechanism-removal ablation and $\alpha$ sensitivity (twelve seeds
 42--53, mean $\pm$ sd). The four modified conditions were retrained, the canonical $\alpha{=}0.15$ arm reuses the original training of the same protocol, and all five are evaluated
 under the same frozen replication protocol (the replay pipeline of
@@ -636,9 +622,6 @@ $\alpha=0.50$ & $0.892 \pm 0.024$ & $0.535 \pm 0.019$
 
 \newpage
 
-%% =====================================================================
-%% ADDITIONAL CHANGES
-%% =====================================================================
 
 \begin{large}
 \noindent \underline{Additional changes:}
@@ -668,7 +651,7 @@ $\alpha=0.50$ & $0.892 \pm 0.024$ & $0.535 \pm 0.019$
 \begin{table*}[!tbp]
 \color{\revcolor}
 \centering
-\setcounter{table}{22}% numeracao do manuscrito
+\setcounter{table}{22}%
 \caption{(Manuscript Table~23.) Experimental protocol map. ``Frozen'' means weights and thresholds
 fixed before the experiment; the replication protocol is the replay pipeline
 of Sections~4.10 and~4.11,
@@ -782,7 +765,7 @@ Deployment (\S4.13, Tab.~22) & ---
 
 \begin{table}[!tbp]
 \centering
-\setcounter{table}{12}% numeracao do manuscrito
+\setcounter{table}{12}%
 \caption{(Manuscript Table~13.) Probabilistic response in borderline episodes
 (seed~42, \mbox{AF-TOI} Fixed configuration).}
 
